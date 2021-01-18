@@ -10,11 +10,12 @@ import serial
 class TMC_UART:
 
     mtr_id=0
-    ser = serial.Serial ("/dev/serial0", 115200)
+    ser = None
     rFrame  = [0x55, 0, 0, 0  ]
     wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
     
-    def __init__(self):
+    def __init__(self, baudrate):
+        self.ser = serial.Serial ("/dev/serial0", baudrate)
         self.mtr_id=0
         self.ser.BYTESIZES = 1
         self.ser.PARITIES = serial.PARITY_NONE
@@ -55,7 +56,7 @@ class TMC_UART:
 
         rtn = self.ser.write(self.rFrame)
         if rtn != len(self.rFrame):
-            print("Err in write {}".format(__), file=sys.stderr)
+            print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
         time.sleep(0.00001)
@@ -78,9 +79,9 @@ class TMC_UART:
             if(len(rtn)>=4):
                 break
             else:
-                print("did not get the expected 4 data bytes. Instead got "+str(len(rtn))+" Bytes")
+                print("TMC2209: did not get the expected 4 data bytes. Instead got "+str(len(rtn))+" Bytes")
             if(tries>=10):
-                print("after 10 tries not valid answer. exiting")
+                print("TMC2209: after 10 tries not valid answer. exiting")
                 raise SystemExit
         
         val = struct.unpack(">i",rtn)[0]
@@ -105,7 +106,7 @@ class TMC_UART:
 
         rtn = self.ser.write(self.wFrame)
         if rtn != len(self.wFrame):
-            print("Err in write {}".format(__), file=sys.stderr)
+            print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
         time.sleep(0.00001)  # adjust per baud and hardware. 

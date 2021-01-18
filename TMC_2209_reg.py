@@ -2,12 +2,12 @@
 GCONF           =   0x00
 GSTAT           =   0x01
 IFCNT           =   0x02
-DRVSTATUS       =   0x6F
-CHOPCONF        =   0x6C
 IOIN            =   0x06
 IHOLD_IRUN      =   0x10
 SG_RESULT       =   0x41
-
+MSCNT           =   0x6A
+CHOPCONF        =   0x6C
+DRVSTATUS       =   0x6F
 
 #GCONF
 i_scale_analog      = 1<<0
@@ -17,6 +17,11 @@ shaft               = 1<<3
 index_otpw          = 1<<4
 index_step          = 1<<5
 mstep_reg_select    = 1<<7
+
+#GSTAT
+reset               = 1<<0
+drv_err             = 1<<1
+uv_cp               = 1<<2
 
 #CHOPCONF
 vsense              = 1<<17
