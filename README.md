@@ -19,3 +19,6 @@ When the driver has a shared TX/RX Pin the Pi receive 12 bit instead of 8.
 
 the code to run the stepper motor is based on the code of the AccelStepper Libary from Mike McCauley
 http://www.airspayce.com/mikem/arduino/AccelStepper/
+
+the code for the uart communicationis based on this code from troxel 
+https://github.com/troxel/TMC_UART
