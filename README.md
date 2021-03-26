@@ -16,3 +16,6 @@ If you have a different driver with TX and RX this is not the case.
 
 Well, in my case the Pi receive 4 bits from itself and 8 bit from the driver.
 When the driver has a shared TX/RX Pin the Pi receive 12 bit instead of 8.
+
+the code to run the stepper motor is based on the code of the AccelStepper Libary from Mike McCauley
+http://www.airspayce.com/mikem/arduino/AccelStepper/
