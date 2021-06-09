@@ -14,13 +14,13 @@ class TMC_UART:
     rFrame  = [0x55, 0, 0, 0  ]
     wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
     
-    def __init__(self, baudrate):
-        self.ser = serial.Serial ("/dev/serial0", baudrate)
+    def __init__(self, serialport,  baudrate):
+        self.ser = serial.Serial (serialport, baudrate)
         self.mtr_id=0
         self.ser.BYTESIZES = 1
         self.ser.PARITIES = serial.PARITY_NONE
         self.ser.STOPBITS = 1
-        self.ser.timeout = 0.001
+        self.ser.timeout = 0.01
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
@@ -59,13 +59,13 @@ class TMC_UART:
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
-        time.sleep(0.00001)
+        time.sleep(0.001)
         
         rtn = self.ser.read(12)
         #print("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
         #print(rtn.hex())
 
-        time.sleep(0.00001)  # adjust per baud and hardware. Sequential reads without some delay fail.
+        time.sleep(0.001)  # adjust per baud and hardware. Sequential reads without some delay fail.
         
         return(rtn[7:11])
         #return(rtn)
@@ -109,7 +109,7 @@ class TMC_UART:
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
-        time.sleep(0.00001)  # adjust per baud and hardware. 
+        time.sleep(0.001)  # adjust per baud and hardware. 
 
         return(True)
 

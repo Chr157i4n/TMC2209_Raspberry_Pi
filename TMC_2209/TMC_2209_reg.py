@@ -32,6 +32,8 @@ msres3              = 1<<27
 intpol              = 1<<28
 
 #IOIN
+io_enn              = 1<<0
+io_step             = 1<<7
 io_spread           = 1<<8
 io_dir              = 1<<9
 

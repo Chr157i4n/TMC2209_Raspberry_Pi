@@ -11,11 +11,8 @@ So the PD_UART-Pin needs to be connected to the Raspberrry Pis RX-Pin directly a
 You can read more about this in the datasheet from Trinamic:
 https://www.trinamic.com/products/integrated-circuits/details/tmc2209-la/
 
-Because the Raspberry Pis UART Receive Pin (RX) is connected to the transmit Pin of the Pi (TX), the Pi also receives what it sends.
-If you have a different driver with TX and RX this is not the case.
-
-Well, in my case the Pi receive 4 bits from itself and 8 bit from the driver.
-When the driver has a shared TX/RX Pin the Pi receive 12 bit instead of 8.
+Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends,
+Well, the Pi receive 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
 
 the code to run the stepper motor is based on the code of the AccelStepper Libary from Mike McCauley
 https://github.com/adafruit/AccelStepper
@@ -23,3 +20,16 @@ http://www.airspayce.com/mikem/arduino/AccelStepper/
 
 the code for the uart communicationis based on this code from troxel 
 https://github.com/troxel/TMC_UART
+
+the Documentation of the TMC2209 can be found here:
+https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
+
+
+## Usage
+- clone this repo to your Raspberry Pi using "git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi"
+- install the python module bitstring with "pip3 install bitstring"
+- enable the serial port in "raspi-config"
+- run the script using "python3 test_script_tmc.py"
+- test whether the UART communication works
+- test whether the communication via STEP, DIR, EN pins work (with the function "testDirStepEn")
+- test whether the motor runs 1 revolution forward and then 1 revolution backwards

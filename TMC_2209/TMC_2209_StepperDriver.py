@@ -47,8 +47,8 @@ class TMC_2209:
     _step_pin_high = False
     
     
-    def __init__(self, pin_step, pin_dir, pin_en, baudrate=9600):
-        self.tmc_uart = TMC_UART(baudrate)
+    def __init__(self, pin_step, pin_dir, pin_en, serialport="/dev/serial0", baudrate=115200):
+        self.tmc_uart = TMC_UART(serialport, baudrate)
         self._pin_step = pin_step
         self._pin_dir = pin_dir
         self._pin_en = pin_en
@@ -62,8 +62,8 @@ class TMC_2209:
         print("TMC2209: GPIO Init finished")      
         self.readStepsPerRevolution()
         self.clearGSTAT()
-        print("TMC2209: TMC2209 Init finished")
         self.tmc_uart.flushSerialBuffer()
+        print("TMC2209: Init finished")
 
 
     def __del__(self):
@@ -220,8 +220,19 @@ class TMC_2209:
             print("TMC2209: dir is high")
         else:
             print("TMC2209: dir is low")
+
+        if(ioin & reg.io_step):
+            print("TMC2209: step is high")
+        else:
+            print("TMC2209: step is low")
+
+        if(ioin & reg.io_enn):
+            print("TMC2209: en is high")
+        else:
+            print("TMC2209: en is low")
         
         print("TMC2209: ---")
+        return ioin
 
 
 #-----------------------------------------------------------------------
@@ -679,7 +690,7 @@ class TMC_2209:
 #-----------------------------------------------------------------------
     def getInterfaceTransmissionCounter(self):
         ifcnt = self.tmc_uart.read_int(reg.IFCNT)
-        print("TMC2209: Interface Transmission Counter: "+str(ifcnt))
+        #print("TMC2209: Interface Transmission Counter: "+str(ifcnt))
         return ifcnt
         
 
@@ -845,15 +856,14 @@ class TMC_2209:
             # First step from stopped
             self._cn = self._c0
             GPIO.output(self._pin_step, GPIO.LOW)
-            self._step_pin_high = False
             #direction = (distanceTo > 0) ? DIRECTION_CW : DIRECTION_CCW
             #print("TMC2209: distance to: " + str(distanceTo))
             if(distanceTo > 0):
                 self.setDirection_pin(1)
-                #print("TMC2209: going CW")
+                print("TMC2209: going CW")
             else:
                 self.setDirection_pin(0)
-                #print("TMC2209: going CCW")
+                print("TMC2209: going CCW")
         else:
             # Subsequent step. Works for accel (n is +_ve) and decel (n is -ve).
             self._cn = self._cn - ((2.0 * self._cn) / ((4.0 * self._n) + 1)) # Equation 13
@@ -890,18 +900,83 @@ class TMC_2209:
             else: # Anticlockwise 
                 self._currentPos -= 1
                 #print("TMC2209: going CCW")
-            GPIO.output(self._pin_step, GPIO.HIGH)
-            self._step_pin_high=True
-            #print("TMC2209: one step on")
+            self.makeAStep()
+            #print("TMC2209: one step")
             self._lastStepTime = curtime # Caution: does not account for costs in step()
             return True
-        elif (self._step_pin_high == True and curtime - self._lastStepTime >= 0.5 * self._stepInterval):
-            GPIO.output(self._pin_step, GPIO.LOW)
-            self._step_pin_high = False
-            #print("TMC2209: one step off")
-            return False
         else:
             return False
+
+
+
+#-----------------------------------------------------------------------
+# method that makes on step
+# for the TMC2209 there needs to be a signal duration of minimum 100 ns
+#-----------------------------------------------------------------------
+    def makeAStep(self):
+        GPIO.output(self._pin_step, GPIO.HIGH)
+        time.sleep(1/1000/1000)
+        GPIO.output(self._pin_step, GPIO.LOW)
+        time.sleep(1/1000/1000)
+
+#-----------------------------------------------------------------------
+# tests the EN, DIR and STEP pin
+#-----------------------------------------------------------------------
+    def testDirStepEn(self):
+        pin_dir_ok = pin_step_ok = pin_en_ok = True
+        
+        GPIO.output(self._pin_step, GPIO.HIGH)
+        GPIO.output(self._pin_dir, GPIO.HIGH)
+        GPIO.output(self._pin_en, GPIO.HIGH)
+        time.sleep(0.1)
+        ioin = self.readIOIN()
+        if(not(ioin & reg.io_dir)):
+            pin_dir_ok = False
+        if(not(ioin & reg.io_step)):
+            pin_step_ok = False
+        if(not(ioin & reg.io_enn)):
+            pin_en_ok = False
+
+        GPIO.output(self._pin_step, GPIO.LOW)
+        GPIO.output(self._pin_dir, GPIO.LOW)
+        GPIO.output(self._pin_en, GPIO.LOW)
+        time.sleep(0.1)
+        ioin = self.readIOIN()
+        if(ioin & reg.io_dir):
+            pin_dir_ok = False
+        if(ioin & reg.io_step):
+            pin_step_ok = False
+        if(ioin & reg.io_enn):
+            pin_en_ok = False
+
+        GPIO.output(self._pin_step, GPIO.HIGH)
+        GPIO.output(self._pin_dir, GPIO.HIGH)
+        GPIO.output(self._pin_en, GPIO.HIGH)
+        time.sleep(0.1)
+        ioin = self.readIOIN()
+        if(not(ioin & reg.io_dir)):
+            pin_dir_ok = False
+        if(not(ioin & reg.io_step)):
+            pin_step_ok = False
+        if(not(ioin & reg.io_enn)):
+            pin_en_ok = False
+
+        self.setMotorEnabled(False)
+
+        print("---")
+        if(pin_dir_ok):
+            print("Pin DIR: \tOK")
+        else:
+            print("Pin DIR: \tnot OK")
+        if(pin_step_ok):
+            print("Pin STEP: \tOK")
+        else:
+            print("Pin STEP: \tnot OK")
+        if(pin_en_ok):
+            print("Pin EN: \tOK")
+        else:
+            print("Pin EN: \tnot OK")
+        print("---")
 
 
 #-----------------------------------------------------------------------
@@ -910,9 +985,9 @@ class TMC_2209:
     def test(self):
         self.setDirection_pin(1)
         
-        for i in range(1):
+        for i in range(100):
             self._currentPos += 1
             GPIO.output(self._pin_step, GPIO.HIGH)
-            time.sleep(0.01)
+            time.sleep(0.001)
             GPIO.output(self._pin_step, GPIO.LOW)
             time.sleep(0.01)
