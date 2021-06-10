@@ -34,4 +34,10 @@ https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datashe
 - test whether the communication via STEP, DIR, EN pins work (with the function "testDirStepEn")
 - test the movement of the motor
 
-for me this baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000
+For me this baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000
+
+If the TMC2209 driver is connected to Vmotor, the internal voltage regulator will create the Vio for the chip.
+So you dont need to connect anything to the Vio pin of the driver.
+
+
+![](Images/image1.jpg)
