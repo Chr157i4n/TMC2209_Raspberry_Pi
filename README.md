@@ -32,4 +32,6 @@ https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datashe
 - run the script using "python3 test_script_tmc.py"
 - test whether the UART communication works
 - test whether the communication via STEP, DIR, EN pins work (with the function "testDirStepEn")
-- test whether the motor runs 1 revolution forward and then 1 revolution backwards
+- test the movement of the motor
+
+for me this baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000

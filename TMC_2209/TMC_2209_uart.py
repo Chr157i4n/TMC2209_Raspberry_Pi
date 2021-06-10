@@ -13,14 +13,18 @@ class TMC_UART:
     ser = None
     rFrame  = [0x55, 0, 0, 0  ]
     wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
+    communication_pause = 0
     
-    def __init__(self, serialport,  baudrate):
+    def __init__(self, serialport, baudrate):
         self.ser = serial.Serial (serialport, baudrate)
         self.mtr_id=0
         self.ser.BYTESIZES = 1
         self.ser.PARITIES = serial.PARITY_NONE
         self.ser.STOPBITS = 1
-        self.ser.timeout = 0.01
+
+        self.ser.timeout = 20000/baudrate            # adjust per baud and hardware. Sequential reads without some delay fail.
+        self.communication_pause = 500/baudrate     # adjust per baud and hardware. Sequential reads without some delay fail.
+
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
@@ -59,13 +63,13 @@ class TMC_UART:
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
-        time.sleep(0.001)
+        time.sleep(self.communication_pause)  # adjust per baud and hardware. Sequential reads without some delay fail.
         
         rtn = self.ser.read(12)
         #print("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
         #print(rtn.hex())
 
-        time.sleep(0.001)  # adjust per baud and hardware. Sequential reads without some delay fail.
+        time.sleep(self.communication_pause)
         
         return(rtn[7:11])
         #return(rtn)
@@ -88,7 +92,7 @@ class TMC_UART:
         return(val)
 
     # -------------------------------
-    def write_reg(self, reg,val):
+    def write_reg(self, reg, val):
         
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
@@ -109,9 +113,26 @@ class TMC_UART:
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
-        time.sleep(0.001)  # adjust per baud and hardware. 
+        time.sleep(self.communication_pause)
 
         return(True)
+
+
+    def write_reg_check(self, reg, val):
+        IFCNT           =   0x02
+
+        ifcnt1 = self.read_int(IFCNT)
+        self.write_reg(reg, val)
+        ifcnt2 = self.read_int(IFCNT)
+
+        if(ifcnt1 >= ifcnt2):
+            print("TMC2209: writing not successful!")
+            print("ifcnt:",ifcnt1,ifcnt2)
+            return False
+        else:
+            return True
+
+
 
 
     def flushSerialBuffer(self):

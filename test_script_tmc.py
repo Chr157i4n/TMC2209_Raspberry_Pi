@@ -1,5 +1,4 @@
-from TMC_2209.TMC_2209_StepperDriver import TMC_2209
-from TMC_2209.TMC_2209_StepperDriver import Loglevel
+from TMC_2209.TMC_2209_StepperDriver import *
 import time
 
 print("---")
@@ -11,7 +10,8 @@ print("---")
 
 tmc = TMC_2209(16, 20, 21) #use your pins for pin_step, pin_dir, pin_en here
 
-tmc.setLoglevel(Loglevel.info)
+tmc.setLoglevel(Loglevel.debug)
+tmc.setMovementAbsRel(MovementAbsRel.absolute)
 
 tmc.setDirection_reg(False)
 tmc.setVSense(True)
@@ -35,8 +35,14 @@ tmc.readGCONF()
 
 # tmc.setMotorEnabled(True)
 
-# tmc.runToPositionSteps(400)  #move 400 steps (1 revolutions (1.8° Motor))
-# tmc.runToPositionSteps(0)  #move 400 steps back to the start (1 revolutions (1.8° Motor))
+# tmc.runToPositionSteps(400)                             #move to position 400
+# tmc.runToPositionSteps(0)                               #move to position 0
+
+# tmc.runToPositionSteps(400, MovementAbsRel.relative)    #move 400 steps forward
+# tmc.runToPositionSteps(-400, MovementAbsRel.relative)   #move 400 steps backward
+
+# tmc.runToPositionSteps(400)                             #move to position 400
+# tmc.runToPositionSteps(0)                               #move to position 0
 
 # tmc.setMotorEnabled(False)
 
