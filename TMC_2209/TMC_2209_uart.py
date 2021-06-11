@@ -7,6 +7,13 @@ import struct
 import serial
 
 
+#-----------------------------------------------------------------------
+# TMC_UART
+#
+# this class is used to communicate with the TMC via UART
+# it can be used to change the settings of the TMC.
+# like the current or the microsteppingmode
+#-----------------------------------------------------------------------
 class TMC_UART:
 
     mtr_id=0
@@ -15,6 +22,10 @@ class TMC_UART:
     wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
     communication_pause = 0
     
+
+#-----------------------------------------------------------------------
+# constructor
+#-----------------------------------------------------------------------
     def __init__(self, serialport, baudrate):
         self.ser = serial.Serial (serialport, baudrate)
         self.mtr_id=0
@@ -30,10 +41,16 @@ class TMC_UART:
         self.ser.reset_input_buffer()
         
 
+#-----------------------------------------------------------------------
+# destructor
+#-----------------------------------------------------------------------
     def __del__(self):
         self.ser.close()
         
-    
+
+#-----------------------------------------------------------------------
+# this function calculates the crc8 parity bit
+#-----------------------------------------------------------------------
     def compute_crc8_atm(self, datagram, initial_value=0):
         crc = initial_value
         # Iterate bytes in data
@@ -48,7 +65,11 @@ class TMC_UART:
                 byte = byte >> 1
         return crc
     
-    # -------------------------------
+
+#-----------------------------------------------------------------------
+# reads the registry on the TMC with a given address.
+# returns the binary value of that register
+#-----------------------------------------------------------------------
     def read_reg(self, reg):
         
         self.ser.reset_output_buffer()
@@ -74,7 +95,11 @@ class TMC_UART:
         return(rtn[7:11])
         #return(rtn)
 
-    # -------------------------------
+
+#-----------------------------------------------------------------------
+# this function tries to read the registry of the TMC 10 times
+# if a valid answer is returned, this function returns it as an integer
+#-----------------------------------------------------------------------
     def read_int(self, reg):
         tries = 0
         while(True):
@@ -91,7 +116,13 @@ class TMC_UART:
         val = struct.unpack(">i",rtn)[0]
         return(val)
 
-    # -------------------------------
+
+#-----------------------------------------------------------------------
+# this function can write a value to the register of the tmc
+# 1. use read_int to get the current setting of the TMC
+# 2. then modify the settings as wished
+# 3. write them back to the driver with this function
+#-----------------------------------------------------------------------
     def write_reg(self, reg, val):
         
         self.ser.reset_output_buffer()
@@ -118,6 +149,11 @@ class TMC_UART:
         return(True)
 
 
+#-----------------------------------------------------------------------
+# this function als writes a value to the register of the TMC
+# but it also checks if the writing process was successfully by checking
+# the InterfaceTransmissionCounter before and after writing
+#-----------------------------------------------------------------------
     def write_reg_check(self, reg, val):
         IFCNT           =   0x02
 
@@ -133,16 +169,24 @@ class TMC_UART:
             return True
 
 
-
-
+#-----------------------------------------------------------------------
+# this function clear the communication buffers of the Raspberry Pi
+#-----------------------------------------------------------------------
     def flushSerialBuffer(self):
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
 
 
+#-----------------------------------------------------------------------
+# this sets a specific bit to 1
+#-----------------------------------------------------------------------
     def set_bit(self, value, bit):
         return value | (bit)
 
+
+#-----------------------------------------------------------------------
+# this sets a specific bit to 0
+#-----------------------------------------------------------------------
     def clear_bit(self, value, bit):
         return value & ~(bit)
 

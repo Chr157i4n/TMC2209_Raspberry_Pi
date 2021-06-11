@@ -21,6 +21,7 @@ class Loglevel(Enum):
     movement = 40
     all = 100
 
+
 class MovementAbsRel(Enum):
     absolute = 0
     relative = 1
@@ -29,7 +30,13 @@ class MovementAbsRel(Enum):
 
 
 
-
+#-----------------------------------------------------------------------
+# TMC_2209
+#
+# this class has two different functions:
+# 1. change setting in the TMC-driver via UART
+# 2. move the motor via STEP/DIR pins
+#-----------------------------------------------------------------------
 class TMC_2209:
     
     tmc_uart = None
@@ -63,6 +70,9 @@ class TMC_2209:
     _movement_abs_rel = MovementAbsRel.absolute
     
     
+#-----------------------------------------------------------------------
+# constructor
+#-----------------------------------------------------------------------
     def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0"):
         self.tmc_uart = TMC_UART(serialport, baudrate)
         self._pin_step = pin_step
@@ -85,6 +95,9 @@ class TMC_2209:
             print("TMC2209: Init finished")
 
 
+#-----------------------------------------------------------------------
+# destructor
+#-----------------------------------------------------------------------
     def __del__(self):
         if(self._loglevel.value >= Loglevel.info.value):
             print("TMC2209: Deinit")
@@ -105,6 +118,9 @@ class TMC_2209:
 #-----------------------------------------------------------------------       
     def setMovementAbsRel(self, movement_abs_rel):
         self._movement_abs_rel = movement_abs_rel
+
+
+
 
 
 #-----------------------------------------------------------------------
@@ -419,7 +435,8 @@ class TMC_2209:
                 print("TMC2209: write normal motor direction")
             gconf = self.tmc_uart.clear_bit(gconf, reg.shaft)
         self.tmc_uart.write_reg_check(reg.GCONF, gconf)
-        
+  
+
 #-----------------------------------------------------------------------
 # return whether Vref (1) or 5V (0) is used for current scale
 #-----------------------------------------------------------------------
@@ -442,7 +459,6 @@ class TMC_2209:
                 print("TMC2209: activated 5V-out for current scale")
             gconf = self.tmc_uart.clear_bit(gconf, reg.i_scale_analog)
         self.tmc_uart.write_reg_check(reg.GCONF, gconf)
-
 
 
 #-----------------------------------------------------------------------
@@ -523,6 +539,7 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # sets the current flow for the motor
 # run_current in mA
+# check whether Vref is actually 1.2V
 #-----------------------------------------------------------------------
     def setCurrent(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10, Vref = 1.2):
         CS_IRun = 0
@@ -556,7 +573,7 @@ class TMC_2209:
 
         self.setIRun_Ihold(CS_IHold, CS_IRun, hold_current_delay)
 
-       
+  
 #-----------------------------------------------------------------------
 # return whether spreadcycle (1) is active or stealthchop (0)
 #-----------------------------------------------------------------------
@@ -689,7 +706,6 @@ class TMC_2209:
         if(self._loglevel.value >= Loglevel.debug.value):
             print("TMC2209: Interface Transmission Counter: "+str(ifcnt))
         return ifcnt
-        
 
 
 #-----------------------------------------------------------------------
@@ -809,7 +825,6 @@ class TMC_2209:
     def run(self):
         if (self.runSpeed()): #returns true, when a step is made
             self.computeNewSpeed()
-            #print("TMC2209: distance to go: " + str(self.distanceToGo()) + "\tspeed: " + str(self._speed))
         return (self._speed != 0.0 and self.distanceToGo() != 0)
 
 
@@ -822,10 +837,14 @@ class TMC_2209:
 
 #-----------------------------------------------------------------------
 # returns the calculated current speed depending on the acceleration
+# this code is based on: 
+# "Generate stepper-motor speed profiles in real time" by David Austin
+#
+# https://www.embedded.com/generate-stepper-motor-speed-profiles-in-real-time/
+# https://web.archive.org/web/20140705143928/http://fab.cba.mit.edu/classes/MIT/961.09/projects/i0/Stepper_Motor_Speed_Profile.pdf
 #-----------------------------------------------------------------------
     def computeNewSpeed(self):
         distanceTo = self.distanceToGo() # +ve is clockwise from curent location
-        #print("TMC2209: distanceTo: " + str(distanceTo))
         stepsToStop = (self._speed * self._speed) / (2.0 * self._acceleration) # Equation 16
         if (distanceTo == 0 and stepsToStop <= 1):
             # We are at the target and its time to stop
@@ -863,7 +882,6 @@ class TMC_2209:
             # First step from stopped
             self._cn = self._c0
             GPIO.output(self._pin_step, GPIO.LOW)
-            #direction = (distanceTo > 0) ? DIRECTION_CW : DIRECTION_CCW
             #print("TMC2209: distance to: " + str(distanceTo))
             if(distanceTo > 0):
                 self.setDirection_pin(1)
@@ -892,23 +910,17 @@ class TMC_2209:
         if (not self._stepInterval):
             return False
         
-        
-        #curtime = micros();
-        #curtime = time.time() * 1000 * 1000
         curtime = time.time_ns()/1000
         
         #print("TMC2209: current time: " + str(curtime))
         #print("TMC2209: last st time: " + str(self._lastStepTime))
         
         if (curtime - self._lastStepTime >= self._stepInterval):
-            #print(type(self.direction))
-            #print(self.direction)
+
             if (self._direction == 1): # Clockwise
                 self._currentPos += 1
-                #print("TMC2209: going CW")
             else: # Anticlockwise 
                 self._currentPos -= 1
-                #print("TMC2209: going CCW")
             self.makeAStep()
             
             self._lastStepTime = curtime # Caution: does not account for costs in step()
@@ -933,6 +945,8 @@ class TMC_2209:
 
 #-----------------------------------------------------------------------
 # tests the EN, DIR and STEP pin
+# this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
+# and checks the IOIN Register of the TMC meanwhile
 #-----------------------------------------------------------------------
     def testDirStepEn(self):
         pin_dir_ok = pin_step_ok = pin_en_ok = True
