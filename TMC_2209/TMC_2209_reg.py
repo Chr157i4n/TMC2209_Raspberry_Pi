@@ -14,6 +14,9 @@ GSTAT           =   0x01
 IFCNT           =   0x02
 IOIN            =   0x06
 IHOLD_IRUN      =   0x10
+TSTEP           =   0x12
+TCOOLTHRS       =   0x14
+SGTHRS          =   0x40
 SG_RESULT       =   0x41
 MSCNT           =   0x6A
 CHOPCONF        =   0x6C
@@ -68,6 +71,9 @@ otpw                = 1<<0
 ihold               = 31<<0
 irun                = 31<<8
 iholddelay          = 15<<16
+
+#SGTHRS
+sgthrs              = 255<<0
 
 #others
 mres_256 = 0

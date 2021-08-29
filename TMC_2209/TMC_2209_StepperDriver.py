@@ -46,6 +46,8 @@ class TMC_2209:
 
     _direction = True
 
+    _stop = False
+
     _msres = -1
     _stepsPerRevolution = 0
     
@@ -713,9 +715,68 @@ class TMC_2209:
 # its will be calculated with every fullstep
 # higher values means a lower motor load
 #-----------------------------------------------------------------------
+    def getTStep(self):
+        tstep = self.tmc_uart.read_int(reg.TSTEP)
+        return tstep
+
+
+#-----------------------------------------------------------------------
+# return the current stallguard result
+# its will be calculated with every fullstep
+# higher values means a lower motor load
+#-----------------------------------------------------------------------
     def getStallguard_Result(self):
         sg_result = self.tmc_uart.read_int(reg.SG_RESULT)
         return sg_result
+
+
+#-----------------------------------------------------------------------
+# sets the register bit "SGTHRS" to to a given value
+# this is needed for the stallguard interrupt callback
+# SG_RESULT becomes compared to the double of this threshold.
+# SG_RESULT ≤ SGTHRS*2
+#-----------------------------------------------------------------------
+    def setStallguard_Threshold(self, threshold):
+
+        if(self._loglevel.value >= Loglevel.info.value):
+            print("TMC2209: sgthrs")
+            print(bin(threshold))
+
+            print("TMC2209: writing sgthrs")
+        self.tmc_uart.write_reg_check(reg.SGTHRS, threshold)
+
+
+#-----------------------------------------------------------------------
+# This  is  the  lower  threshold  velocity  for  switching  
+# on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
+#-----------------------------------------------------------------------
+    def setCoolStep_Threshold(self, threshold):
+
+        if(self._loglevel.value >= Loglevel.info.value):
+            print("TMC2209: tcoolthrs")
+            print(bin(threshold))
+
+            print("TMC2209: writing tcoolthrs")
+        self.tmc_uart.write_reg_check(reg.TCOOLTHRS, threshold)
+
+
+#-----------------------------------------------------------------------
+# set a function to call back, when the driver detects a stall 
+# via stallguard
+# high value on the diag pin can also mean a driver error
+#-----------------------------------------------------------------------
+    def setStallguard_Callback(self, pin_stallguard, threshold, my_callback, min_speed = 2000):
+
+        self.setStallguard_Threshold(threshold)
+        self.setCoolStep_Threshold(min_speed)
+
+        if(self._loglevel.value >= Loglevel.info.value):
+            print("TMC2209: setup stallguard callback")
+        
+        GPIO.setup(pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    
+        GPIO.add_event_detect(pin_stallguard, GPIO.RISING, callback=my_callback, bouncetime=300) 
+
 
 
 #-----------------------------------------------------------------------
@@ -785,6 +846,13 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
+# stop the current movement
+#-----------------------------------------------------------------------
+    def stop(self):
+        self._stop = True
+
+
+#-----------------------------------------------------------------------
 # runs the motor to the given position.
 # with acceleration and deceleration
 # blocks the code until finished!
@@ -800,11 +868,12 @@ class TMC_2209:
         else:
             self._targetPos = steps
 
+        self._stop = False
         self._stepInterval = 0
         self._speed = 0.0
         self._n = 0
         self.computeNewSpeed()
-        while (self.run()): #returns false, when target position is reached
+        while (self.run() and not self._stop): #returns false, when target position is reached
             pass
 
 
@@ -825,6 +894,8 @@ class TMC_2209:
     def run(self):
         if (self.runSpeed()): #returns true, when a step is made
             self.computeNewSpeed()
+            #print(self.getStallguard_Result())
+            #print(self.getTStep())
         return (self._speed != 0.0 and self.distanceToGo() != 0)
 
 

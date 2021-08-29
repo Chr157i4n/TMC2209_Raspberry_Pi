@@ -1,9 +1,12 @@
 from TMC_2209.TMC_2209_StepperDriver import *
 import time
 
+
 print("---")
 print("SCRIPT START")
 print("---")
+
+
 
 
 
@@ -12,6 +15,9 @@ print("---")
 # use your pins for pin_step, pin_dir, pin_en here
 #-----------------------------------------------------------------------
 tmc = TMC_2209(16, 20, 21)
+
+
+
 
 
 #-----------------------------------------------------------------------
@@ -23,12 +29,15 @@ tmc.setLoglevel(Loglevel.debug)
 tmc.setMovementAbsRel(MovementAbsRel.absolute)
 
 
+
+
+
 #-----------------------------------------------------------------------
 # these functions change settings in the TMC register
 #-----------------------------------------------------------------------
 tmc.setDirection_reg(False)
 tmc.setVSense(True)
-tmc.setCurrent(400)
+tmc.setCurrent(300)
 tmc.setIScaleAnalog(True)
 tmc.setInterpolation(True)
 tmc.setSpreadCycle(False)
@@ -37,6 +46,10 @@ tmc.setInternalRSense(False)
 
 
 print("---\n---")
+
+
+
+
 
 #-----------------------------------------------------------------------
 # these functions read and print the current settings in the TMC register
@@ -47,9 +60,6 @@ tmc.readDRVSTATUS()
 tmc.readGCONF()
 
 print("---\n---")
-
-
-
 
 
 
@@ -67,12 +77,14 @@ print("---\n---")
 
 
 
-
 #-----------------------------------------------------------------------
 # set the Accerleration and maximal Speed
 #-----------------------------------------------------------------------
 tmc.setAcceleration(2000)
-tmc.setMaxSpeed(1500)
+tmc.setMaxSpeed(500)
+
+
+
 
 
 #-----------------------------------------------------------------------
@@ -81,6 +93,12 @@ tmc.setMaxSpeed(1500)
 # tmc.setMotorEnabled(True)
 
 
+
+
+
+#-----------------------------------------------------------------------
+# move the motor 1 revolution
+#-----------------------------------------------------------------------
 # tmc.runToPositionSteps(400)                             #move to position 400
 # tmc.runToPositionSteps(0)                               #move to position 0
 
@@ -91,6 +109,30 @@ tmc.setMaxSpeed(1500)
 
 # tmc.runToPositionSteps(400)                             #move to position 400
 # tmc.runToPositionSteps(0)                               #move to position 0
+
+
+
+
+
+#-----------------------------------------------------------------------
+# set a callback function for the stallguard interrupt based detection
+# 1. param: pin connected to the tmc DIAG output
+# 2. param: is the threshold StallGuard
+# 3. param: is the callback function (threaded)
+# 4. param (optional): min speed threshold (in steptime measured  in  clock  cycles)
+#-----------------------------------------------------------------------
+# def my_callback(channel):  
+#     print("StallGuard!")
+#     tmc.stop()
+
+# tmc.setStallguard_Callback(26, 50, my_callback) # after this function call, StallGuard is active
+
+# tmc.runToPositionSteps(4000, MovementAbsRel.relative)    #move 4000 steps forward
+# time.sleep(1)
+# tmc.runToPositionSteps(-400, MovementAbsRel.relative)    #move 400 steps backwards
+
+
+
 
 
 #-----------------------------------------------------------------------
