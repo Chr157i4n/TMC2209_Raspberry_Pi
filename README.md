@@ -27,14 +27,37 @@ the Documentation of the TMC2209 can be found here:
 https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
 
 
-## Usage
+## Installation
 - clone this repo to your Raspberry Pi using "git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi"
 - install the python module bitstring with "pip3 install bitstring"
 - enable the serial port in "raspi-config"
-- run the script using "python3 test_script_tmc.py"
-- test whether the UART communication works
-- test whether the communication via STEP, DIR, EN pins work (with the function "testDirStepEn")
-- test the movement of the motor
+
+
+## Usage
+1. run the script "test_script_01_uart_connection.py"
+this only communicates with the TMC driver over UART. It should set some settings in the driver and then outputs the settings.
+When it outputs "TMC2209: after 10 tries not valid answer. exiting", you need to check the UART-connection.
+
+2. run the script "test_script_02_pin_connection.py"
+this scripts enables the raspberry GPIO output for the dir, en and step pin and then checks the tmc driver register, 
+whether the driver sees them as HIGH or LOW. Because then enable pin is activated for a short time, the motor current ouput
+will be also activated in this script for a short time.
+This script should output: 
+Pin DIR:        OK
+Pin STEP:       OK
+Pin EN:         OK
+if not, check the connection of the pin
+
+3. run the script "test_script_03_basic_movement.py"
+this script should move the motor 6 times one revolution back and forth.
+
+4. run the script "test_script_04_stallguard.py"
+in this script the stallguard feature of the TMC2209 is beeing setup.
+a funtion will be called, if the driver detects a stall. the function stops the current movement.
+The motor will be moved 10 revolutions. If the movement is unhindered finished, the script outputs "Movement finished successfully".
+If you block the motor with pliers or so, the the motor will stop and the script outputs "StallGuard!" and "Movement was not completed"
+
+
 
 For me this baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000
 
@@ -43,6 +66,7 @@ So you dont need to connect anything to the Vio pin of the driver.
 
 The function setCurrent only works correctly if the Vref voltage ist 1.2V, otherwise change Vref to 1.2V or
 give the actual Vref as parameter to the setCurrent function.
+
 
 
 ![](Images/image1.jpg)

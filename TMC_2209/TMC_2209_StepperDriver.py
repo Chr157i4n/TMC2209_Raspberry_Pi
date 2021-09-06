@@ -855,7 +855,9 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # runs the motor to the given position.
 # with acceleration and deceleration
-# blocks the code until finished!
+# blocks the code until finished or stopped from a different thread!
+# returns true when the movement if finshed normally and false,
+# when the movement was stopped
 #-----------------------------------------------------------------------
     def runToPositionSteps(self, steps, movement_abs_rel = None):
         if(movement_abs_rel is not None):
@@ -875,6 +877,7 @@ class TMC_2209:
         self.computeNewSpeed()
         while (self.run() and not self._stop): #returns false, when target position is reached
             pass
+        return not self._stop
 
 
 #-----------------------------------------------------------------------
@@ -883,7 +886,7 @@ class TMC_2209:
 # blocks the code until finished!
 #-----------------------------------------------------------------------
     def runToPositionRevolutions(self, revolutions, movement_absolute_relative = None):
-        self.runToPositionSteps(round(revolutions * self._stepsPerRevolution), movement_absolute_relative)
+        return self.runToPositionSteps(round(revolutions * self._stepsPerRevolution), movement_absolute_relative)
 
 
 #-----------------------------------------------------------------------
@@ -1013,6 +1016,7 @@ class TMC_2209:
 
         if(self._loglevel.value >= Loglevel.movement.value):
                 print("TMC2209: one step")
+
 
 #-----------------------------------------------------------------------
 # tests the EN, DIR and STEP pin
