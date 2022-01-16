@@ -15,6 +15,7 @@ IFCNT           =   0x02
 IOIN            =   0x06
 IHOLD_IRUN      =   0x10
 TSTEP           =   0x12
+VACTUAL         =   0x22
 TCOOLTHRS       =   0x14
 SGTHRS          =   0x40
 SG_RESULT       =   0x41

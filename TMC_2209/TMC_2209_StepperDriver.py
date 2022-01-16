@@ -721,6 +721,21 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
+# sets the register bit "VACTUAL" to to a given value
+# VACTUAL allows moving the motor by UART control.
+# It gives the motor velocity in +-(2^23)-1 [μsteps / t]
+# 0: Normal operation. Driver reacts to STEP input
+#-----------------------------------------------------------------------
+    def setVActual(self, vactual):
+        if(self._loglevel.value >= Loglevel.info.value):
+            print("TMC2209: vactual")
+            print(bin(vactual))
+
+            print("TMC2209: writing vactual")
+        self.tmc_uart.write_reg_check(reg.VACTUAL, vactual)
+
+
+#-----------------------------------------------------------------------
 # return the current stallguard result
 # its will be calculated with every fullstep
 # higher values means a lower motor load
