@@ -69,5 +69,5 @@ give the actual Vref as parameter to the setCurrent function.
 
 
 
-![](Images/image1.jpg)
-![](Images/schematic.png)
+![](docs/Images/image1.jpg)
+![](docs/Images/schematic.png)
