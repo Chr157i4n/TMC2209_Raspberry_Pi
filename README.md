@@ -16,29 +16,38 @@ You can read more about this in the datasheet from Trinamic.
 Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends,
 Well, the Pi receive 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
 
-the code to run the stepper motor is based on the code of the AccelStepper Libary from Mike McCauley:
-https://github.com/adafruit/AccelStepper
+the code to run the stepper motor is based on the code of the AccelStepper Libary from Mike McCauley:  
+https://github.com/adafruit/AccelStepper  
 http://www.airspayce.com/mikem/arduino/AccelStepper/
 
-the code for the uart communicationis based on this code from troxel:
+the code for the uart communication is based on this code from troxel:  
 https://github.com/troxel/TMC_UART
 
-the Documentation of the TMC2209 can be found here:
+the Documentation of the TMC2209 can be found here:  
 https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
 
 
 ## Installation
-- clone this repo to your Raspberry Pi using "git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi"
-- install the python module bitstring with "pip3 install bitstring"
-- enable the serial port in "raspi-config"
+- clone this repo to your Raspberry Pi using  
+```
+git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi
+```
+- install the python module bitstring with  
+```
+pip3 install bitstring
+```
+- enable the serial port in  
+```
+sudo raspi-config
+```
 
 
 ## Usage
-1. run the script "test_script_01_uart_connection.py"
+1. run the script [test_script_01_uart_connection.py](tests/test_script_01_uart_connection.py)
 this only communicates with the TMC driver over UART. It should set some settings in the driver and then outputs the settings.
-When it outputs "TMC2209: after 10 tries not valid answer. exiting", you need to check the UART-connection.
+When it outputs ```TMC2209: after 10 tries not valid answer. exiting```, you need to check the UART-connection.
 
-2. run the script "test_script_02_pin_connection.py"
+2. run the script [test_script_02_pin_connection.py](tests/test_script_02_pin_connection.py)
 this scripts enables the raspberry GPIO output for the dir, en and step pin and then checks the tmc driver register, 
 whether the driver sees them as HIGH or LOW. Because then enable pin is activated for a short time, the motor current ouput
 will be also activated in this script for a short time.
@@ -48,14 +57,14 @@ Pin STEP:       OK
 Pin EN:         OK
 if not, check the connection of the pin
 
-3. run the script "test_script_03_basic_movement.py"
+3. run the script [test_script_03_basic_movement.py](tests/test_script_03_basic_movement.py)
 this script should move the motor 6 times one revolution back and forth.
 
-4. run the script "test_script_04_stallguard.py"
+4. run the script [test_script_04_stallguard.py](tests/test_script_04_stallguard.py)
 in this script the stallguard feature of the TMC2209 is beeing setup.
 a funtion will be called, if the driver detects a stall. the function stops the current movement.
-The motor will be moved 10 revolutions. If the movement is unhindered finished, the script outputs "Movement finished successfully".
-If you block the motor with pliers or so, the the motor will stop and the script outputs "StallGuard!" and "Movement was not completed"
+The motor will be moved 10 revolutions. If the movement is unhindered finished, the script outputs ```Movement finished successfully```.
+If you block the motor with pliers or so, the the motor will stop and the script outputs ```StallGuard!``` and ```Movement was not completed```
 
 
 
@@ -70,4 +79,4 @@ give the actual Vref as parameter to the setCurrent function.
 
 
 ![](docs/Images/image1.jpg)
-![](docs/Images/schematic.png)
+![wiring diagram](docs/Images/wiring_diagram.png)
