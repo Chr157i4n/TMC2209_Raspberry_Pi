@@ -52,6 +52,7 @@ class TMC_2209:
     _stepsPerRevolution = 0
     
     _loglevel = Loglevel.info
+    _logprefix = "TMC2209"
 
     _currentPos = 0                 # current position of stepper in steps
     _targetPos = 0                  # the target position in steps
@@ -118,8 +119,7 @@ class TMC_2209:
 #-----------------------------------------------------------------------       
     def log(self, message, loglevel=Loglevel.none.value):
         if(self._loglevel.value >= loglevel):
-            log_prefix = "TMC2209"
-            print(log_prefix+"_"+str(self.tmc_uart.mtr_id)+": "+message)
+            print(self._logprefix+"_"+str(self.tmc_uart.mtr_id)+": "+message)
 
 #-----------------------------------------------------------------------
 # set whether the movment should be relative or absolute by default.
