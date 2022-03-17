@@ -1,4 +1,4 @@
-from TMC_2209.TMC_2209_StepperDriver import *
+from src.TMC_2209.TMC_2209_StepperDriver import *
 import time
 
 
@@ -85,18 +85,15 @@ tmc.setMotorEnabled(True)
 
 
 #-----------------------------------------------------------------------
-# move the motor 1 revolution
+# move the motor for 1 second forward, stop for 1 second
+# and then move backwards for 1 second
 #-----------------------------------------------------------------------
-tmc.runToPositionSteps(400)                             #move to position 400
-tmc.runToPositionSteps(0)                               #move to position 0
-
-
-tmc.runToPositionSteps(400, MovementAbsRel.relative)    #move 400 steps forward
-tmc.runToPositionSteps(-400, MovementAbsRel.relative)   #move 400 steps backward
-
-
-tmc.runToPositionSteps(400)                             #move to position 400
-tmc.runToPositionSteps(0)                               #move to position 0
+tmc.setVActual(400)
+time.sleep(1)
+tmc.setVActual(0)
+time.sleep(1)
+tmc.setVActual(-400)
+time.sleep(1)
 
 
 

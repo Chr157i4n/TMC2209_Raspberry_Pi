@@ -1,4 +1,4 @@
-from TMC_2209.TMC_2209_StepperDriver import *
+from src.TMC_2209.TMC_2209_StepperDriver import *
 import time
 
 
@@ -52,12 +52,21 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# these functions read and print the current settings in the TMC register
+# this function test whether the connection of the DIR, STEP and EN pin
+# between Raspberry Pi and TMC driver is working
 #-----------------------------------------------------------------------
-tmc.readIOIN()
-tmc.readCHOPCONF()
-tmc.readDRVSTATUS()
-tmc.readGCONF()
+tmc.testDirStepEn()
+
+print("---\n---")
+
+
+
+
+
+#-----------------------------------------------------------------------
+# deactivate the motor current output
+#-----------------------------------------------------------------------
+tmc.setMotorEnabled(False)
 
 print("---\n---")
 
