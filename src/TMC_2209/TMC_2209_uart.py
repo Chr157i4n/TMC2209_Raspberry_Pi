@@ -16,7 +16,7 @@ import serial
 #-----------------------------------------------------------------------
 class TMC_UART:
 
-    mtr_id=0
+    mtr_id = 0
     ser = None
     rFrame  = [0x55, 0, 0, 0  ]
     wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
@@ -26,9 +26,9 @@ class TMC_UART:
 #-----------------------------------------------------------------------
 # constructor
 #-----------------------------------------------------------------------
-    def __init__(self, serialport, baudrate):
+    def __init__(self, serialport, baudrate, mtr_id = 0):
         self.ser = serial.Serial (serialport, baudrate)
-        self.mtr_id=0
+        self.mtr_id = mtr_id
         self.ser.BYTESIZES = 1
         self.ser.PARITIES = serial.PARITY_NONE
         self.ser.STOPBITS = 1

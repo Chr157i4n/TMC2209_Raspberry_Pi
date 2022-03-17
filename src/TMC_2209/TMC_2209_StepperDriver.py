@@ -75,8 +75,8 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # constructor
 #-----------------------------------------------------------------------
-    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0"):
-        self.tmc_uart = TMC_UART(serialport, baudrate)
+    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0", driver_address=0):
+        self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
         self._pin_step = pin_step
         self._pin_dir = pin_dir
         self._pin_en = pin_en
@@ -103,8 +103,11 @@ class TMC_2209:
     def __del__(self):
         if(self._loglevel.value >= Loglevel.info.value):
             print("TMC2209: Deinit")
-        self.setMotorEnabled(False)
-        GPIO.cleanup() 
+        try:
+            self.setMotorEnabled(False)
+            GPIO.cleanup()
+        except:
+            print("TMC2209: already cleaned up")
 
 
 #-----------------------------------------------------------------------
