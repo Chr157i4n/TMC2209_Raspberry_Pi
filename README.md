@@ -42,7 +42,12 @@ sudo raspi-config
 ```
 
 
-## Usage
+## Tests
+You can run the test files from the main directory with
+```
+python3 -m tests.test_script_01_uart_connection
+```
+
 1. run the script [test_script_01_uart_connection.py](tests/test_script_01_uart_connection.py)
 this only communicates with the TMC driver over UART. It should set some settings in the driver and then outputs the settings.
 When it outputs ```TMC2209: after 10 tries not valid answer. exiting```, you need to check the UART-connection.
