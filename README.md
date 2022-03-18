@@ -4,7 +4,7 @@ This is a libary to drive a stepper motor with a TMC2209 stepper driver and a Ra
 This code is still experimental, so use it on your own risk.
 
 This libary is programmed in pure Python. The performance of Python is not good enough to drive the motor with high speed.
-So if you move the motor with high speed and this libary the motor will loose steps.
+So if you move the motor with high speed and this libary the motor will lose steps.
 
 My TMC2209 is a driver from Watterott:
 https://shop.watterott.com/SilentStepStick-TMC2209-V2_1
@@ -14,7 +14,7 @@ So the PD_UART-Pin needs to be connected to the Raspberrry Pis RX-Pin directly a
 You can read more about this in the datasheet from Trinamic.
 
 Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends,
-Well, the Pi receive 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
+Well, the Pi receives 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
 
 the code to run the stepper motor is based on the code of the AccelStepper Libary from Mike McCauley:  
 https://github.com/adafruit/AccelStepper  
@@ -26,8 +26,16 @@ https://github.com/troxel/TMC_UART
 the Documentation of the TMC2209 can be found here:  
 https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
 
+the code is also available on PyPI:
+https://pypi.org/project/TMC-2209-Raspberry-Pi
+
 
 ## Installation
+### Installation with PIP
+```
+pip3 install TMC-2209-Raspberry-Pi
+```
+### Installation with GIT
 - clone this repo to your Raspberry Pi using  
 ```
 git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi
@@ -80,6 +88,31 @@ So you dont need to connect anything to the Vio pin of the driver.
 
 The function setCurrent only works correctly if the Vref voltage ist 1.2V, otherwise change Vref to 1.2V or
 give the actual Vref as parameter to the setCurrent function.
+
+## Usage
+```python
+from TMC_2209.TMC_2209_StepperDriver import *
+tmc = TMC_2209(16, 20, 21)
+
+tmc.setDirection_reg(False)
+tmc.setVSense(True)
+tmc.setCurrent(300)
+tmc.setIScaleAnalog(True)
+tmc.setInterpolation(True)
+tmc.setSpreadCycle(False)
+tmc.setMicrosteppingResolution(2)
+tmc.setInternalRSense(False)
+
+tmc.setAcceleration(2000)
+tmc.setMaxSpeed(500)
+
+tmc.setMotorEnabled(True)
+
+tmc.runToPositionSteps(400)
+tmc.runToPositionSteps(0)
+
+tmc.setMotorEnabled(False)
+```
 
 
 
