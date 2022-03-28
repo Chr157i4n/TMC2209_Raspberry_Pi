@@ -23,6 +23,7 @@ A clear and concise description of what you expected to happen.
 - Raspberry Pi Version
 - OS Version
 - Version of this library
+- TMC2209 version and manufacturer
 
 **Additional context**
 Add any other context about the problem here.
