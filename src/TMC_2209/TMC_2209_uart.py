@@ -191,4 +191,31 @@ class TMC_UART:
         return value & ~(bit)
 
 
+#-----------------------------------------------------------------------
+# test UART connection
+#-----------------------------------------------------------------------
+    def test_uart(self, reg):
+        
+        self.ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
+        
+        self.rFrame[1] = self.mtr_id
+        self.rFrame[2] = reg
+        self.rFrame[3] = self.compute_crc8_atm(self.rFrame[:-1])
 
+        rtn = self.ser.write(self.rFrame)
+        if rtn != len(self.rFrame):
+            print("TMC2209: Err in write {}".format(__), file=sys.stderr)
+            return False
+
+        time.sleep(self.communication_pause)  # adjust per baud and hardware. Sequential reads without some delay fail.
+        
+        rtn = self.ser.read(12)
+        print("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
+        print("hex: "+str(rtn.hex()))
+        c = BitArray(hex=rtn.hex())
+        print("bin: "+str(c.bin))
+
+        time.sleep(self.communication_pause)
+        
+        return bytes(self.rFrame), rtn

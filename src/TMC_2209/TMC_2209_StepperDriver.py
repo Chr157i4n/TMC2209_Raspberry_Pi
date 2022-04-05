@@ -76,7 +76,7 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # constructor
 #-----------------------------------------------------------------------
-    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0", driver_address=0):
+    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False):
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
         self._pin_step = pin_step
         self._pin_dir = pin_dir
@@ -88,9 +88,11 @@ class TMC_2209:
         GPIO.setup(self._pin_dir, GPIO.OUT)
         GPIO.setup(self._pin_en, GPIO.OUT)
         GPIO.output(self._pin_dir, self._direction)
-        self.log("GPIO Init finished", Loglevel.info.value)      
-        self.readStepsPerRevolution()
-        self.clearGSTAT()
+        self.log("GPIO Init finished", Loglevel.info.value)
+        if(not no_uart):
+            self.readStepsPerRevolution()
+            self.clearGSTAT()
+
         self.tmc_uart.flushSerialBuffer()
         self.log("Init finished", Loglevel.info.value)
 
@@ -1066,7 +1068,7 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # test method
 #-----------------------------------------------------------------------
-    def test(self):
+    def testSTEP(self):
         self.setDirection_pin(1)
         
         for i in range(100):
@@ -1075,3 +1077,44 @@ class TMC_2209:
             time.sleep(0.001)
             GPIO.output(self._pin_step, GPIO.LOW)
             time.sleep(0.01)
+
+#-----------------------------------------------------------------------
+# test method
+#-----------------------------------------------------------------------
+    def testUART(self):
+        self.log("---")
+        self.log("TEST UART")
+        result = self.tmc_uart.test_uart(reg.IOIN)
+
+        snd = result[0]
+        rtn = result[1]
+
+        self.log("length snd: "+str(len(snd)), Loglevel.debug.value)
+        self.log("length rtn: "+str(len(rtn)), Loglevel.debug.value)
+
+        if(len(rtn)==12):
+            self.log("the Raspberry Pi received the sended bits and the answer from the TMC", Loglevel.info.value)
+        elif(len(rtn)==4):
+            self.log("the Raspberry Pi received only the sended bits", Loglevel.info.value)
+        elif(len(rtn)==0):
+            self.log("the Raspberry Pi did not receive anything", Loglevel.info.value)
+        else:
+            self.log("the Raspberry Pi received an unexpected amount of bits: "+str(len(rtn)), Loglevel.info.value)
+
+        if(snd[0:4] == rtn[0:4]):
+            self.log("the Raspberry Pi received exactly the bits it has send. the first 4 bits are the same", Loglevel.info.value)
+        else:
+            self.log("the Raspberry Pi did not received the bits it has send. the first 4 bits are different", Loglevel.info.value)
+
+
+        self.log("complete", Loglevel.debug.value)
+        self.log(str(snd), Loglevel.debug.value)
+        self.log(str(rtn), Loglevel.debug.value)
+
+        self.log("just the first 4 bits", Loglevel.debug.value)
+        self.log(str(snd[0:4]), Loglevel.debug.value)
+        self.log(str(rtn[0:4]), Loglevel.debug.value)
+
+        
+        self.log("---")
+        return True
