@@ -49,6 +49,22 @@ pip3 install bitstring
 sudo raspi-config
 ```
 
+## Wiring
+Pin TMC2209 | connect to | Function
+-- | -- | --
+TX or PDN_UART with 1kOhm | TX of Raspberry Pi | send data to TMC via UART
+RX or PDN_UART directly | RX of Raspberry Pi | receive data from TMC via UART
+VM | 12V or 24V of power supply | power for the motor
+GND | GND of power supply | power for the motor
+VDD | 5V of Raspberry Pi | does not need to be connected
+GND2 | GND of Raspberry Pi | GND for VDD and Signals
+EN | GPIO21 of Raspberry Pi | enable the motor output
+STEP | GPIO16 of Raspberry Pi | moves the motor one step per pulse
+DIR | GPIO20 of Raspberry Pi | set the direction of the motor
+DIAG | GPIO26 of Raspberry Pi | optional, for StallGuard
+
+The GPIO pins can be specific when initiating the class
+
 
 ## Tests
 You can run the test files from the main directory with
@@ -56,11 +72,11 @@ You can run the test files from the main directory with
 python3 -m tests.test_script_01_uart_connection
 ```
 
-1. run the script [test_script_01_uart_connection.py](tests/test_script_01_uart_connection.py)
+#### [test_script_01_uart_connection.py](tests/test_script_01_uart_connection.py)
 this only communicates with the TMC driver over UART. It should set some settings in the driver and then outputs the settings.
 When it outputs ```TMC2209: after 10 tries not valid answer. exiting```, you need to check the UART-connection.
 
-2. run the script [test_script_02_pin_connection.py](tests/test_script_02_pin_connection.py)
+#### [test_script_02_pin_connection.py](tests/test_script_02_pin_connection.py)
 this scripts enables the raspberry GPIO output for the dir, en and step pin and then checks the tmc driver register, 
 whether the driver sees them as HIGH or LOW. Because then enable pin is activated for a short time, the motor current ouput
 will be also activated in this script for a short time.
@@ -70,15 +86,21 @@ Pin STEP:       OK
 Pin EN:         OK
 if not, check the connection of the pin
 
-3. run the script [test_script_03_basic_movement.py](tests/test_script_03_basic_movement.py)
+#### [test_script_03_basic_movement.py](tests/test_script_03_basic_movement.py)
 this script should move the motor 6 times one revolution back and forth.
 
-4. run the script [test_script_04_stallguard.py](tests/test_script_04_stallguard.py)
+####  [test_script_04_stallguard.py](tests/test_script_04_stallguard.py)
 in this script the stallguard feature of the TMC2209 is beeing setup.
 a funtion will be called, if the driver detects a stall. the function stops the current movement.
 The motor will be moved 10 revolutions. If the movement is unhindered finished, the script outputs ```Movement finished successfully```.
 If you block the motor with pliers or so, the the motor will stop and the script outputs ```StallGuard!``` and ```Movement was not completed```
 
+####  [test_script_05_vactual.py](tests/test_script_05_vactual.py)
+VACTUAL allows moving the motor by UART control. It gives the motor velocity in +-(2^23)-1 [μsteps / t]
+
+####  [test_script_06_multiple_drivers.py](tests/test_script_06_multiple_drivers.py)
+Multiple drivers can be addressed via UART by setting different addresses with the MS1 and MS2 pins.
+Simultaneous of multiple motors is currently not supported.
 
 
 For me this baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000
@@ -115,6 +137,10 @@ tmc.setMotorEnabled(False)
 ```
 
 
+## Troubleshoot
+if you encounter any issue, feel free to open an issue
 
-![](docs/Images/image1.jpg)
+
+
+![photo](docs/Images/image1.jpg)
 ![wiring diagram](docs/Images/wiring_diagram.png)
