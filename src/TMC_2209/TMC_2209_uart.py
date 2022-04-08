@@ -27,7 +27,16 @@ class TMC_UART:
 # constructor
 #-----------------------------------------------------------------------
     def __init__(self, serialport, baudrate, mtr_id = 0):
-        self.ser = serial.Serial (serialport, baudrate)
+        try:
+            self.ser = serial.Serial (serialport, baudrate)
+        except Exception as e:
+            errnum = e.args[0]
+            print("TMC2209: SERIAL ERROR: "+str(e))
+            if(errnum == 2):
+                print("TMC2209: "+str(serialport)+" does not exist. You need to activate the serial port with \"sudo raspi-config\"")
+            if(errnum == 13):
+                print("TMC2209: you have no permission to use the serial port. You may need to add your user to the dialout group with \"sudo usermod -a -G dialout pi\"")
+
         self.mtr_id = mtr_id
         self.ser.BYTESIZES = 1
         self.ser.PARITIES = serial.PARITY_NONE
@@ -45,7 +54,8 @@ class TMC_UART:
 # destructor
 #-----------------------------------------------------------------------
     def __del__(self):
-        self.ser.close()
+        if(self.ser is not None):
+            self.ser.close()
         
 
 #-----------------------------------------------------------------------
@@ -163,7 +173,7 @@ class TMC_UART:
 
         if(ifcnt1 >= ifcnt2):
             print("TMC2209: writing not successful!")
-            print("ifcnt:",ifcnt1,ifcnt2)
+            print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
             return False
         else:
             return True
@@ -211,10 +221,10 @@ class TMC_UART:
         time.sleep(self.communication_pause)  # adjust per baud and hardware. Sequential reads without some delay fail.
         
         rtn = self.ser.read(12)
-        print("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
-        print("hex: "+str(rtn.hex()))
+        print("TMC2209: received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
+        print("TMC2209: hex: "+str(rtn.hex()))
         c = BitArray(hex=rtn.hex())
-        print("bin: "+str(c.bin))
+        print("TMC2209: bin: "+str(c.bin))
 
         time.sleep(self.communication_pause)
         

@@ -84,10 +84,12 @@ class TMC_2209:
         self.log("Init", Loglevel.info.value)
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self._pin_step, GPIO.OUT)
-        GPIO.setup(self._pin_dir, GPIO.OUT)
-        GPIO.setup(self._pin_en, GPIO.OUT)
-        GPIO.output(self._pin_dir, self._direction)
+        self.log("STEP Pin: " + str(self._pin_step), Loglevel.info.value)
+        self.log("DIR Pin: " + str(self._pin_dir), Loglevel.info.value)
+        self.log("EN Pin: " + str(self._pin_en), Loglevel.info.value)
+        GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
+        GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
         self.log("GPIO Init finished", Loglevel.info.value)
         if(not no_uart):
             self.readStepsPerRevolution()
@@ -105,8 +107,9 @@ class TMC_2209:
         try:
             self.setMotorEnabled(False)
             GPIO.cleanup()
+            self.log("GPIO cleanup")
         except:
-            self.log("already cleaned up")
+            self.log("GPIO already cleaned up")
 
 
 #-----------------------------------------------------------------------
