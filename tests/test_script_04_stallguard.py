@@ -36,7 +36,6 @@ tmc.setMovementAbsRel(MovementAbsRel.absolute)
 # these functions change settings in the TMC register
 #-----------------------------------------------------------------------
 tmc.setDirection_reg(False)
-tmc.setVSense(True)
 tmc.setCurrent(300)
 tmc.setIScaleAnalog(True)
 tmc.setInterpolation(True)

@@ -538,12 +538,18 @@ class TMC_2209:
         Rsense = 0.11
         Vfs = 0
 
-        if(self.getVSense()):
-            self.log("Vsense: 1", Loglevel.info.value)
+        Vfs = 0.325 * Vref / 2.5
+        CS_IRun = 32.0*1.41421*run_current/1000.0*(Rsense+0.02)/Vfs - 1
+
+        # If Current Scale is too low, turn on high sensitivity VSsense and calculate again
+        if(CS_IRun < 16):
+            self.log("CS too low; switching to VSense True", Loglevel.info.value)
             Vfs = 0.180 * Vref / 2.5
-        else:
-            self.log("Vsense: 0", Loglevel.info.value)
-            Vfs = 0.325 * Vref / 2.5
+            CS_IRun = 32.0*1.41421*run_current/1000.0*(Rsense+0.02)/Vfs - 1
+            self.setVSense(True)
+        else: # If CS >= 16, turn off high_senser
+            self.log("CS in range; using VSense False", Loglevel.info.value)
+            self.setVSense(False)
             
         CS_IRun = 32.0*1.41421*run_current/1000.0*(Rsense+0.02)/Vfs - 1
 
