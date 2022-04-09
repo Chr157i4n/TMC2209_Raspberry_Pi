@@ -102,14 +102,13 @@ VACTUAL allows moving the motor by UART control. It gives the motor velocity in 
 Multiple drivers can be addressed via UART by setting different addresses with the MS1 and MS2 pins.
 Simultaneous of multiple motors is currently not supported.
 
-
+\
+\
 For me this baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000
 
 If the TMC2209 driver is connected to Vmotor, the internal voltage regulator will create the Vio for the chip.
 So you dont need to connect anything to the Vio pin of the driver.
 
-The function setCurrent only works correctly if the Vref voltage ist 1.2V, otherwise change Vref to 1.2V or
-give the actual Vref as parameter to the setCurrent function.
 
 ## Usage
 ```python
@@ -138,8 +137,14 @@ tmc.setMotorEnabled(False)
 
 
 ## Troubleshoot
-if you encounter any issue, feel free to open an issue
+if you encounter any problem, feel free to open an issue
 
+Problem | Solution 
+-- | --
+FileNotFoundError: [Errno 2] <br /> No such file or directory: '/dev/serial0' | depending on your Raspberry Pi version, you need to enable the Serial Port <br /> run `sudo raspi-config` in your terminal. <br /> there go to '3 Interface Options' -> 'P3 Serial Port' <br /> Would you like a login shell to be accessible over serial? No <br /> Would you like the serial port hardware to be enabled? Yes <br /> Finish and then reboot
+PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need to give the permission to acces the Serial Port to your current user <br /> You may need to add your user (pi) to the dialout group with `sudo usermod -a -G dialout pi`
+"did not get the expected 4 data bytes. Instead got 0 Bytes" | You can use the 'debug_script_01_uart_connection' script to get a better reading on the received bytes and troubleshoot your problem
+"the Raspberry Pi received only the sended bits" or<br /> inconsistent received bits | Make sure the UART ist properly connected to the TMC driver and the driver is powered and working. <br /> Make sure login shell (console) over serial is disabled
 
 
 ![photo](docs/Images/image1.jpg)
