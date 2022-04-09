@@ -1,10 +1,10 @@
 # TMC_2209_Raspberry_Pi
-This is a libary to drive a stepper motor with a TMC2209 stepper driver and a Raspberry Pi
+This is a library to drive a stepper motor with a TMC2209 stepper driver and a Raspberry Pi
 
 This code is still experimental, so use it on your own risk.
 
-This libary is programmed in pure Python. The performance of Python is not good enough to drive the motor with high speed.
-So if you move the motor with high speed and this libary the motor will lose steps.
+This library is programmed in pure Python. The performance of Python is not good enough to drive the motor with high speed.
+So if you move the motor with high speed and this library the motor will lose steps.
 
 My TMC2209 is a Bigtreetech TMC 2209 V1.2:
 https://github.com/bigtreetech/BIGTREETECH-TMC2209-V1.2
@@ -16,7 +16,7 @@ You can read more about this in the datasheet from Trinamic.
 Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends,
 Well, the Pi receives 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
 
-the code to run the stepper motor is based on the code of the AccelStepper Libary from Mike McCauley:  
+the code to run the stepper motor is based on the code of the AccelStepper Library from Mike McCauley:  
 https://github.com/adafruit/AccelStepper  
 http://www.airspayce.com/mikem/arduino/AccelStepper/
 
