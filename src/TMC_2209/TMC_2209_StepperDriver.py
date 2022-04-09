@@ -533,23 +533,33 @@ class TMC_2209:
 # run_current in mA
 # check whether Vref is actually 1.2V
 #-----------------------------------------------------------------------
-    def setCurrent(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10, Vref = 1.2):
+    def setCurrent(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10, use_Vref=False, Vref = 1.2):
         CS_IRun = 0
         Rsense = 0.11
         Vfs = 0
 
-        if(self.getVSense()):
-            self.log("Vsense: 1", Loglevel.info.value)
-            Vfs = 0.180 * Vref / 2.5
+        if (use_Vref):
+            self.setIScaleAnalog(True)
         else:
-            self.log("Vsense: 0", Loglevel.info.value)
-            Vfs = 0.325 * Vref / 2.5
-            
+            Vref=2.5
+            self.setIScaleAnalog(False)
+
+        Vfs = 0.325 * Vref / 2.5
         CS_IRun = 32.0*1.41421*run_current/1000.0*(Rsense+0.02)/Vfs - 1
+
+        # If Current Scale is too low, turn on high sensitivity VSsense and calculate again
+        if(CS_IRun < 16):
+            self.log("CS too low; switching to VSense True", Loglevel.info.value)
+            Vfs = 0.180 * Vref / 2.5
+            CS_IRun = 32.0*1.41421*run_current/1000.0*(Rsense+0.02)/Vfs - 1
+            self.setVSense(True)
+        else: # If CS >= 16, turn off high_senser
+            self.log("CS in range; using VSense False", Loglevel.info.value)
+            self.setVSense(False)
 
         CS_IRun = min(CS_IRun, 31)
         CS_IRun = max(CS_IRun, 0)
-        
+
         CS_IHold = hold_current_multiplier * CS_IRun
 
         CS_IRun = round(CS_IRun)
@@ -559,6 +569,10 @@ class TMC_2209:
         self.log("CS_IRun: " + str(CS_IRun), Loglevel.info.value)
         self.log("CS_IHold: " + str(CS_IHold), Loglevel.info.value)
         self.log("Delay: " + str(hold_current_delay), Loglevel.info.value)
+
+        # return (float)(CS+1)/32.0 * (vsense() ? 0.180 : 0.325)/(Rsense+0.02) / 1.41421 * 1000;
+        run_current_actual = (CS_IRun+1)/32.0 * (Vfs)/(Rsense+0.02) / 1.41421 * 1000
+        self.log("actual current: "+str(round(run_current_actual))+" mA", Loglevel.info.value)
 
         self.setIRun_Ihold(CS_IHold, CS_IRun, hold_current_delay)
 
