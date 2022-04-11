@@ -82,6 +82,22 @@ tmc.setVActual(0)
 time.sleep(1)
 tmc.setVActual(-400)
 time.sleep(1)
+tmc.setVActual(0)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# setVActual_rps converts 
+#-----------------------------------------------------------------------
+tmc.setVActual_rps(1)
+time.sleep(1)
+tmc.setVActual(0)
+time.sleep(1)
+tmc.setVActual_rps(-1)
+time.sleep(1)
+tmc.setVActual(0)
 
 
 

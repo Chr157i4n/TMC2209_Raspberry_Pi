@@ -431,7 +431,7 @@ class TMC_2209:
             self.log("write inverse motor direction", Loglevel.info.value)
             gconf = self.tmc_uart.set_bit(gconf, reg.shaft)
         else:
-            self.log("write normal motor direction")
+            self.log("write normal motor direction", Loglevel.info.value)
             gconf = self.tmc_uart.clear_bit(gconf, reg.shaft)
         self.tmc_uart.write_reg_check(reg.GCONF, gconf)
   
@@ -503,6 +503,9 @@ class TMC_2209:
         gconf = self.tmc_uart.read_int(reg.GCONF)
         if(en):
             self.log("activated internal sense resistors.", Loglevel.info.value)
+            self.log("VREF pin internally is driven to GND in this mode.", Loglevel.info.value)
+            self.log("This will most likely destroy your driver!!!", Loglevel.info.value)
+            raise SystemExit
             gconf = self.tmc_uart.set_bit(gconf, reg.internal_rsense)
         else:
             self.log("activated operation with external sense resistors", Loglevel.info.value)
@@ -722,11 +725,22 @@ class TMC_2209:
 # 0: Normal operation. Driver reacts to STEP input
 #-----------------------------------------------------------------------
     def setVActual(self, vactual):
-        self.log("vactual", Loglevel.info.value)
+        self.log("vactual: "+str(vactual), Loglevel.info.value)
         self.log(str(bin(vactual)), Loglevel.info.value)
 
         self.log("writing vactual", Loglevel.info.value)
         self.tmc_uart.write_reg_check(reg.VACTUAL, vactual)
+
+
+#-----------------------------------------------------------------------
+# sets the register bit "VACTUAL" to to a given value
+# VACTUAL allows moving the motor by UART control.
+# It gives the motor velocity in +-(2^23)-1 [μsteps / t]
+# 0: Normal operation. Driver reacts to STEP input
+#-----------------------------------------------------------------------
+    def setVActual_rps(self, rps):
+        vactual = rps/0.715*self._stepsPerRevolution
+        self.setVActual(int(round(vactual)))
 
 
 #-----------------------------------------------------------------------
