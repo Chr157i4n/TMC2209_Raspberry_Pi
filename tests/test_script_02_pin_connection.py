@@ -37,7 +37,6 @@ tmc.setMovementAbsRel(MovementAbsRel.absolute)
 #-----------------------------------------------------------------------
 tmc.setDirection_reg(False)
 tmc.setCurrent(300)
-tmc.setIScaleAnalog(True)
 tmc.setInterpolation(True)
 tmc.setSpreadCycle(False)
 tmc.setMicrosteppingResolution(2)

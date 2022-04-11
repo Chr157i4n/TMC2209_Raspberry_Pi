@@ -37,7 +37,6 @@ tmc.setMovementAbsRel(MovementAbsRel.absolute)
 #-----------------------------------------------------------------------
 tmc.setDirection_reg(False)
 tmc.setCurrent(300)
-tmc.setIScaleAnalog(True)
 tmc.setInterpolation(True)
 tmc.setSpreadCycle(False)
 tmc.setMicrosteppingResolution(2)
@@ -65,16 +64,6 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# set the Accerleration and maximal Speed
-#-----------------------------------------------------------------------
-tmc.setAcceleration(2000)
-tmc.setMaxSpeed(500)
-
-
-
-
-
-#-----------------------------------------------------------------------
 # activate the motor current output
 #-----------------------------------------------------------------------
 tmc.setMotorEnabled(True)
@@ -93,6 +82,22 @@ tmc.setVActual(0)
 time.sleep(1)
 tmc.setVActual(-400)
 time.sleep(1)
+tmc.setVActual(0)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# setVActual_rps converts 
+#-----------------------------------------------------------------------
+tmc.setVActual_rps(1)
+time.sleep(1)
+tmc.setVActual(0)
+time.sleep(1)
+tmc.setVActual_rps(-1)
+time.sleep(1)
+tmc.setVActual(0)
 
 
 
