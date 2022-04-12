@@ -76,28 +76,43 @@ tmc.setMotorEnabled(True)
 # move the motor for 1 second forward, stop for 1 second
 # and then move backwards for 1 second
 #-----------------------------------------------------------------------
-tmc.setVActual(400)
-time.sleep(1)
-tmc.setVActual(0)
-time.sleep(1)
-tmc.setVActual(-400)
-time.sleep(1)
-tmc.setVActual(0)
+#tmc.setVActual(400)
+#time.sleep(1)
+#tmc.setVActual(0)
+#time.sleep(1)
+#tmc.setVActual(-400)
+#time.sleep(1)
+#tmc.setVActual(0)
 
 
 
 
 
 #-----------------------------------------------------------------------
-# setVActual_rps converts 
+# setVActual_rps uses revolutions per seconds as parameter
 #-----------------------------------------------------------------------
 tmc.setVActual_rps(1)
 time.sleep(1)
-tmc.setVActual(0)
+tmc.setVActual_rps(0)
 time.sleep(1)
 tmc.setVActual_rps(-1)
 time.sleep(1)
-tmc.setVActual(0)
+tmc.setVActual_rps(0)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# setVActual_rps uses revolutions per seconds as parameter
+#-----------------------------------------------------------------------
+#tmc.setVActual_rpm(60)
+#time.sleep(1)
+#tmc.setVActual(0)
+#time.sleep(1)
+#tmc.setVActual_rpm(-60)
+#time.sleep(1)
+#tmc.setVActual(0)
 
 
 

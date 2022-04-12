@@ -733,14 +733,22 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
-# sets the register bit "VACTUAL" to to a given value
-# VACTUAL allows moving the motor by UART control.
-# It gives the motor velocity in +-(2^23)-1 [μsteps / t]
-# 0: Normal operation. Driver reacts to STEP input
+# converts the rps parameter to a vactual value which represents
+# rotation speed in revolutions per second
+# With internal oscillator:
+# VACTUAL[2209] = v[Hz] / 0.715Hz
 #-----------------------------------------------------------------------
     def setVActual_rps(self, rps):
         vactual = rps/0.715*self._stepsPerRevolution
         self.setVActual(int(round(vactual)))
+
+
+#-----------------------------------------------------------------------
+# converts the rps parameter to a vactual value which represents
+# rotation speed in revolutions per minute
+#-----------------------------------------------------------------------
+    def setVActual_rpm(self, rpm):
+        self.setVActual_rps(rpm/60)
 
 
 #-----------------------------------------------------------------------
