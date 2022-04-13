@@ -76,14 +76,14 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # constructor
 #-----------------------------------------------------------------------
-    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False):
+    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM):
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
         self._pin_step = pin_step
         self._pin_dir = pin_dir
         self._pin_en = pin_en
         self.log("Init", Loglevel.info.value)
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(gpio_mode)
         self.log("STEP Pin: " + str(self._pin_step), Loglevel.debug.value)
         self.log("DIR Pin: " + str(self._pin_dir), Loglevel.debug.value)
         self.log("EN Pin: " + str(self._pin_en), Loglevel.debug.value)
