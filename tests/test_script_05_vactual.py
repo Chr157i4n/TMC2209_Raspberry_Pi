@@ -91,13 +91,13 @@ tmc.setMotorEnabled(True)
 #-----------------------------------------------------------------------
 # setVActual_rps uses revolutions per seconds as parameter
 #-----------------------------------------------------------------------
-tmc.setVActual_rps(1)
-time.sleep(1)
-tmc.setVActual_rps(0)
-time.sleep(1)
-tmc.setVActual_rps(-1)
-time.sleep(1)
-tmc.setVActual_rps(0)
+# tmc.setVActual_rps(1)
+# time.sleep(1)
+# tmc.setVActual_rps(0)
+# time.sleep(1)
+# tmc.setVActual_rps(-1)
+# time.sleep(1)
+# tmc.setVActual_rps(0)
 
 
 
@@ -113,6 +113,26 @@ tmc.setVActual_rps(0)
 #tmc.setVActual_rpm(-60)
 #time.sleep(1)
 #tmc.setVActual(0)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# setVActual_rpm and setVActual_rps accept "revolutions" and "duration" as keyword parameter
+# if duration is set the script will set VActual to that rpm for that duration and stop the motor afterwards
+# if revolutions the script will calculate the duration based on the speed and the revolutions
+# Movement of the Motor will not be very accurate with this way
+#-----------------------------------------------------------------------
+tmc.setVActual_rpm(30, revolutions=2)
+
+tmc.setVActual_rpm(-120, revolutions=2)
+
+time.sleep(1)
+
+tmc.setVActual_rpm(30, duration=4)
+
+tmc.setVActual_rpm(-120, duration=1)
 
 
 
