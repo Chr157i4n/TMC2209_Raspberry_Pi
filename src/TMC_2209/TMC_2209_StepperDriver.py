@@ -331,7 +331,33 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # homes the motor in the given direction using stallguard
 #-----------------------------------------------------------------------
-    def doHoming(self, direction, threshold=None):
+    def doHoming(self, direction, diag_pin, threshold=None):        
+        if(threshold is not None):
+            self._sg_threshold = threshold
+        
+        self.log("---", Loglevel.info.value)
+        self.log("homing", Loglevel.info.value)
+
+        self.setSpreadCycle(0)
+
+        self.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.debug.value)
+
+        self.setStallguard_Callback(diag_pin, self._sg_threshold, self.stop)
+        
+        if(direction):
+            self.setVActual_rpm(30, revolutions=1)
+        else:
+            self.setVActual_rpm(30, revolutions=-1)
+        self._currentPos = 0
+        
+        self.log("---", Loglevel.info.value)
+        
+
+#-----------------------------------------------------------------------
+# homes the motor in the given direction using stallguard
+# old function, uses STEP/DIR 
+#-----------------------------------------------------------------------
+    def doHoming2(self, direction, threshold=None):
         sg_results = []
         
         if(threshold is not None):
@@ -372,7 +398,6 @@ class TMC_2209:
 
         if(step_counter<self._stepsPerRevolution):
             self.log("homing successful",Loglevel.info.value)
-            self.log("Stepcounter: "+str(step_counter),Loglevel.info.value)
             self.log("Stepcounter: "+str(step_counter),Loglevel.debug.value)
             self.log(str(sg_results),Loglevel.debug.value)
             self._currentPos = 0
@@ -724,23 +749,46 @@ class TMC_2209:
 # It gives the motor velocity in +-(2^23)-1 [μsteps / t]
 # 0: Normal operation. Driver reacts to STEP input
 #-----------------------------------------------------------------------
-    def setVActual(self, vactual):
-        self.log("vactual: "+str(vactual), Loglevel.info.value)
+    def setVActual(self, vactual, duration=0):
+        self._stop = False
+
+        if(duration != 0):
+            self.log("vactual: "+str(vactual)+" for "+str(duration)+" sec", Loglevel.info.value)
+        else:
+            self.log("vactual: "+str(vactual), Loglevel.info.value)
         self.log(str(bin(vactual)), Loglevel.info.value)
 
         self.log("writing vactual", Loglevel.info.value)
         self.tmc_uart.write_reg_check(reg.VACTUAL, vactual)
 
+        if(duration != 0):
+            starttime = time.time()
+            while((not self._stop) and (time.time() < starttime+duration)):
+                pass
+            self.tmc_uart.write_reg_check(reg.VACTUAL, 0)
+            return not self._stop
+
+
 
 #-----------------------------------------------------------------------
-# sets the register bit "VACTUAL" to to a given value
-# VACTUAL allows moving the motor by UART control.
-# It gives the motor velocity in +-(2^23)-1 [μsteps / t]
-# 0: Normal operation. Driver reacts to STEP input
+# converts the rps parameter to a vactual value which represents
+# rotation speed in revolutions per second
+# With internal oscillator:
+# VACTUAL[2209] = v[Hz] / 0.715Hz
 #-----------------------------------------------------------------------
-    def setVActual_rps(self, rps):
+    def setVActual_rps(self, rps, duration=0, revolutions=0):
         vactual = rps/0.715*self._stepsPerRevolution
-        self.setVActual(int(round(vactual)))
+        if(revolutions!=0):
+            duration = abs(revolutions/rps)
+        return self.setVActual(int(round(vactual)), duration)
+
+
+#-----------------------------------------------------------------------
+# converts the rps parameter to a vactual value which represents
+# rotation speed in revolutions per minute
+#-----------------------------------------------------------------------
+    def setVActual_rpm(self, rpm, duration=0, revolutions=0):
+        return self.setVActual_rps(rpm/60, duration, revolutions)
 
 
 #-----------------------------------------------------------------------
