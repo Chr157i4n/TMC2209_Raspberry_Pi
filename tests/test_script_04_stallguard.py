@@ -111,9 +111,12 @@ else:
 
 
 #-----------------------------------------------------------------------
-# deactivate the motor current output
+# homing
+# 1. param: DIAG pin
+# 2. param: maximum number of revolutions. Can be negative for inverse direction
+# 3. param(optional): StallGuard detection threshold
 #-----------------------------------------------------------------------
-# tmc.doHoming(True, 26, 50)
+#tmc.doHoming(26, 1, 50)
 
 
 

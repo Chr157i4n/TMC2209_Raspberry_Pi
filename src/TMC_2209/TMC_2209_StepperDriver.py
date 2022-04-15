@@ -330,8 +330,12 @@ class TMC_2209:
 
 #-----------------------------------------------------------------------
 # homes the motor in the given direction using stallguard
+# 1. param: DIAG pin
+# 2. param: maximum number of revolutions. Can be negative for inverse direction
+# 3. param(optional): StallGuard detection threshold
+# returns true when homing was successful
 #-----------------------------------------------------------------------
-    def doHoming(self, direction, diag_pin, threshold=None):        
+    def doHoming(self, diag_pin, revolutions, threshold=None):        
         if(threshold is not None):
             self._sg_threshold = threshold
         
@@ -344,18 +348,24 @@ class TMC_2209:
 
         self.setStallguard_Callback(diag_pin, self._sg_threshold, self.stop)
         
-        if(direction):
-            self.setVActual_rpm(30, revolutions=1)
+        homingfailed = self.setVActual_rpm(30, revolutions=revolutions)
+
+        if(homingfailed):
+            self.log("homing failed", Loglevel.error.value)
         else:
-            self.setVActual_rpm(30, revolutions=-1)
+            self.log("homing successful",Loglevel.info.value)
+        
         self._currentPos = 0
         
         self.log("---", Loglevel.info.value)
+        return not homingfailed
         
 
 #-----------------------------------------------------------------------
 # homes the motor in the given direction using stallguard
 # old function, uses STEP/DIR 
+# 1. param: direction
+# 2. param(optional): StallGuard detection threshold
 #-----------------------------------------------------------------------
     def doHoming2(self, direction, threshold=None):
         sg_results = []
@@ -918,7 +928,7 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # stop the current movement
 #-----------------------------------------------------------------------
-    def stop(self):
+    def stop(self, notneeded = None):
         self._stop = True
 
 
