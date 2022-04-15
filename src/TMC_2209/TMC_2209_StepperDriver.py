@@ -780,6 +780,8 @@ class TMC_2209:
         vactual = rps/0.715*self._stepsPerRevolution
         if(revolutions!=0):
             duration = abs(revolutions/rps)
+        if(revolutions<0):
+            vactual = -vactual
         return self.setVActual(int(round(vactual)), duration)
 
 
