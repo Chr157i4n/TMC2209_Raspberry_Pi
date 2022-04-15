@@ -14,7 +14,7 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_step, pin_dir, pin_en here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(16, 20, 6)
+tmc = TMC_2209(16, 20, 21)
 
 
 
@@ -93,18 +93,18 @@ def my_callback(channel):
     print("StallGuard!")
     tmc.stop()
 
-#tmc.setStallguard_Callback(26, 50, my_callback) # after this function call, StallGuard is active
+tmc.setStallguard_Callback(26, 50, my_callback) # after this function call, StallGuard is active
 
 
 
-# finishedsuccessfully = tmc.runToPositionSteps(4000, MovementAbsRel.relative)        #uses STEP/DIR to move the motor
+finishedsuccessfully = tmc.runToPositionSteps(4000, MovementAbsRel.relative)        #uses STEP/DIR to move the motor
 # finishedsuccessfully = tmc.setVActual_rpm(30, revolutions=10)                     #uses VActual Register to  move the motor
 
 
-# if(finishedsuccessfully == True):
-#     print("Movement finished successfully")
-# else:
-#     print("Movement was not completed")
+if(finishedsuccessfully == True):
+    print("Movement finished successfully")
+else:
+    print("Movement was not completed")
 
 
 
