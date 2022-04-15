@@ -63,6 +63,8 @@ STEP | GPIO16 of Raspberry Pi | moves the motor one step per pulse
 DIR | GPIO20 of Raspberry Pi | set the direction of the motor
 DIAG | GPIO26 of Raspberry Pi | optional, for StallGuard
 
+![wiring diagram](docs/Images/wiring_diagram.png)
+
 The GPIO pins can be specific when initiating the class
 
 
@@ -144,6 +146,4 @@ PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need 
 "did not get the expected 4 data bytes. Instead got 0 Bytes" | You can use the 'debug_script_01_uart_connection' script to get a better reading on the received bytes and troubleshoot your problem
 "the Raspberry Pi received only the sended bits" or<br /> inconsistent received bits | Make sure the UART ist properly connected to the TMC driver and the driver is powered and working. <br /> Make sure login shell (console) over serial is disabled
 
-
-![photo](docs/Images/image1.jpg)
-![wiring diagram](docs/Images/wiring_diagram.png)
+![wiring photo](docs/Images/image1.jpg)
