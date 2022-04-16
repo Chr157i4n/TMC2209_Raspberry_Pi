@@ -759,7 +759,7 @@ class TMC_2209:
 # It gives the motor velocity in +-(2^23)-1 [μsteps / t]
 # 0: Normal operation. Driver reacts to STEP input
 #-----------------------------------------------------------------------
-    def setVActual(self, vactual, duration=0):
+    def setVActual(self, vactual, duration=0, showStallGuardResult=False):
         self._stop = False
 
         if(duration != 0):
@@ -774,10 +774,13 @@ class TMC_2209:
         if(duration != 0):
             starttime = time.time()
             while((not self._stop) and (time.time() < starttime+duration)):
-                pass
+                if(showStallGuardResult):
+                    self.log("StallGuard result: "+str(self.getStallguard_Result()), Loglevel.info.value)
+                    time.sleep(0.1)
+                else:
+                    pass
             self.tmc_uart.write_reg_check(reg.VACTUAL, 0)
             return not self._stop
-
 
 
 #-----------------------------------------------------------------------

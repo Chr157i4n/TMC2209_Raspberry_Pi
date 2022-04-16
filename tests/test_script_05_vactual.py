@@ -125,13 +125,9 @@ tmc.setMotorEnabled(True)
 # Movement of the Motor will not be very accurate with this way
 #-----------------------------------------------------------------------
 tmc.setVActual_rpm(30, revolutions=2)
-
 tmc.setVActual_rpm(-120, revolutions=2)
-
 time.sleep(1)
-
 tmc.setVActual_rpm(30, duration=4)
-
 tmc.setVActual_rpm(-120, duration=1)
 
 
