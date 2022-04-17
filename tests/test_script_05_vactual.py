@@ -135,6 +135,16 @@ tmc.setVActual_rpm(-120, duration=1)
 
 
 #-----------------------------------------------------------------------
+# use acceleration (velocity ramping) with VActual
+# does not work with revolutions as parameter
+#-----------------------------------------------------------------------
+# tmc.setVActual_rpm(-120, duration=10, acceleration=500)
+
+
+
+
+
+#-----------------------------------------------------------------------
 # deactivate the motor current output
 #-----------------------------------------------------------------------
 tmc.setMotorEnabled(False)
