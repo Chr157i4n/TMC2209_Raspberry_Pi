@@ -168,15 +168,20 @@ class TMC_UART:
         IFCNT           =   0x02
 
         ifcnt1 = self.read_int(IFCNT)
-        self.write_reg(reg, val)
-        ifcnt2 = self.read_int(IFCNT)
-
-        if(ifcnt1 >= ifcnt2):
-            print("TMC2209: writing not successful!")
-            print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
-            return False
-        else:
-            return True
+        
+        tries = 0
+        while(True):
+            self.write_reg(reg, val)
+            tries += 1
+            ifcnt2 = self.read_int(IFCNT)
+            if(ifcnt1 >= ifcnt2):
+                print("TMC2209: writing not successful!")
+                print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
+            else:
+                return True
+            if(tries>=10):
+                print("TMC2209: after 10 tries not valid write access. exiting")
+                raise SystemExit
 
 
 #-----------------------------------------------------------------------
