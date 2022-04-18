@@ -6,6 +6,8 @@ import binascii
 import struct
 import serial
 
+from . import TMC_2209_reg as reg
+
 
 #-----------------------------------------------------------------------
 # TMC_UART
@@ -80,13 +82,13 @@ class TMC_UART:
 # reads the registry on the TMC with a given address.
 # returns the binary value of that register
 #-----------------------------------------------------------------------
-    def read_reg(self, reg):
+    def read_reg(self, register):
         
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
         self.rFrame[1] = self.mtr_id
-        self.rFrame[2] = reg
+        self.rFrame[2] = register
         self.rFrame[3] = self.compute_crc8_atm(self.rFrame[:-1])
 
         rtn = self.ser.write(self.rFrame)
@@ -110,10 +112,10 @@ class TMC_UART:
 # this function tries to read the registry of the TMC 10 times
 # if a valid answer is returned, this function returns it as an integer
 #-----------------------------------------------------------------------
-    def read_int(self, reg):
+    def read_int(self, register):
         tries = 0
         while(True):
-            rtn = self.read_reg(reg)
+            rtn = self.read_reg(register)
             tries += 1
             if(len(rtn)>=4):
                 break
@@ -133,13 +135,13 @@ class TMC_UART:
 # 2. then modify the settings as wished
 # 3. write them back to the driver with this function
 #-----------------------------------------------------------------------
-    def write_reg(self, reg, val):
+    def write_reg(self, register, val):
         
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
         self.wFrame[1] = self.mtr_id
-        self.wFrame[2] =  reg | 0x80;  # set write bit
+        self.wFrame[2] =  register | 0x80;  # set write bit
         
         self.wFrame[3] = 0xFF & (val>>24)
         self.wFrame[4] = 0xFF & (val>>16)
@@ -164,24 +166,22 @@ class TMC_UART:
 # but it also checks if the writing process was successfully by checking
 # the InterfaceTransmissionCounter before and after writing
 #-----------------------------------------------------------------------
-    def write_reg_check(self, reg, val):
-        IFCNT           =   0x02
-
-        ifcnt1 = self.read_int(IFCNT)
+    def write_reg_check(self, register, val):
+        ifcnt1 = self.read_int(reg.IFCNT)
         
         tries = 0
         while(True):
-            self.write_reg(reg, val)
+            self.write_reg(register, val)
             tries += 1
-            ifcnt2 = self.read_int(IFCNT)
+            ifcnt2 = self.read_int(reg.IFCNT)
             if(ifcnt1 >= ifcnt2):
                 print("TMC2209: writing not successful!")
                 print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
             else:
                 return True
             if(tries>=10):
-                print("TMC2209: after 10 tries not valid write access. exiting")
-                raise SystemExit
+                print("TMC2209: after 10 tries not valid write access.")
+                self.handle_error()
 
 
 #-----------------------------------------------------------------------
@@ -207,15 +207,32 @@ class TMC_UART:
 
 
 #-----------------------------------------------------------------------
+# error handling
+#-----------------------------------------------------------------------
+    def handle_error(self):
+        gstat = self.read_int(reg.GSTAT)
+        if(gstat == 0):
+            print("TMC2209: Everything looks fine in GSTAT")
+        if(gstat & reg.reset):
+            print("TMC2209: The Driver has been reset since the last read access to GSTAT")
+        if(gstat & reg.drv_err):
+            print("TMC2209: The driver has been shut down due to overtemperature or short circuit detection since the last read access")
+        if(gstat & reg.uv_cp):
+            print("TMC2209: Undervoltage on the charge pump. The driver is disabled in this case")
+        print("exiting!")
+        raise SystemExit
+
+
+#-----------------------------------------------------------------------
 # test UART connection
 #-----------------------------------------------------------------------
-    def test_uart(self, reg):
+    def test_uart(self, register):
         
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
         self.rFrame[1] = self.mtr_id
-        self.rFrame[2] = reg
+        self.rFrame[2] = register
         self.rFrame[3] = self.compute_crc8_atm(self.rFrame[:-1])
 
         rtn = self.ser.write(self.rFrame)
