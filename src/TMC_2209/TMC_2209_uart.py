@@ -23,6 +23,7 @@ class TMC_UART:
     rFrame  = [0x55, 0, 0, 0  ]
     wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
     communication_pause = 0
+    error_handler_running = False
     
 
 #-----------------------------------------------------------------------
@@ -112,18 +113,18 @@ class TMC_UART:
 # this function tries to read the registry of the TMC 10 times
 # if a valid answer is returned, this function returns it as an integer
 #-----------------------------------------------------------------------
-    def read_int(self, register):
-        tries = 0
+    def read_int(self, register, tries=10):
         while(True):
             rtn = self.read_reg(register)
-            tries += 1
+            tries -= 1
             if(len(rtn)>=4):
                 break
             else:
                 print("TMC2209: did not get the expected 4 data bytes. Instead got "+str(len(rtn))+" Bytes")
-            if(tries>=10):
-                print("TMC2209: after 10 tries not valid answer. exiting")
-                raise SystemExit
+            if(tries<=0):
+                print("TMC2209: after 10 tries not valid answer")
+                self.handle_error()
+                return -1
         
         val = struct.unpack(">i",rtn)[0]
         return(val)
@@ -166,22 +167,22 @@ class TMC_UART:
 # but it also checks if the writing process was successfully by checking
 # the InterfaceTransmissionCounter before and after writing
 #-----------------------------------------------------------------------
-    def write_reg_check(self, register, val):
+    def write_reg_check(self, register, val, tries=10):
         ifcnt1 = self.read_int(reg.IFCNT)
         
-        tries = 0
         while(True):
             self.write_reg(register, val)
-            tries += 1
+            tries -= 1
             ifcnt2 = self.read_int(reg.IFCNT)
             if(ifcnt1 >= ifcnt2):
                 print("TMC2209: writing not successful!")
                 print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
             else:
                 return True
-            if(tries>=10):
-                print("TMC2209: after 10 tries not valid write access.")
+            if(tries<=0):
+                print("TMC2209: after 10 tries not valid write access")
                 self.handle_error()
+                return -1
 
 
 #-----------------------------------------------------------------------
@@ -210,15 +211,21 @@ class TMC_UART:
 # error handling
 #-----------------------------------------------------------------------
     def handle_error(self):
+        if(self.error_handler_running):
+            return
+        self.error_handler_running = True
         gstat = self.read_int(reg.GSTAT)
-        if(gstat == 0):
+        if(gstat == -1):
+            print("TMC2209: No answer from Driver")
+        elif(gstat == 0):
             print("TMC2209: Everything looks fine in GSTAT")
-        if(gstat & reg.reset):
-            print("TMC2209: The Driver has been reset since the last read access to GSTAT")
-        if(gstat & reg.drv_err):
-            print("TMC2209: The driver has been shut down due to overtemperature or short circuit detection since the last read access")
-        if(gstat & reg.uv_cp):
-            print("TMC2209: Undervoltage on the charge pump. The driver is disabled in this case")
+        else:
+            if(gstat & reg.reset):
+                print("TMC2209: The Driver has been reset since the last read access to GSTAT")
+            if(gstat & reg.drv_err):
+                print("TMC2209: The driver has been shut down due to overtemperature or short circuit detection since the last read access")
+            if(gstat & reg.uv_cp):
+                print("TMC2209: Undervoltage on the charge pump. The driver is disabled in this case")
         print("exiting!")
         raise SystemExit
 

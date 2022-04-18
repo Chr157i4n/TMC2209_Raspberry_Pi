@@ -253,7 +253,8 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # read the register Adress "GSTAT" and prints all current setting
 #-----------------------------------------------------------------------
-    def clearGSTAT(self):        
+    def clearGSTAT(self):
+        self.log("clearing GSTAT", Loglevel.info.value)
         gstat = self.tmc_uart.read_int(reg.GSTAT)
         
         gstat = self.tmc_uart.set_bit(gstat, reg.reset)
