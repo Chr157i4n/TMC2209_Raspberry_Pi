@@ -218,6 +218,7 @@ class TMC_UART:
             return
         self.error_handler_running = True
         gstat = self.read_int(reg.GSTAT)
+        print("TMC2209: GSTAT Error check:")
         if(gstat == -1):
             print("TMC2209: No answer from Driver")
         elif(gstat == 0):
