@@ -47,6 +47,9 @@ class TMC_2209:
     _direction = True
 
     _stop = False
+    _startTime = 0
+    _sgDelay = 0
+    _sgCallback = None
 
     _msres = -1
     _stepsPerRevolution = 0
@@ -760,7 +763,7 @@ class TMC_2209:
 # It gives the motor velocity in +-(2^23)-1 [μsteps / t]
 # 0: Normal operation. Driver reacts to STEP input
 #-----------------------------------------------------------------------
-    def setVActual(self, vactual, duration=0, showStallGuardResult=False, acceleration=0):
+    def setVActual(self, vactual, duration=0, acceleration=0, showStallGuardResult=False, showTStep=False):
         self._stop = False
         currentVActual = 0
         sleeptime = 0.05
@@ -778,11 +781,11 @@ class TMC_2209:
             self.tmc_uart.write_reg_check(reg.VACTUAL, vactual)
 
         if(duration != 0):
-            startTime = time.time()
+            self._startTime = time.time()
             currentTime = time.time()
-            while((not self._stop) and (currentTime < startTime+duration)):
+            while((not self._stop) and (currentTime < self._startTime+duration)):
                 if(acceleration != 0):
-                    timeToStop = startTime+duration-abs(currentVActual/acceleration)
+                    timeToStop = self._startTime+duration-abs(currentVActual/acceleration)
                     #self.log("cur: "+str(currentTime)+ "\t| stop: "+str(timeToStop)+ "\t| vac: "+str(currentVActual)+ "\t| acc: "+str(acceleration), Loglevel.info.value)
                 if(acceleration != 0 and currentTime > timeToStop):
                     currentVActual -= acceleration*sleeptime
@@ -795,6 +798,9 @@ class TMC_2209:
                     time.sleep(sleeptime)
                 if(showStallGuardResult):
                     self.log("StallGuard result: "+str(self.getStallguard_Result()), Loglevel.info.value)
+                    time.sleep(0.1)
+                if(showTStep):
+                    self.log("TStep result: "+str(self.getTStep()), Loglevel.info.value)
                     time.sleep(0.1)
                 currentTime = time.time()
             self.tmc_uart.write_reg_check(reg.VACTUAL, 0)
@@ -867,16 +873,29 @@ class TMC_2209:
 # via stallguard
 # high value on the diag pin can also mean a driver error
 #-----------------------------------------------------------------------
-    def setStallguard_Callback(self, pin_stallguard, threshold, my_callback, min_speed = 2000):
+    def setStallguard_Callback(self, pin_stallguard, threshold, callback, min_speed = 2000, ignore_delay = 0):
         self.log("setup stallguard callback on GPIO"+str(pin_stallguard), Loglevel.info.value)
         self.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+str(min_speed), Loglevel.info.value)
 
         self.setStallguard_Threshold(threshold)
         self.setCoolStep_Threshold(min_speed)
+        self._sgDelay = ignore_delay
+        self._sgCallback = callback
         
         GPIO.setup(pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     
-        GPIO.add_event_detect(pin_stallguard, GPIO.RISING, callback=my_callback, bouncetime=300) 
+        GPIO.add_event_detect(pin_stallguard, GPIO.RISING, callback=self.stallguard_Callback, bouncetime=300) 
+
+
+#-----------------------------------------------------------------------
+# the callback function for StallGuard.
+# only checks whether the duration of the current movement is longer than
+# _sgDelay and then calls the actual callback
+#-----------------------------------------------------------------------
+    def stallguard_Callback(self, channel):
+        if(self._sgDelay == 0 or time.time()>self._startTime+self._sgDelay):
+            self._sgCallback(channel)
+
 
 
 

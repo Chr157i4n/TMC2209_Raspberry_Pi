@@ -65,7 +65,8 @@ DIAG | GPIO26 of Raspberry Pi | optional, for StallGuard
 
 ![wiring diagram](docs/Images/wiring_diagram.png)
 
-The GPIO pins can be specific when initiating the class
+The GPIO pins can be specific when initiating the class.
+If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
 
 
 ## Tests
