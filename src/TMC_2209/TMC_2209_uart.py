@@ -105,7 +105,7 @@ class TMC_UART:
 
         time.sleep(self.communication_pause)
         
-        return(rtn[7:11])
+        return(rtn)
         #return(rtn)
 
 
@@ -116,17 +116,20 @@ class TMC_UART:
     def read_int(self, register, tries=10):
         while(True):
             rtn = self.read_reg(register)
+            rtn_data = rtn[7:11]
             tries -= 1
-            if(len(rtn)>=4):
+            if(len(rtn_data)>=4):
                 break
             else:
-                print("TMC2209: did not get the expected 4 data bytes. Instead got "+str(len(rtn))+" Bytes")
+                print("TMC2209: UART Communication Error: "+str(len(rtn_data))+" data bytes | "+str(len(rtn))+" total bytes")
             if(tries<=0):
                 print("TMC2209: after 10 tries not valid answer")
+                print("TMC2209: snd:\t"+str(bytes(self.rFrame)))
+                print("TMC2209: rtn\t"+str(rtn))
                 self.handle_error()
                 return -1
         
-        val = struct.unpack(">i",rtn)[0]
+        val = struct.unpack(">i",rtn_data)[0]
         return(val)
 
 
@@ -226,7 +229,7 @@ class TMC_UART:
                 print("TMC2209: The driver has been shut down due to overtemperature or short circuit detection since the last read access")
             if(gstat & reg.uv_cp):
                 print("TMC2209: Undervoltage on the charge pump. The driver is disabled in this case")
-        print("exiting!")
+        print("EXITING!")
         raise SystemExit
 
 
