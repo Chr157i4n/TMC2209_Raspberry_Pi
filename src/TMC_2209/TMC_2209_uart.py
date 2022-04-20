@@ -115,15 +115,18 @@ class TMC_UART:
 #-----------------------------------------------------------------------
     def read_int(self, register, tries=10):
         while(True):
+            tries -= 1
             rtn = self.read_reg(register)
             rtn_data = rtn[7:11]
             not_zero_count = len([elem for elem in rtn if elem != 0])
-            tries -= 1
             
-            if(len(rtn_data)>=4 and not_zero_count != 0):
-                break
-            else:
+            if(len(rtn)<12 or not_zero_count == 0):
                 print("TMC2209: UART Communication Error: "+str(len(rtn_data))+" data bytes | "+str(len(rtn))+" total bytes")
+            elif(rtn[11] != self.compute_crc8_atm(rtn[4:11])):
+                print("TMC2209: UART Communication Error: CRC MISMATCH")
+            else:
+                break
+                        
             if(tries<=0):
                 print("TMC2209: after 10 tries not valid answer")
                 print("TMC2209: snd:\t"+str(bytes(self.rFrame)))
@@ -164,7 +167,7 @@ class TMC_UART:
 
         time.sleep(self.communication_pause)
 
-        return(True)
+        return True
 
 
 #-----------------------------------------------------------------------
