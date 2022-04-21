@@ -43,6 +43,7 @@ class TMC_2209:
     _pin_step = -1
     _pin_dir = -1
     _pin_en = -1
+    _pin_stallguard = -1
 
     _direction = True
 
@@ -50,6 +51,7 @@ class TMC_2209:
     _startTime = 0
     _sgDelay = 0
     _sgCallback = None
+    
 
     _msres = -1
     _stepsPerRevolution = 0
@@ -79,21 +81,32 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # constructor
 #-----------------------------------------------------------------------
-    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM):
+    def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
-        self._pin_step = pin_step
-        self._pin_dir = pin_dir
-        self._pin_en = pin_en
+
+        if(loglevel is not None):
+            self._loglevel = loglevel
+
         self.log("Init", Loglevel.info.value)
         GPIO.setwarnings(False)
         GPIO.setmode(gpio_mode)
-        self.log("STEP Pin: " + str(self._pin_step), Loglevel.debug.value)
-        self.log("DIR Pin: " + str(self._pin_dir), Loglevel.debug.value)
-        self.log("EN Pin: " + str(self._pin_en), Loglevel.debug.value)
-        GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
-        GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
+
+        self.log("EN Pin: " + str(pin_en), Loglevel.debug.value)
+        self._pin_en = pin_en
         GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
+
+        self.log("STEP Pin: " + str(pin_step), Loglevel.debug.value)
+        if(pin_step is not -1):
+            self._pin_step = pin_step
+            GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
+
+        self.log("DIR Pin: " + str(pin_dir), Loglevel.debug.value)
+        if(pin_dir is not -1):
+            self._pin_dir = pin_dir
+            GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
+
         self.log("GPIO Init finished", Loglevel.info.value)
+        
         if(not no_uart):
             self.readStepsPerRevolution()
             self.clearGSTAT()
@@ -107,12 +120,22 @@ class TMC_2209:
 #-----------------------------------------------------------------------
     def __del__(self):
         self.log("Deinit", Loglevel.info.value)
-        try:
-            self.setMotorEnabled(False)
-            GPIO.cleanup()
-            self.log("GPIO cleanup")
-        except:
-            self.log("GPIO already cleaned up")
+ 
+        self.setMotorEnabled(False)
+
+        self.log("GPIO cleanup")
+        if(self._pin_step is not -1):
+            GPIO.cleanup(self._pin_step)
+        if(self._pin_dir is not -1):
+            GPIO.cleanup(self._pin_dir)
+        if(self._pin_en is not -1):
+            GPIO.cleanup(self._pin_en)
+        if(self._pin_stallguard is not -1):
+            GPIO.remove_event_detect(self._pin_stallguard)
+            GPIO.cleanup(self._pin_stallguard)
+        
+        self.log("Deinit finished", Loglevel.info.value)
+        
 
 
 #-----------------------------------------------------------------------
@@ -881,10 +904,11 @@ class TMC_2209:
         self.setCoolStep_Threshold(min_speed)
         self._sgDelay = ignore_delay
         self._sgCallback = callback
+        self._pin_stallguard = pin_stallguard
         
-        GPIO.setup(pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self._pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     
-        GPIO.add_event_detect(pin_stallguard, GPIO.RISING, callback=self.stallguard_Callback, bouncetime=300) 
+        GPIO.add_event_detect(self._pin_stallguard, GPIO.RISING, callback=self.stallguard_callback, bouncetime=300) 
 
 
 #-----------------------------------------------------------------------
@@ -892,7 +916,7 @@ class TMC_2209:
 # only checks whether the duration of the current movement is longer than
 # _sgDelay and then calls the actual callback
 #-----------------------------------------------------------------------
-    def stallguard_Callback(self, channel):
+    def stallguard_callback(self, channel):
         if(self._sgDelay == 0 or time.time()>self._startTime+self._sgDelay):
             self._sgCallback(channel)
 

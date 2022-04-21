@@ -12,9 +12,9 @@ print("---")
 
 #-----------------------------------------------------------------------
 # initiate the TMC_2209 class
-# use your pins for pin_step, pin_dir, pin_en here
+# use your pin for pin_en here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(16, 20, 21)
+tmc = TMC_2209(21, loglevel=Loglevel.debug)
 
 
 
