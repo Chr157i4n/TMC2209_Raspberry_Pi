@@ -917,8 +917,12 @@ class TMC_2209:
 # _sgDelay and then calls the actual callback
 #-----------------------------------------------------------------------
     def stallguard_callback(self, channel):
-        if(self._sgDelay == 0 or time.time()>self._startTime+self._sgDelay):
-            self._sgCallback(channel)
+        if(self._sgCallback == None):
+            self.log("StallGuard callback is None", Loglevel.debug.value)
+            return
+        if(time.time()<=self._startTime+self._sgDelay and self._sgDelay != 0):
+            return
+        self._sgCallback(channel)
 
 
 
