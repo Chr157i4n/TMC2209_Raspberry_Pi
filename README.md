@@ -72,6 +72,25 @@ DIAG | GPIO26 of Raspberry Pi | optional, for StallGuard
 The GPIO pins can be specific when initiating the class.
 If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
 
+## Changelog
+### version 0.1.8
+- Pin parameter order in constructor changed to EN, STEP, DIR
+- STEP and DIR pins are optional parameters
+- CRC check for read access reply datagrams
+- if only zeroes are received an error will be thrown
+- added ignore_delay to StallGuard callback
+- implemented write access retry
+- implemented velocity ramping with VActual
+- add ability to print StallGuard results and TStep in VActual
+- if write or read access fails, GSTAT will be checked for driver errors
+
+### version 0.1.7
+- updated README
+- added number of revolutions as parameter for doHoming
+- added output whether doHoming was successful or not
+
+### version 0.1.6
+-  added ability to invert direction in setVActual_rps with negative revolutions
 
 ## Tests
 You can run the test files from the main directory with
