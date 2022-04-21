@@ -14,7 +14,7 @@ print("---")
 # initiate the TMC_2209 class
 # use your pin for pin_en here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21, loglevel=Loglevel.debug)
+tmc = TMC_2209(21)
 
 
 
