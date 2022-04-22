@@ -57,7 +57,7 @@ class TMC_UART:
 # destructor
 #-----------------------------------------------------------------------
     def __del__(self):
-        if(self.ser is not None):
+        if(self.ser != None):
             self.ser.close()
         
 

@@ -84,7 +84,7 @@ class TMC_2209:
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
 
-        if(loglevel is not None):
+        if(loglevel != None):
             self._loglevel = loglevel
 
         self.log("Init", Loglevel.info.value)
@@ -96,12 +96,12 @@ class TMC_2209:
         GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
 
         self.log("STEP Pin: " + str(pin_step), Loglevel.debug.value)
-        if(pin_step is not -1):
+        if(pin_step != -1):
             self._pin_step = pin_step
             GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
 
         self.log("DIR Pin: " + str(pin_dir), Loglevel.debug.value)
-        if(pin_dir is not -1):
+        if(pin_dir != -1):
             self._pin_dir = pin_dir
             GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
 
@@ -124,13 +124,13 @@ class TMC_2209:
         self.setMotorEnabled(False)
 
         self.log("GPIO cleanup")
-        if(self._pin_step is not -1):
+        if(self._pin_step != -1):
             GPIO.cleanup(self._pin_step)
-        if(self._pin_dir is not -1):
+        if(self._pin_dir != -1):
             GPIO.cleanup(self._pin_dir)
-        if(self._pin_en is not -1):
+        if(self._pin_en != -1):
             GPIO.cleanup(self._pin_en)
-        if(self._pin_stallguard is not -1):
+        if(self._pin_stallguard != -1):
             GPIO.remove_event_detect(self._pin_stallguard)
             GPIO.cleanup(self._pin_stallguard)
         
@@ -363,7 +363,7 @@ class TMC_2209:
 # returns true when homing was successful
 #-----------------------------------------------------------------------
     def doHoming(self, diag_pin, revolutions, threshold=None):        
-        if(threshold is not None):
+        if(threshold != None):
             self._sg_threshold = threshold
         
         self.log("---", Loglevel.info.value)
@@ -397,7 +397,7 @@ class TMC_2209:
     def doHoming2(self, direction, threshold=None):
         sg_results = []
         
-        if(threshold is not None):
+        if(threshold != None):
             self._sg_threshold = threshold
         
         self.log("---", Loglevel.info.value)
@@ -1007,7 +1007,7 @@ class TMC_2209:
 # when the movement was stopped
 #-----------------------------------------------------------------------
     def runToPositionSteps(self, steps, movement_abs_rel = None):
-        if(movement_abs_rel is not None):
+        if(movement_abs_rel != None):
             this_movement_abs_rel = movement_abs_rel
         else:
             this_movement_abs_rel = self._movement_abs_rel
