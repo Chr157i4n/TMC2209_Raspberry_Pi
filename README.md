@@ -161,6 +161,6 @@ My goal is to make a library, that can run a stepper motor with a TMC2209 steppe
 The main focus for this are Test setups, as Python is not fast enough for high motor speeds.
 
 ## Feedback/Contributing
-if you encounter any problem, feel free to open an issue on the Github [issue page](https://github.com/Chr157i4n/TMC2209_Raspberry_Pi/issues)
+If you encounter any problem, feel free to open an issue on the Github [issue page](https://github.com/Chr157i4n/TMC2209_Raspberry_Pi/issues)
 Feedback will keep this project growing and I encourage all suggestions.
 feel free to submit a pull request.

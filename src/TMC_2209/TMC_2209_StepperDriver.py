@@ -82,6 +82,20 @@ class TMC_2209:
 # constructor
 #-----------------------------------------------------------------------
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
+        self.init(pin_en, pin_step, pin_dir, baudrate, serialport, driver_address, no_uart, gpio_mode, loglevel)
+
+
+#-----------------------------------------------------------------------
+# destructor
+#-----------------------------------------------------------------------
+    def __del__(self):
+        self.deinit()
+        
+
+#-----------------------------------------------------------------------
+# init function
+#-----------------------------------------------------------------------
+    def init(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
 
         if(loglevel != None):
@@ -116,25 +130,28 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
-# destructor
+# deinit function
 #-----------------------------------------------------------------------
-    def __del__(self):
-        self.log("Deinit", Loglevel.info.value)
- 
-        self.setMotorEnabled(False)
+    def deinit(self):
+        try:
+            self.log("Deinit", Loglevel.info.value)
+    
+            self.setMotorEnabled(False)
 
-        self.log("GPIO cleanup")
-        if(self._pin_step != -1):
-            GPIO.cleanup(self._pin_step)
-        if(self._pin_dir != -1):
-            GPIO.cleanup(self._pin_dir)
-        if(self._pin_en != -1):
-            GPIO.cleanup(self._pin_en)
-        if(self._pin_stallguard != -1):
-            GPIO.remove_event_detect(self._pin_stallguard)
-            GPIO.cleanup(self._pin_stallguard)
-        
-        self.log("Deinit finished", Loglevel.info.value)
+            self.log("GPIO cleanup")
+            if(self._pin_step != -1):
+                GPIO.cleanup(self._pin_step)
+            if(self._pin_dir != -1):
+                GPIO.cleanup(self._pin_dir)
+            if(self._pin_en != -1):
+                GPIO.cleanup(self._pin_en)
+            if(self._pin_stallguard != -1):
+                GPIO.remove_event_detect(self._pin_stallguard)
+                GPIO.cleanup(self._pin_stallguard)
+            
+            self.log("Deinit finished", Loglevel.info.value)
+        except:
+            pass
         
 
 
