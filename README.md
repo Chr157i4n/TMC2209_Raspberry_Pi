@@ -20,13 +20,6 @@ You can read more about this in the datasheet from Trinamic.
 Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends,
 Well, the Pi receives 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
 
-the code to run the stepper motor is based on the code of the AccelStepper Library from Mike McCauley:  
-https://github.com/adafruit/AccelStepper  
-http://www.airspayce.com/mikem/arduino/AccelStepper/
-
-the code for the uart communication is based on this code from troxel:  
-https://github.com/troxel/TMC_UART
-
 the Documentation of the TMC2209 can be found here:  
 https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
 
@@ -72,25 +65,6 @@ DIAG | GPIO26 of Raspberry Pi | optional, for StallGuard
 The GPIO pins can be specific when initiating the class.
 If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
 
-## Changelog
-### version 0.1.8
-- Pin parameter order in constructor changed to EN, STEP, DIR
-- STEP and DIR pins are optional parameters
-- CRC check for read access reply datagrams
-- if only zeroes are received an error will be thrown
-- added ignore_delay to StallGuard callback
-- implemented write access retry
-- implemented velocity ramping with VActual
-- add ability to print StallGuard results and TStep in VActual
-- if write or read access fails, GSTAT will be checked for driver errors
-
-### version 0.1.7
-- updated README
-- added number of revolutions as parameter for doHoming
-- added output whether doHoming was successful or not
-
-### version 0.1.6
--  added ability to invert direction in setVActual_rps with negative revolutions
 
 ## Tests
 You can run the test files from the main directory with
@@ -174,3 +148,19 @@ PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need 
 "the Raspberry Pi received only the sended bits" or<br /> inconsistent received bits | Make sure the UART ist properly connected to the TMC driver and the driver is powered and working. <br /> Make sure login shell (console) over serial is disabled
 
 ![wiring photo](docs/Images/image1.jpg)
+
+## Acknowledgements
+the code to run the stepper motor is based on the code of the AccelStepper Library from Mike McCauley:  
+https://github.com/adafruit/AccelStepper  
+http://www.airspayce.com/mikem/arduino/AccelStepper/
+
+the code for the uart communication is based on this code from troxel:  
+https://github.com/troxel/TMC_UART
+
+My goal is to make a library, that can run a stepper motor with a TMC2209 stepper driver and can write the setting in the register of the TMC2209, entirly in Python.
+The main focus for this are Test setups, as Python is not fast enough for high motor speeds.
+
+## Feedback/Contributing
+if you encounter any problem, feel free to open an issue on the Github [issue page](https://github.com/Chr157i4n/TMC2209_Raspberry_Pi/issues)
+Feedback will keep this project growing and I encourage all suggestions.
+feel free to submit a pull request.
