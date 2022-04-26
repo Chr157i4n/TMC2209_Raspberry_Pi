@@ -74,7 +74,7 @@ python3 -m tests.test_script_01_uart_connection
 
 #### [test_script_01_uart_connection.py](tests/test_script_01_uart_connection.py)
 this only communicates with the TMC driver over UART. It should set some settings in the driver and then outputs the settings.
-When it outputs ```TMC2209: after 10 tries not valid answer. exiting```, you need to check the UART-connection.
+When it outputs ```TMC2209: UART Communication Error```, you need to check the UART-connection.
 
 #### [test_script_02_pin_connection.py](tests/test_script_02_pin_connection.py)
 this scripts enables the raspberry GPIO output for the dir, en and step pin and then checks the tmc driver register, 
@@ -113,7 +113,7 @@ So you dont need to connect anything to the Vio pin of the driver.
 ## Usage
 ```python
 from TMC_2209.TMC_2209_StepperDriver import *
-tmc = TMC_2209(16, 20, 21)
+tmc = TMC_2209(21, 16, 20)
 
 tmc.setDirection_reg(False)
 tmc.setCurrent(300)
