@@ -76,6 +76,8 @@ class TMC_2209:
     _cmin = 0                       # Min step size in microseconds based on maxSpeed
     _sg_threshold = 100             # threshold for stallguard
     _movement_abs_rel = MovementAbsRel.absolute
+
+    _deinit_finished = False
     
     
 #-----------------------------------------------------------------------
@@ -133,9 +135,9 @@ class TMC_2209:
 # deinit function
 #-----------------------------------------------------------------------
     def deinit(self):
-        try:
+        if(self._deinit_finished == False):
             self.log("Deinit", Loglevel.info.value)
-    
+
             self.setMotorEnabled(False)
 
             self.log("GPIO cleanup")
@@ -150,8 +152,10 @@ class TMC_2209:
                 GPIO.cleanup(self._pin_stallguard)
             
             self.log("Deinit finished", Loglevel.info.value)
-        except:
-            pass
+            self._deinit_finished= True
+        else:
+            self.log("Deinit already finished", Loglevel.info.value)
+
         
 
 

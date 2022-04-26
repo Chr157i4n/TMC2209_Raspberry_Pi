@@ -62,7 +62,10 @@ print("---\n---")
 #-----------------------------------------------------------------------
 tmc1.setMotorEnabled(False)
 tmc2.setMotorEnabled(False)
+tmc1.deinit()
+tmc2.deinit()
 del tmc1
+del tmc2
 
 print("---")
 print("SCRIPT FINISHED")
