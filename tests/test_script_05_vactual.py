@@ -12,9 +12,9 @@ print("---")
 
 #-----------------------------------------------------------------------
 # initiate the TMC_2209 class
-# use your pins for pin_step, pin_dir, pin_en here
+# use your pin for pin_en here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(16, 20, 21)
+tmc = TMC_2209(21)
 
 
 
@@ -125,14 +125,20 @@ tmc.setMotorEnabled(True)
 # Movement of the Motor will not be very accurate with this way
 #-----------------------------------------------------------------------
 tmc.setVActual_rpm(30, revolutions=2)
-
 tmc.setVActual_rpm(-120, revolutions=2)
-
 time.sleep(1)
-
 tmc.setVActual_rpm(30, duration=4)
-
 tmc.setVActual_rpm(-120, duration=1)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# use acceleration (velocity ramping) with VActual
+# does not work with revolutions as parameter
+#-----------------------------------------------------------------------
+# tmc.setVActual_rpm(-120, duration=10, acceleration=500)
 
 
 
@@ -152,6 +158,7 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # deinitiate the TMC_2209 class
 #-----------------------------------------------------------------------
+tmc.deinit()
 del tmc
 
 print("---")

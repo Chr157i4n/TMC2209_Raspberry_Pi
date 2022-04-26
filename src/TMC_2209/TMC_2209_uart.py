@@ -6,6 +6,8 @@ import binascii
 import struct
 import serial
 
+from . import TMC_2209_reg as reg
+
 
 #-----------------------------------------------------------------------
 # TMC_UART
@@ -21,6 +23,7 @@ class TMC_UART:
     rFrame  = [0x55, 0, 0, 0  ]
     wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
     communication_pause = 0
+    error_handler_running = False
     
 
 #-----------------------------------------------------------------------
@@ -54,7 +57,7 @@ class TMC_UART:
 # destructor
 #-----------------------------------------------------------------------
     def __del__(self):
-        if(self.ser is not None):
+        if(self.ser != None):
             self.ser.close()
         
 
@@ -80,13 +83,13 @@ class TMC_UART:
 # reads the registry on the TMC with a given address.
 # returns the binary value of that register
 #-----------------------------------------------------------------------
-    def read_reg(self, reg):
+    def read_reg(self, register):
         
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
         self.rFrame[1] = self.mtr_id
-        self.rFrame[2] = reg
+        self.rFrame[2] = register
         self.rFrame[3] = self.compute_crc8_atm(self.rFrame[:-1])
 
         rtn = self.ser.write(self.rFrame)
@@ -102,7 +105,7 @@ class TMC_UART:
 
         time.sleep(self.communication_pause)
         
-        return(rtn[7:11])
+        return(rtn)
         #return(rtn)
 
 
@@ -110,20 +113,28 @@ class TMC_UART:
 # this function tries to read the registry of the TMC 10 times
 # if a valid answer is returned, this function returns it as an integer
 #-----------------------------------------------------------------------
-    def read_int(self, reg):
-        tries = 0
+    def read_int(self, register, tries=10):
         while(True):
-            rtn = self.read_reg(reg)
-            tries += 1
-            if(len(rtn)>=4):
-                break
+            tries -= 1
+            rtn = self.read_reg(register)
+            rtn_data = rtn[7:11]
+            not_zero_count = len([elem for elem in rtn if elem != 0])
+            
+            if(len(rtn)<12 or not_zero_count == 0):
+                print("TMC2209: UART Communication Error: "+str(len(rtn_data))+" data bytes | "+str(len(rtn))+" total bytes")
+            elif(rtn[11] != self.compute_crc8_atm(rtn[4:11])):
+                print("TMC2209: UART Communication Error: CRC MISMATCH")
             else:
-                print("TMC2209: did not get the expected 4 data bytes. Instead got "+str(len(rtn))+" Bytes")
-            if(tries>=10):
-                print("TMC2209: after 10 tries not valid answer. exiting")
-                raise SystemExit
+                break
+                        
+            if(tries<=0):
+                print("TMC2209: after 10 tries not valid answer")
+                print("TMC2209: snd:\t"+str(bytes(self.rFrame)))
+                print("TMC2209: rtn:\t"+str(rtn))
+                self.handle_error()
+                return -1
         
-        val = struct.unpack(">i",rtn)[0]
+        val = struct.unpack(">i",rtn_data)[0]
         return(val)
 
 
@@ -133,13 +144,13 @@ class TMC_UART:
 # 2. then modify the settings as wished
 # 3. write them back to the driver with this function
 #-----------------------------------------------------------------------
-    def write_reg(self, reg, val):
+    def write_reg(self, register, val):
         
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
         self.wFrame[1] = self.mtr_id
-        self.wFrame[2] =  reg | 0x80;  # set write bit
+        self.wFrame[2] =  register | 0x80;  # set write bit
         
         self.wFrame[3] = 0xFF & (val>>24)
         self.wFrame[4] = 0xFF & (val>>16)
@@ -156,7 +167,7 @@ class TMC_UART:
 
         time.sleep(self.communication_pause)
 
-        return(True)
+        return True
 
 
 #-----------------------------------------------------------------------
@@ -164,19 +175,22 @@ class TMC_UART:
 # but it also checks if the writing process was successfully by checking
 # the InterfaceTransmissionCounter before and after writing
 #-----------------------------------------------------------------------
-    def write_reg_check(self, reg, val):
-        IFCNT           =   0x02
-
-        ifcnt1 = self.read_int(IFCNT)
-        self.write_reg(reg, val)
-        ifcnt2 = self.read_int(IFCNT)
-
-        if(ifcnt1 >= ifcnt2):
-            print("TMC2209: writing not successful!")
-            print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
-            return False
-        else:
-            return True
+    def write_reg_check(self, register, val, tries=10):
+        ifcnt1 = self.read_int(reg.IFCNT)
+        
+        while(True):
+            self.write_reg(register, val)
+            tries -= 1
+            ifcnt2 = self.read_int(reg.IFCNT)
+            if(ifcnt1 >= ifcnt2):
+                print("TMC2209: writing not successful!")
+                print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
+            else:
+                return True
+            if(tries<=0):
+                print("TMC2209: after 10 tries not valid write access")
+                self.handle_error()
+                return -1
 
 
 #-----------------------------------------------------------------------
@@ -202,15 +216,39 @@ class TMC_UART:
 
 
 #-----------------------------------------------------------------------
+# error handling
+#-----------------------------------------------------------------------
+    def handle_error(self):
+        if(self.error_handler_running):
+            return
+        self.error_handler_running = True
+        gstat = self.read_int(reg.GSTAT)
+        print("TMC2209: GSTAT Error check:")
+        if(gstat == -1):
+            print("TMC2209: No answer from Driver")
+        elif(gstat == 0):
+            print("TMC2209: Everything looks fine in GSTAT")
+        else:
+            if(gstat & reg.reset):
+                print("TMC2209: The Driver has been reset since the last read access to GSTAT")
+            if(gstat & reg.drv_err):
+                print("TMC2209: The driver has been shut down due to overtemperature or short circuit detection since the last read access")
+            if(gstat & reg.uv_cp):
+                print("TMC2209: Undervoltage on the charge pump. The driver is disabled in this case")
+        print("EXITING!")
+        raise SystemExit
+
+
+#-----------------------------------------------------------------------
 # test UART connection
 #-----------------------------------------------------------------------
-    def test_uart(self, reg):
+    def test_uart(self, register):
         
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
         self.rFrame[1] = self.mtr_id
-        self.rFrame[2] = reg
+        self.rFrame[2] = register
         self.rFrame[3] = self.compute_crc8_atm(self.rFrame[:-1])
 
         rtn = self.ser.write(self.rFrame)

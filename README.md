@@ -1,4 +1,8 @@
 # TMC_2209_Raspberry_Pi
+
+**Pin parameter order in constructor has changed in version 0.1.8 to EN, STEP, DIR !**
+\
+\
 This is a library to drive a stepper motor with a TMC2209 stepper driver and a Raspberry Pi
 
 This code is still experimental, so use it on your own risk.
@@ -15,13 +19,6 @@ You can read more about this in the datasheet from Trinamic.
 
 Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends,
 Well, the Pi receives 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
-
-the code to run the stepper motor is based on the code of the AccelStepper Library from Mike McCauley:  
-https://github.com/adafruit/AccelStepper  
-http://www.airspayce.com/mikem/arduino/AccelStepper/
-
-the code for the uart communication is based on this code from troxel:  
-https://github.com/troxel/TMC_UART
 
 the Documentation of the TMC2209 can be found here:  
 https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
@@ -56,7 +53,7 @@ TX or PDN_UART with 1kOhm | TX of Raspberry Pi | send data to TMC via UART
 RX or PDN_UART directly | RX of Raspberry Pi | receive data from TMC via UART
 VM | 12V or 24V of power supply | power for the motor
 GND | GND of power supply | power for the motor
-VDD | 5V of Raspberry Pi | does not need to be connected
+VDD | 3,3V of Raspberry Pi | optional, for more stable logic voltage
 GND2 | GND of Raspberry Pi | GND for VDD and Signals
 EN | GPIO21 of Raspberry Pi | enable the motor output
 STEP | GPIO16 of Raspberry Pi | moves the motor one step per pulse
@@ -65,7 +62,8 @@ DIAG | GPIO26 of Raspberry Pi | optional, for StallGuard
 
 ![wiring diagram](docs/Images/wiring_diagram.png)
 
-The GPIO pins can be specific when initiating the class
+The GPIO pins can be specific when initiating the class.
+If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
 
 
 ## Tests
@@ -143,7 +141,26 @@ Problem | Solution
 -- | --
 FileNotFoundError: [Errno 2] <br /> No such file or directory: '/dev/serial0' | depending on your Raspberry Pi version, you need to enable the Serial Port <br /> run `sudo raspi-config` in your terminal. <br /> there go to '3 Interface Options' -> 'P3 Serial Port' <br /> Would you like a login shell to be accessible over serial? No <br /> Would you like the serial port hardware to be enabled? Yes <br /> Finish and then reboot
 PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need to give the permission to acces the Serial Port to your current user <br /> You may need to add your user (pi) to the dialout group with `sudo usermod -a -G dialout pi`
-"did not get the expected 4 data bytes. Instead got 0 Bytes" | You can use the 'debug_script_01_uart_connection' script to get a better reading on the received bytes and troubleshoot your problem
+"TMC2209: UART Communication Error" | You can use the 'debug_script_01_uart_connection' script to get a better reading on the received bytes and troubleshoot your problem
+"TMC2209: UART Communication Error: 0 data bytes \| 4 total bytes" | only 4 total bytes receives indicates, that the Raspberry Pi receives its own data, but nothing from the TMC driver. This happens if RX and TX are connected properly, but the TMC driver has no power
+"TMC2209: UART Communication Error: 0 data bytes \| 0 total bytes" | 0 total bytes receives indicates, a problem with your wiring or your Raspberry Pi. This happens if TX is not connected
+"TMC2209: UART Communication Error: 4 data bytes \| 12 total bytes" | this indicates, the Raspberry Pi received only zeroes. This happens if only RX is connected and TX not
 "the Raspberry Pi received only the sended bits" or<br /> inconsistent received bits | Make sure the UART ist properly connected to the TMC driver and the driver is powered and working. <br /> Make sure login shell (console) over serial is disabled
 
 ![wiring photo](docs/Images/image1.jpg)
+
+## Acknowledgements
+the code to run the stepper motor is based on the code of the AccelStepper Library from Mike McCauley:  
+https://github.com/adafruit/AccelStepper  
+http://www.airspayce.com/mikem/arduino/AccelStepper/
+
+the code for the uart communication is based on this code from troxel:  
+https://github.com/troxel/TMC_UART
+
+My goal is to make a library, that can run a stepper motor with a TMC2209 stepper driver and can write the setting in the register of the TMC2209, entirly in Python.
+The main focus for this are Test setups, as Python is not fast enough for high motor speeds.
+
+## Feedback/Contributing
+If you encounter any problem, feel free to open an issue on the Github [issue page](https://github.com/Chr157i4n/TMC2209_Raspberry_Pi/issues)
+Feedback will keep this project growing and I encourage all suggestions.
+feel free to submit a pull request.

@@ -12,10 +12,10 @@ print("---")
 
 #-----------------------------------------------------------------------
 # initiate the TMC_2209 class
-# use your pins for pin_step, pin_dir, pin_en here
+# use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc1 = TMC_2209(16, 20, 21, driver_address=0)
-tmc2 = TMC_2209(13, 19, 26, driver_address=1)
+tmc1 = TMC_2209(21, 16, 20, driver_address=0)
+tmc2 = TMC_2209(26, 13, 19, driver_address=1)
 
 
 
@@ -62,7 +62,10 @@ print("---\n---")
 #-----------------------------------------------------------------------
 tmc1.setMotorEnabled(False)
 tmc2.setMotorEnabled(False)
+tmc1.deinit()
+tmc2.deinit()
 del tmc1
+del tmc2
 
 print("---")
 print("SCRIPT FINISHED")

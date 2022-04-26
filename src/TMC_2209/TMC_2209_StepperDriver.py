@@ -43,10 +43,15 @@ class TMC_2209:
     _pin_step = -1
     _pin_dir = -1
     _pin_en = -1
+    _pin_stallguard = -1
 
     _direction = True
 
     _stop = False
+    _startTime = 0
+    _sgDelay = 0
+    _sgCallback = None
+    
 
     _msres = -1
     _stepsPerRevolution = 0
@@ -71,26 +76,53 @@ class TMC_2209:
     _cmin = 0                       # Min step size in microseconds based on maxSpeed
     _sg_threshold = 100             # threshold for stallguard
     _movement_abs_rel = MovementAbsRel.absolute
+
+    _deinit_finished = False
     
     
 #-----------------------------------------------------------------------
 # constructor
 #-----------------------------------------------------------------------
-    def __init__(self, pin_step, pin_dir, pin_en, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM):
+    def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
+        self.init(pin_en, pin_step, pin_dir, baudrate, serialport, driver_address, no_uart, gpio_mode, loglevel)
+
+
+#-----------------------------------------------------------------------
+# destructor
+#-----------------------------------------------------------------------
+    def __del__(self):
+        self.deinit()
+        
+
+#-----------------------------------------------------------------------
+# init function
+#-----------------------------------------------------------------------
+    def init(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
-        self._pin_step = pin_step
-        self._pin_dir = pin_dir
-        self._pin_en = pin_en
+
+        if(loglevel != None):
+            self._loglevel = loglevel
+
         self.log("Init", Loglevel.info.value)
         GPIO.setwarnings(False)
         GPIO.setmode(gpio_mode)
-        self.log("STEP Pin: " + str(self._pin_step), Loglevel.debug.value)
-        self.log("DIR Pin: " + str(self._pin_dir), Loglevel.debug.value)
-        self.log("EN Pin: " + str(self._pin_en), Loglevel.debug.value)
-        GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
-        GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
+
+        self.log("EN Pin: " + str(pin_en), Loglevel.debug.value)
+        self._pin_en = pin_en
         GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
+
+        self.log("STEP Pin: " + str(pin_step), Loglevel.debug.value)
+        if(pin_step != -1):
+            self._pin_step = pin_step
+            GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
+
+        self.log("DIR Pin: " + str(pin_dir), Loglevel.debug.value)
+        if(pin_dir != -1):
+            self._pin_dir = pin_dir
+            GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
+
         self.log("GPIO Init finished", Loglevel.info.value)
+        
         if(not no_uart):
             self.readStepsPerRevolution()
             self.clearGSTAT()
@@ -100,16 +132,31 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
-# destructor
+# deinit function
 #-----------------------------------------------------------------------
-    def __del__(self):
-        self.log("Deinit", Loglevel.info.value)
-        try:
+    def deinit(self):
+        if(self._deinit_finished == False):
+            self.log("Deinit", Loglevel.info.value)
+
             self.setMotorEnabled(False)
-            GPIO.cleanup()
+
             self.log("GPIO cleanup")
-        except:
-            self.log("GPIO already cleaned up")
+            if(self._pin_step != -1):
+                GPIO.cleanup(self._pin_step)
+            if(self._pin_dir != -1):
+                GPIO.cleanup(self._pin_dir)
+            if(self._pin_en != -1):
+                GPIO.cleanup(self._pin_en)
+            if(self._pin_stallguard != -1):
+                GPIO.remove_event_detect(self._pin_stallguard)
+                GPIO.cleanup(self._pin_stallguard)
+            
+            self.log("Deinit finished", Loglevel.info.value)
+            self._deinit_finished= True
+        else:
+            self.log("Deinit already finished", Loglevel.info.value)
+
+        
 
 
 #-----------------------------------------------------------------------
@@ -253,7 +300,8 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # read the register Adress "GSTAT" and prints all current setting
 #-----------------------------------------------------------------------
-    def clearGSTAT(self):        
+    def clearGSTAT(self):
+        self.log("clearing GSTAT", Loglevel.info.value)
         gstat = self.tmc_uart.read_int(reg.GSTAT)
         
         gstat = self.tmc_uart.set_bit(gstat, reg.reset)
@@ -336,7 +384,7 @@ class TMC_2209:
 # returns true when homing was successful
 #-----------------------------------------------------------------------
     def doHoming(self, diag_pin, revolutions, threshold=None):        
-        if(threshold is not None):
+        if(threshold != None):
             self._sg_threshold = threshold
         
         self.log("---", Loglevel.info.value)
@@ -370,7 +418,7 @@ class TMC_2209:
     def doHoming2(self, direction, threshold=None):
         sg_results = []
         
-        if(threshold is not None):
+        if(threshold != None):
             self._sg_threshold = threshold
         
         self.log("---", Loglevel.info.value)
@@ -759,8 +807,12 @@ class TMC_2209:
 # It gives the motor velocity in +-(2^23)-1 [μsteps / t]
 # 0: Normal operation. Driver reacts to STEP input
 #-----------------------------------------------------------------------
-    def setVActual(self, vactual, duration=0):
+    def setVActual(self, vactual, duration=0, acceleration=0, showStallGuardResult=False, showTStep=False):
         self._stop = False
+        currentVActual = 0
+        sleeptime = 0.05
+        if(vactual<0):
+            acceleration = -acceleration
 
         if(duration != 0):
             self.log("vactual: "+str(vactual)+" for "+str(duration)+" sec", Loglevel.info.value)
@@ -769,15 +821,34 @@ class TMC_2209:
         self.log(str(bin(vactual)), Loglevel.info.value)
 
         self.log("writing vactual", Loglevel.info.value)
-        self.tmc_uart.write_reg_check(reg.VACTUAL, vactual)
+        if(acceleration == 0):
+            self.tmc_uart.write_reg_check(reg.VACTUAL, vactual)
 
         if(duration != 0):
-            starttime = time.time()
-            while((not self._stop) and (time.time() < starttime+duration)):
-                pass
+            self._startTime = time.time()
+            currentTime = time.time()
+            while((not self._stop) and (currentTime < self._startTime+duration)):
+                if(acceleration != 0):
+                    timeToStop = self._startTime+duration-abs(currentVActual/acceleration)
+                    #self.log("cur: "+str(currentTime)+ "\t| stop: "+str(timeToStop)+ "\t| vac: "+str(currentVActual)+ "\t| acc: "+str(acceleration), Loglevel.info.value)
+                if(acceleration != 0 and currentTime > timeToStop):
+                    currentVActual -= acceleration*sleeptime
+                    self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(currentVActual)))
+                    time.sleep(sleeptime)
+                elif(acceleration != 0 and abs(currentVActual)<abs(vactual)):
+                    currentVActual += acceleration*sleeptime
+                    #self.log("currentVActual: "+str(int(round(currentVActual))), Loglevel.info.value)
+                    self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(currentVActual)))
+                    time.sleep(sleeptime)
+                if(showStallGuardResult):
+                    self.log("StallGuard result: "+str(self.getStallguard_Result()), Loglevel.info.value)
+                    time.sleep(0.1)
+                if(showTStep):
+                    self.log("TStep result: "+str(self.getTStep()), Loglevel.info.value)
+                    time.sleep(0.1)
+                currentTime = time.time()
             self.tmc_uart.write_reg_check(reg.VACTUAL, 0)
             return not self._stop
-
 
 
 #-----------------------------------------------------------------------
@@ -786,21 +857,21 @@ class TMC_2209:
 # With internal oscillator:
 # VACTUAL[2209] = v[Hz] / 0.715Hz
 #-----------------------------------------------------------------------
-    def setVActual_rps(self, rps, duration=0, revolutions=0):
+    def setVActual_rps(self, rps, duration=0, revolutions=0, acceleration=0):
         vactual = rps/0.715*self._stepsPerRevolution
         if(revolutions!=0):
             duration = abs(revolutions/rps)
         if(revolutions<0):
             vactual = -vactual
-        return self.setVActual(int(round(vactual)), duration)
+        return self.setVActual(int(round(vactual)), duration, acceleration=acceleration)
 
 
 #-----------------------------------------------------------------------
 # converts the rps parameter to a vactual value which represents
 # rotation speed in revolutions per minute
 #-----------------------------------------------------------------------
-    def setVActual_rpm(self, rpm, duration=0, revolutions=0):
-        return self.setVActual_rps(rpm/60, duration, revolutions)
+    def setVActual_rpm(self, rpm, duration=0, revolutions=0, acceleration=0):
+        return self.setVActual_rps(rpm/60, duration, revolutions, acceleration)
 
 
 #-----------------------------------------------------------------------
@@ -846,16 +917,34 @@ class TMC_2209:
 # via stallguard
 # high value on the diag pin can also mean a driver error
 #-----------------------------------------------------------------------
-    def setStallguard_Callback(self, pin_stallguard, threshold, my_callback, min_speed = 2000):
+    def setStallguard_Callback(self, pin_stallguard, threshold, callback, min_speed = 2000, ignore_delay = 0):
+        self.log("setup stallguard callback on GPIO"+str(pin_stallguard), Loglevel.info.value)
+        self.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+str(min_speed), Loglevel.info.value)
 
         self.setStallguard_Threshold(threshold)
         self.setCoolStep_Threshold(min_speed)
-
-        self.log("setup stallguard callback", Loglevel.info.value)
+        self._sgDelay = ignore_delay
+        self._sgCallback = callback
+        self._pin_stallguard = pin_stallguard
         
-        GPIO.setup(pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self._pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     
-        GPIO.add_event_detect(pin_stallguard, GPIO.RISING, callback=my_callback, bouncetime=300) 
+        GPIO.add_event_detect(self._pin_stallguard, GPIO.RISING, callback=self.stallguard_callback, bouncetime=300) 
+
+
+#-----------------------------------------------------------------------
+# the callback function for StallGuard.
+# only checks whether the duration of the current movement is longer than
+# _sgDelay and then calls the actual callback
+#-----------------------------------------------------------------------
+    def stallguard_callback(self, channel):
+        if(self._sgCallback == None):
+            self.log("StallGuard callback is None", Loglevel.debug.value)
+            return
+        if(time.time()<=self._startTime+self._sgDelay and self._sgDelay != 0):
+            return
+        self._sgCallback(channel)
+
 
 
 
@@ -907,8 +996,7 @@ class TMC_2209:
     def setAcceleration(self, acceleration):
         if (acceleration == 0.0):
             return
-        if (acceleration < 0.0):
-          acceleration = -acceleration
+        acceleration = abs(acceleration)
         if (self._acceleration != acceleration):
             # Recompute _n per Equation 17
             self._n = self._n * (self._acceleration / acceleration)
@@ -940,7 +1028,7 @@ class TMC_2209:
 # when the movement was stopped
 #-----------------------------------------------------------------------
     def runToPositionSteps(self, steps, movement_abs_rel = None):
-        if(movement_abs_rel is not None):
+        if(movement_abs_rel != None):
             this_movement_abs_rel = movement_abs_rel
         else:
             this_movement_abs_rel = self._movement_abs_rel
