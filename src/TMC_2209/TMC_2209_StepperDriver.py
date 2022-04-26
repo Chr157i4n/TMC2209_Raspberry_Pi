@@ -1287,12 +1287,12 @@ class TMC_2209:
 
 
         self.log("complete", Loglevel.debug.value)
-        self.log(str(snd), Loglevel.debug.value)
-        self.log(str(rtn), Loglevel.debug.value)
+        self.log(str(snd.hex()), Loglevel.debug.value)
+        self.log(str(rtn.hex()), Loglevel.debug.value)
 
         self.log("just the first 4 bits", Loglevel.debug.value)
-        self.log(str(snd[0:4]), Loglevel.debug.value)
-        self.log(str(rtn[0:4]), Loglevel.debug.value)
+        self.log(str(snd[0:4].hex()), Loglevel.debug.value)
+        self.log(str(rtn[0:4].hex()), Loglevel.debug.value)
 
         
         self.log("---")
