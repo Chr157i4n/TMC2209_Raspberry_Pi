@@ -10,8 +10,8 @@ This code is still experimental, so use it on your own risk.
 This library is programmed in pure Python. The performance of Python is not good enough to drive the motor with high speed.
 So if you move the motor with high speed and this library the motor will lose steps.
 
-My TMC2209 is a Bigtreetech TMC 2209 V1.2:
-https://github.com/bigtreetech/BIGTREETECH-TMC2209-V1.2
+My TMC2209 is a [Bigtreetech TMC 2209 V1.2](https://github.com/bigtreetech/BIGTREETECH-TMC2209-V1.2)
+
 
 It has a rSense of 110 mOhm and it uses one Pin (PDN_UART) for UART RX and TX.
 So the PD_UART-Pin needs to be connected to the Raspberrry Pis RX-Pin directly and to the TX-Pin with an 1kOhm resistor.
@@ -21,10 +21,9 @@ Because the TMC2209 use one shared pin for transmit and receive in the UART comm
 Well, the Pi receives 4 bytes from itself and 8 bytes from the driver. So the Pi receives a total of 12 bytes and only the last 8 are the reply, of which only 4 are data bytes.
 
 the Documentation of the TMC2209 can be found here:  
-https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
+[TMC2209 - Datsheet](https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf)
 
-the code is also available on PyPI:
-https://pypi.org/project/TMC-2209-Raspberry-Pi
+the code is also available on [PyPI](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 
 
 ## Installation
@@ -150,12 +149,9 @@ PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need 
 ![wiring photo](docs/Images/image1.jpg)
 
 ## Acknowledgements
-the code to run the stepper motor is based on the code of the AccelStepper Library from Mike McCauley:  
-https://github.com/adafruit/AccelStepper  
-http://www.airspayce.com/mikem/arduino/AccelStepper/
+the code to run the stepper motor is based on the code of the [AccelStepper Library from Mike McCauley](http://www.airspayce.com/mikem/arduino/AccelStepper)
 
-the code for the uart communication is based on this code from troxel:  
-https://github.com/troxel/TMC_UART
+the code for the uart communication is based on this [code from troxel](https://github.com/troxel/TMC_UART)
 
 My goal is to make a library, that can run a stepper motor with a TMC2209 stepper driver and can write the setting in the register of the TMC2209, entirly in Python.
 The main focus for this are Test setups, as Python is not fast enough for high motor speeds.
