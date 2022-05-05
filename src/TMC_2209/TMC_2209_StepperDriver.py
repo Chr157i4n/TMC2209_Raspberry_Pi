@@ -969,7 +969,7 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
-# sets the maximum motor speed in steps per second
+# sets the maximum motor speed in µsteps per second
 #-----------------------------------------------------------------------
     def setMaxSpeed(self, speed):
         if (speed < 0.0):
@@ -984,6 +984,13 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
+# sets the maximum motor speed in fullsteps per second
+#-----------------------------------------------------------------------
+    def setMaxSpeed_fullstep(self, speed):
+        self.setMaxSpeed(speed*self._msres)
+
+
+#-----------------------------------------------------------------------
 # returns the maximum motor speed in steps per second
 #-----------------------------------------------------------------------
     def getMaxSpeed(self):
@@ -991,7 +998,7 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
-# sets the motor acceleration/decceleration in steps per sec per sec
+# sets the motor acceleration/decceleration in µsteps per sec per sec
 #-----------------------------------------------------------------------
     def setAcceleration(self, acceleration):
         if (acceleration == 0.0):
@@ -1004,6 +1011,12 @@ class TMC_2209:
             self._c0 = 0.676 * math.sqrt(2.0 / acceleration) * 1000000.0 # Equation 15
             self._acceleration = acceleration
             self.computeNewSpeed()
+
+#-----------------------------------------------------------------------
+# sets the motor acceleration/decceleration in fullsteps per sec per sec
+#-----------------------------------------------------------------------
+    def setAcceleration_fullstep(self, acceleration):
+        self.setAcceleration(acceleration*self._msres)
 
 
 #-----------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # TMC_2209_Raspberry_Pi
 
-**Pin parameter order in constructor has changed in version 0.1.8 to EN, STEP, DIR !**
+**Pin parameter order in constructor has changed in version 0.2 to EN, STEP, DIR !**
 \
 \
 This is a library to drive a stepper motor with a TMC2209 stepper driver and a Raspberry Pi
