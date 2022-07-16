@@ -13,8 +13,8 @@
 
 ## version 0.1.7
 - updated README
-- added number of revolutions as parameter for doHoming
-- added output whether doHoming was successful or not
+- added number of revolutions as parameter for do_homing
+- added output whether do_homing was successful or not
 
 ## version 0.1.6
 -  added ability to invert direction in setVActual_rps with negative revolutions

@@ -26,11 +26,11 @@ tmc2 = TMC_2209(26, 13, 19, driver_address=1)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.setLoglevel(Loglevel.debug)
-tmc1.setMovementAbsRel(MovementAbsRel.absolute)
+tmc1.set_loglevel(Loglevel.DEBUG)
+tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
-tmc2.setLoglevel(Loglevel.debug)
-tmc2.setMovementAbsRel(MovementAbsRel.absolute)
+tmc2.set_loglevel(Loglevel.DEBUG)
+tmc2.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
 
@@ -60,8 +60,8 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # deinitiate the TMC_2209 class
 #-----------------------------------------------------------------------
-tmc1.setMotorEnabled(False)
-tmc2.setMotorEnabled(False)
+tmc1.set_motor_enabled(False)
+tmc2.set_motor_enabled(False)
 tmc1.deinit()
 tmc2.deinit()
 del tmc1

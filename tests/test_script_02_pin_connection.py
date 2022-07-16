@@ -25,8 +25,8 @@ tmc = TMC_2209(21, 16, 20)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.setLoglevel(Loglevel.debug)
-tmc.setMovementAbsRel(MovementAbsRel.absolute)
+tmc.set_loglevel(Loglevel.DEBUG)
+tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
 
@@ -35,12 +35,12 @@ tmc.setMovementAbsRel(MovementAbsRel.absolute)
 #-----------------------------------------------------------------------
 # these functions change settings in the TMC register
 #-----------------------------------------------------------------------
-tmc.setDirection_reg(False)
-tmc.setCurrent(300)
-tmc.setInterpolation(True)
-tmc.setSpreadCycle(False)
-tmc.setMicrosteppingResolution(2)
-tmc.setInternalRSense(False)
+tmc.set_direction_reg(False)
+tmc.set_current(300)
+tmc.set_interpolation(True)
+tmc.set_spreadcycle(False)
+tmc.set_microstepping_resolution(2)
+tmc.set_internal_rsense(False)
 
 
 print("---\n---")
@@ -53,7 +53,7 @@ print("---\n---")
 # this function test whether the connection of the DIR, STEP and EN pin
 # between Raspberry Pi and TMC driver is working
 #-----------------------------------------------------------------------
-tmc.testDirStepEn()
+tmc.test_dir_step_en()
 
 print("---\n---")
 
@@ -64,7 +64,7 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # deactivate the motor current output
 #-----------------------------------------------------------------------
-tmc.setMotorEnabled(False)
+tmc.set_motor_enabled(False)
 
 print("---\n---")
 
