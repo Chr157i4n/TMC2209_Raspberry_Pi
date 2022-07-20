@@ -1,4 +1,8 @@
 # Changelog
+## version 0.2.1
+- added setPDNdisable
+- added setMaxSpeed_fullstep and setAcceleration_fullstep
+
 ## version 0.2
 - Pin parameter order in constructor changed to EN, STEP, DIR
 - STEP and DIR pins are optional parameters
