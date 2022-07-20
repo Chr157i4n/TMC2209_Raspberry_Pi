@@ -64,10 +64,18 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# set the Accerleration and maximal Speed
+# set the Acceleration and maximal Speed
 #-----------------------------------------------------------------------
-tmc.setAcceleration(2000)
-tmc.setMaxSpeed(500)
+# tmc.setAcceleration(2000)
+# tmc.setMaxSpeed(500)
+
+#-----------------------------------------------------------------------
+# set the Acceleration and maximal Speed in fullsteps
+#-----------------------------------------------------------------------
+tmc.setAcceleration_fullstep(1000)
+tmc.setMaxSpeed_fullstep(250)
+
+
 
 
 

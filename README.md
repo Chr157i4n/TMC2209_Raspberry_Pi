@@ -1,6 +1,10 @@
 # TMC_2209_Raspberry_Pi
 
-**Pin parameter order in constructor has changed in version 0.1.8 to EN, STEP, DIR !**
+[![PyPI python version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/python/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
+[![PyPI version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/v/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
+[![PyPI downloads TMC-2209-Raspberry-Pi](https://img.shields.io/pypi/dm/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
+
+**Pin parameter order in constructor has changed in version 0.2 to EN, STEP, DIR !**
 \
 \
 This is a library to drive a stepper motor with a TMC2209 stepper driver and a Raspberry Pi
@@ -10,21 +14,20 @@ This code is still experimental, so use it on your own risk.
 This library is programmed in pure Python. The performance of Python is not good enough to drive the motor with high speed.
 So if you move the motor with high speed and this library the motor will lose steps.
 
-My TMC2209 is a Bigtreetech TMC 2209 V1.2:
-https://github.com/bigtreetech/BIGTREETECH-TMC2209-V1.2
+My TMC2209 is a [Bigtreetech TMC 2209 V1.2](https://github.com/bigtreetech/BIGTREETECH-TMC2209-V1.2)
+
 
 It has a rSense of 110 mOhm and it uses one Pin (PDN_UART) for UART RX and TX.
 So the PD_UART-Pin needs to be connected to the Raspberrry Pis RX-Pin directly and to the TX-Pin with an 1kOhm resistor.
 You can read more about this in the datasheet from Trinamic.
 
-Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends,
-Well, the Pi receives 8 bits from itself and 4 bit from the driver. So the Pi receives a total of 12 bits and only the last 4 needs to be used.
+Because the TMC2209 use one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends.
+Well, the Pi receives 4 bytes from itself and 8 bytes from the driver. So the Pi receives a total of 12 bytes and only the last 8 are the reply, of which only 4 are data bytes.
 
 the Documentation of the TMC2209 can be found here:  
-https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf
+[TMC2209 - Datsheet](https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf)
 
-the code is also available on PyPI:
-https://pypi.org/project/TMC-2209-Raspberry-Pi
+the code is also available on [PyPI](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 
 
 ## Installation
@@ -74,7 +77,7 @@ python3 -m tests.test_script_01_uart_connection
 
 #### [test_script_01_uart_connection.py](tests/test_script_01_uart_connection.py)
 this only communicates with the TMC driver over UART. It should set some settings in the driver and then outputs the settings.
-When it outputs ```TMC2209: after 10 tries not valid answer. exiting```, you need to check the UART-connection.
+When it outputs ```TMC2209: UART Communication Error```, you need to check the UART-connection.
 
 #### [test_script_02_pin_connection.py](tests/test_script_02_pin_connection.py)
 this scripts enables the raspberry GPIO output for the dir, en and step pin and then checks the tmc driver register, 
@@ -113,7 +116,7 @@ So you dont need to connect anything to the Vio pin of the driver.
 ## Usage
 ```python
 from TMC_2209.TMC_2209_StepperDriver import *
-tmc = TMC_2209(16, 20, 21)
+tmc = TMC_2209(21, 16, 20)
 
 tmc.setDirection_reg(False)
 tmc.setCurrent(300)
@@ -150,12 +153,9 @@ PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need 
 ![wiring photo](docs/Images/image1.jpg)
 
 ## Acknowledgements
-the code to run the stepper motor is based on the code of the AccelStepper Library from Mike McCauley:  
-https://github.com/adafruit/AccelStepper  
-http://www.airspayce.com/mikem/arduino/AccelStepper/
+the code to run the stepper motor is based on the code of the [AccelStepper Library from Mike McCauley](http://www.airspayce.com/mikem/arduino/AccelStepper)
 
-the code for the uart communication is based on this code from troxel:  
-https://github.com/troxel/TMC_UART
+the code for the uart communication is based on this [code from troxel](https://github.com/troxel/TMC_UART)
 
 My goal is to make a library, that can run a stepper motor with a TMC2209 stepper driver and can write the setting in the register of the TMC2209, entirly in Python.
 The main focus for this are Test setups, as Python is not fast enough for high motor speeds.

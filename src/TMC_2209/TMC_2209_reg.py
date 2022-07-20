@@ -30,6 +30,7 @@ en_spreadcycle      = 1<<2
 shaft               = 1<<3
 index_otpw          = 1<<4
 index_step          = 1<<5
+pdn_disable         = 1<<6
 mstep_reg_select    = 1<<7
 
 #GSTAT
@@ -86,4 +87,3 @@ mres_8 = 5
 mres_4 = 6
 mres_2 = 7
 mres_1 = 8
-

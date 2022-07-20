@@ -615,11 +615,28 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
+# disables PDN on the UART pin
+# 0: PDN_UART controls standstill current reduction
+# 1: PDN_UART input function disabled. Set this bit,
+# when using the UART interface!
+#-----------------------------------------------------------------------
+    def setPDNdisable(self,pdn_disable):
+        gconf = self.tmc_uart.read_int(reg.GCONF)
+        if(pdn_disable):
+            self.log("enabled PDN_UART", Loglevel.info.value)
+            gconf = self.tmc_uart.set_bit(gconf, reg.pdn_disable)
+        else:
+            self.log("disabled PDN_UART", Loglevel.info.value)
+            gconf = self.tmc_uart.clear_bit(gconf, reg.pdn_disable)
+        self.tmc_uart.write_reg_check(reg.GCONF, gconf)
+
+
+#-----------------------------------------------------------------------
 # sets the current flow for the motor
 # run_current in mA
 # check whether Vref is actually 1.2V
 #-----------------------------------------------------------------------
-    def setCurrent(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10, use_Vref=False, Vref = 1.2):
+    def setCurrent(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10, use_Vref=False, Vref = 1.2, pdn_disable = True):
         CS_IRun = 0
         Rsense = 0.11
         Vfs = 0
@@ -662,7 +679,9 @@ class TMC_2209:
 
         self.setIRun_Ihold(CS_IHold, CS_IRun, hold_current_delay)
 
-  
+        self.setPDNdisable(pdn_disable)
+
+
 #-----------------------------------------------------------------------
 # return whether spreadcycle (1) is active or stealthchop (0)
 #-----------------------------------------------------------------------
@@ -969,7 +988,7 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
-# sets the maximum motor speed in steps per second
+# sets the maximum motor speed in µsteps per second
 #-----------------------------------------------------------------------
     def setMaxSpeed(self, speed):
         if (speed < 0.0):
@@ -984,6 +1003,13 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
+# sets the maximum motor speed in fullsteps per second
+#-----------------------------------------------------------------------
+    def setMaxSpeed_fullstep(self, speed):
+        self.setMaxSpeed(speed*self._msres)
+
+
+#-----------------------------------------------------------------------
 # returns the maximum motor speed in steps per second
 #-----------------------------------------------------------------------
     def getMaxSpeed(self):
@@ -991,7 +1017,7 @@ class TMC_2209:
 
 
 #-----------------------------------------------------------------------
-# sets the motor acceleration/decceleration in steps per sec per sec
+# sets the motor acceleration/decceleration in µsteps per sec per sec
 #-----------------------------------------------------------------------
     def setAcceleration(self, acceleration):
         if (acceleration == 0.0):
@@ -1004,6 +1030,12 @@ class TMC_2209:
             self._c0 = 0.676 * math.sqrt(2.0 / acceleration) * 1000000.0 # Equation 15
             self._acceleration = acceleration
             self.computeNewSpeed()
+
+#-----------------------------------------------------------------------
+# sets the motor acceleration/decceleration in fullsteps per sec per sec
+#-----------------------------------------------------------------------
+    def setAcceleration_fullstep(self, acceleration):
+        self.setAcceleration(acceleration*self._msres)
 
 
 #-----------------------------------------------------------------------
@@ -1287,12 +1319,12 @@ class TMC_2209:
 
 
         self.log("complete", Loglevel.debug.value)
-        self.log(str(snd), Loglevel.debug.value)
-        self.log(str(rtn), Loglevel.debug.value)
+        self.log(str(snd.hex()), Loglevel.debug.value)
+        self.log(str(rtn.hex()), Loglevel.debug.value)
 
         self.log("just the first 4 bits", Loglevel.debug.value)
-        self.log(str(snd[0:4]), Loglevel.debug.value)
-        self.log(str(rtn[0:4]), Loglevel.debug.value)
+        self.log(str(snd[0:4].hex()), Loglevel.debug.value)
+        self.log(str(rtn[0:4].hex()), Loglevel.debug.value)
 
         
         self.log("---")
