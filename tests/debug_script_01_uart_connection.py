@@ -25,8 +25,8 @@ tmc = TMC_2209(21, 16, 20, no_uart=True)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.setLoglevel(Loglevel.debug)
-tmc.setMovementAbsRel(MovementAbsRel.absolute)
+tmc.set_loglevel(Loglevel.DEBUG)
+tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
 
@@ -39,7 +39,7 @@ tmc.setMovementAbsRel(MovementAbsRel.absolute)
 #-----------------------------------------------------------------------
 print("---\n---")
 
-tmc.testUART()
+tmc.test_uart()
 
 
 print("---\n---")

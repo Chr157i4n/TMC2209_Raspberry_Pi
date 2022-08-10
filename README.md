@@ -4,6 +4,7 @@
 [![PyPI version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/v/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 [![PyPI downloads TMC-2209-Raspberry-Pi](https://img.shields.io/pypi/dm/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 
+**Function names have been changed to snake_case in 0.3**
 **Pin parameter order in constructor has changed in version 0.2 to EN, STEP, DIR !**
 \
 \
@@ -118,22 +119,22 @@ So you dont need to connect anything to the Vio pin of the driver.
 from TMC_2209.TMC_2209_StepperDriver import *
 tmc = TMC_2209(21, 16, 20)
 
-tmc.setDirection_reg(False)
-tmc.setCurrent(300)
-tmc.setInterpolation(True)
-tmc.setSpreadCycle(False)
-tmc.setMicrosteppingResolution(2)
-tmc.setInternalRSense(False)
+tmc.set_direction_reg(False)
+tmc.set_current(300)
+tmc.set_interpolation(True)
+tmc.set_spreadcycle(False)
+tmc.set_microstepping_resolution(2)
+tmc.set_internal_rsense(False)
 
-tmc.setAcceleration(2000)
-tmc.setMaxSpeed(500)
+tmc.set_acceleration(2000)
+tmc.set_max_speed(500)
 
-tmc.setMotorEnabled(True)
+tmc.set_motor_enabled(True)
 
-tmc.runToPositionSteps(400)
-tmc.runToPositionSteps(0)
+tmc.run_to_position_steps(400)
+tmc.run_to_position_steps(0)
 
-tmc.setMotorEnabled(False)
+tmc.set_motor_enabled(False)
 ```
 
 
@@ -163,4 +164,4 @@ The main focus for this are Test setups, as Python is not fast enough for high m
 ## Feedback/Contributing
 If you encounter any problem, feel free to open an issue on the Github [issue page](https://github.com/Chr157i4n/TMC2209_Raspberry_Pi/issues)
 Feedback will keep this project growing and I encourage all suggestions.
-feel free to submit a pull request.
+feel free to submit a pull request on the dev branch

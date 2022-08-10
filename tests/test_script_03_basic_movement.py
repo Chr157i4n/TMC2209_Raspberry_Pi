@@ -14,7 +14,7 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.debug)
+tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
 
 
 
@@ -25,8 +25,8 @@ tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.debug)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.setLoglevel(Loglevel.debug)
-tmc.setMovementAbsRel(MovementAbsRel.absolute)
+tmc.set_loglevel(Loglevel.DEBUG)
+tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
 
@@ -35,12 +35,12 @@ tmc.setMovementAbsRel(MovementAbsRel.absolute)
 #-----------------------------------------------------------------------
 # these functions change settings in the TMC register
 #-----------------------------------------------------------------------
-tmc.setDirection_reg(False)
-tmc.setCurrent(300)
-tmc.setInterpolation(True)
-tmc.setSpreadCycle(False)
-tmc.setMicrosteppingResolution(2)
-tmc.setInternalRSense(False)
+tmc.set_direction_reg(False)
+tmc.set_current(300)
+tmc.set_interpolation(True)
+tmc.set_spreadcycle(False)
+tmc.set_microstepping_resolution(2)
+tmc.set_internal_rsense(False)
 
 
 print("---\n---")
@@ -66,14 +66,14 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # set the Acceleration and maximal Speed
 #-----------------------------------------------------------------------
-# tmc.setAcceleration(2000)
-# tmc.setMaxSpeed(500)
+# tmc.set_acceleration(2000)
+# tmc.set_max_speed(500)
 
 #-----------------------------------------------------------------------
 # set the Acceleration and maximal Speed in fullsteps
 #-----------------------------------------------------------------------
-tmc.setAcceleration_fullstep(1000)
-tmc.setMaxSpeed_fullstep(250)
+tmc.set_acceleration_fullstep(1000)
+tmc.set_max_speed_fullstep(250)
 
 
 
@@ -84,7 +84,7 @@ tmc.setMaxSpeed_fullstep(250)
 #-----------------------------------------------------------------------
 # activate the motor current output
 #-----------------------------------------------------------------------
-tmc.setMotorEnabled(True)
+tmc.set_motor_enabled(True)
 
 
 
@@ -93,16 +93,16 @@ tmc.setMotorEnabled(True)
 #-----------------------------------------------------------------------
 # move the motor 1 revolution
 #-----------------------------------------------------------------------
-tmc.runToPositionSteps(400)                             #move to position 400
-tmc.runToPositionSteps(0)                               #move to position 0
+tmc.run_to_position_steps(400)                             #move to position 400
+tmc.run_to_position_steps(0)                               #move to position 0
 
 
-tmc.runToPositionSteps(400, MovementAbsRel.relative)    #move 400 steps forward
-tmc.runToPositionSteps(-400, MovementAbsRel.relative)   #move 400 steps backward
+tmc.run_to_position_steps(400, MovementAbsRel.RELATIVE)    #move 400 steps forward
+tmc.run_to_position_steps(-400, MovementAbsRel.RELATIVE)   #move 400 steps backward
 
 
-tmc.runToPositionSteps(400)                             #move to position 400
-tmc.runToPositionSteps(0)                               #move to position 0
+tmc.run_to_position_steps(400)                             #move to position 400
+tmc.run_to_position_steps(0)                               #move to position 0
 
 
 
@@ -111,7 +111,7 @@ tmc.runToPositionSteps(0)                               #move to position 0
 #-----------------------------------------------------------------------
 # deactivate the motor current output
 #-----------------------------------------------------------------------
-tmc.setMotorEnabled(False)
+tmc.set_motor_enabled(False)
 
 print("---\n---")
 

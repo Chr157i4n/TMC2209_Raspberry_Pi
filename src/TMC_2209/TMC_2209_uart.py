@@ -20,8 +20,8 @@ class TMC_UART:
 
     mtr_id = 0
     ser = None
-    rFrame  = [0x55, 0, 0, 0  ]
-    wFrame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
+    r_frame  = [0x55, 0, 0, 0  ]
+    w_frame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
     communication_pause = 0
     error_handler_running = False
     
@@ -88,12 +88,12 @@ class TMC_UART:
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
-        self.rFrame[1] = self.mtr_id
-        self.rFrame[2] = register
-        self.rFrame[3] = self.compute_crc8_atm(self.rFrame[:-1])
+        self.r_frame[1] = self.mtr_id
+        self.r_frame[2] = register
+        self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
 
-        rtn = self.ser.write(self.rFrame)
-        if rtn != len(self.rFrame):
+        rtn = self.ser.write(self.r_frame)
+        if rtn != len(self.r_frame):
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
@@ -129,7 +129,7 @@ class TMC_UART:
                         
             if(tries<=0):
                 print("TMC2209: after 10 tries not valid answer")
-                print("TMC2209: snd:\t"+str(bytes(self.rFrame)))
+                print("TMC2209: snd:\t"+str(bytes(self.r_frame)))
                 print("TMC2209: rtn:\t"+str(rtn))
                 self.handle_error()
                 return -1
@@ -149,19 +149,19 @@ class TMC_UART:
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
-        self.wFrame[1] = self.mtr_id
-        self.wFrame[2] =  register | 0x80;  # set write bit
+        self.w_frame[1] = self.mtr_id
+        self.w_frame[2] =  register | 0x80;  # set write bit
         
-        self.wFrame[3] = 0xFF & (val>>24)
-        self.wFrame[4] = 0xFF & (val>>16)
-        self.wFrame[5] = 0xFF & (val>>8)
-        self.wFrame[6] = 0xFF & val
+        self.w_frame[3] = 0xFF & (val>>24)
+        self.w_frame[4] = 0xFF & (val>>16)
+        self.w_frame[5] = 0xFF & (val>>8)
+        self.w_frame[6] = 0xFF & val
         
-        self.wFrame[7] = self.compute_crc8_atm(self.wFrame[:-1])
+        self.w_frame[7] = self.compute_crc8_atm(self.w_frame[:-1])
 
 
-        rtn = self.ser.write(self.wFrame)
-        if rtn != len(self.wFrame):
+        rtn = self.ser.write(self.w_frame)
+        if rtn != len(self.w_frame):
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
@@ -199,7 +199,7 @@ class TMC_UART:
 #-----------------------------------------------------------------------
 # this function clear the communication buffers of the Raspberry Pi
 #-----------------------------------------------------------------------
-    def flushSerialBuffer(self):
+    def flush_serial_buffer(self):
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
 
@@ -250,12 +250,12 @@ class TMC_UART:
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         
-        self.rFrame[1] = self.mtr_id
-        self.rFrame[2] = register
-        self.rFrame[3] = self.compute_crc8_atm(self.rFrame[:-1])
+        self.r_frame[1] = self.mtr_id
+        self.r_frame[2] = register
+        self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
 
-        rtn = self.ser.write(self.rFrame)
-        if rtn != len(self.rFrame):
+        rtn = self.ser.write(self.r_frame)
+        if rtn != len(self.r_frame):
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
@@ -269,4 +269,4 @@ class TMC_UART:
 
         time.sleep(self.communication_pause)
         
-        return bytes(self.rFrame), rtn
+        return bytes(self.r_frame), rtn

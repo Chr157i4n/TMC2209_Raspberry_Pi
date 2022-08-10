@@ -25,8 +25,8 @@ tmc = TMC_2209(21, 16, 20)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.setLoglevel(Loglevel.debug)
-tmc.setMovementAbsRel(MovementAbsRel.absolute)
+tmc.set_loglevel(Loglevel.DEBUG)
+tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
 
@@ -35,12 +35,12 @@ tmc.setMovementAbsRel(MovementAbsRel.absolute)
 #-----------------------------------------------------------------------
 # these functions change settings in the TMC register
 #-----------------------------------------------------------------------
-tmc.setDirection_reg(False)
-tmc.setCurrent(300)
-tmc.setInterpolation(True)
-tmc.setSpreadCycle(False)
-tmc.setMicrosteppingResolution(2)
-tmc.setInternalRSense(False)
+tmc.set_direction_reg(False)
+tmc.set_current(300)
+tmc.set_interpolation(True)
+tmc.set_spreadcycle(False)
+tmc.set_microstepping_resolution(2)
+tmc.set_internal_rsense(False)
 
 
 print("---\n---")
@@ -66,8 +66,8 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # set the Accerleration and maximal Speed
 #-----------------------------------------------------------------------
-tmc.setAcceleration(2000)
-tmc.setMaxSpeed(500)
+tmc.set_acceleration(2000)
+tmc.set_max_speed(500)
 
 
 
@@ -76,7 +76,7 @@ tmc.setMaxSpeed(500)
 #-----------------------------------------------------------------------
 # activate the motor current output
 #-----------------------------------------------------------------------
-tmc.setMotorEnabled(True)
+tmc.set_motor_enabled(True)
 
 
 
@@ -93,12 +93,12 @@ def my_callback(channel):
     print("StallGuard!")
     tmc.stop()
 
-tmc.setStallguard_Callback(26, 50, my_callback) # after this function call, StallGuard is active
+tmc.set_stallguard_callback(26, 50, my_callback) # after this function call, StallGuard is active
 
 
 
-finishedsuccessfully = tmc.runToPositionSteps(4000, MovementAbsRel.relative)        #uses STEP/DIR to move the motor
-# finishedsuccessfully = tmc.setVActual_rpm(30, revolutions=10)                     #uses VActual Register to  move the motor
+finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)        #uses STEP/DIR to move the motor
+# finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)                     #uses VActual Register to  move the motor
 
 
 if(finishedsuccessfully == True):
@@ -116,7 +116,7 @@ else:
 # 2. param: maximum number of revolutions. Can be negative for inverse direction
 # 3. param(optional): StallGuard detection threshold
 #-----------------------------------------------------------------------
-#tmc.doHoming(26, 1, 50)
+#tmc.do_homing(26, 1, 50)
 
 
 
@@ -125,7 +125,7 @@ else:
 #-----------------------------------------------------------------------
 # deactivate the motor current output
 #-----------------------------------------------------------------------
-tmc.setMotorEnabled(False)
+tmc.set_motor_enabled(False)
 
 print("---\n---")
 
