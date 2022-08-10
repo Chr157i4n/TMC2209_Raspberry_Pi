@@ -2,6 +2,14 @@
 ## version 0.3
 - change code to snake_case
 
+## version 0.2.2
+- added set_deinitialize_true
+- fixed ifcnt wrap around from 255 to 0 
+
+## version 0.2.1
+- added setPDNdisable
+- added setMaxSpeed_fullstep and setAcceleration_fullstep
+
 ## version 0.2
 - Pin parameter order in constructor changed to EN, STEP, DIR
 - STEP and DIR pins are optional parameters

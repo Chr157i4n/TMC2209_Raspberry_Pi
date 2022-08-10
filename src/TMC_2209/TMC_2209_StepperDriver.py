@@ -156,6 +156,12 @@ class TMC_2209:
         else:
             self.log("Deinit already finished", Loglevel.INFO.value)
 
+
+#-----------------------------------------------------------------------
+# set deinitialize to true
+#-----------------------------------------------------------------------       
+    def set_deinitialize_true(self):
+        self._deinit_finished = True
         
 
 
