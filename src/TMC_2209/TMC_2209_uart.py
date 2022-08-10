@@ -219,9 +219,9 @@ class TMC_UART:
 # error handling
 #-----------------------------------------------------------------------
     def handle_error(self):
-        if(self.ERROR_handler_running):
+        if(self.error_handler_running):
             return
-        self.ERROR_handler_running = True
+        self.error_handler_running = True
         gstat = self.read_int(reg.GSTAT)
         print("TMC2209: GSTAT Error check:")
         if(gstat == -1):
