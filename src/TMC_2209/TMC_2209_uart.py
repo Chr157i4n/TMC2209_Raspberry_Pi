@@ -177,6 +177,9 @@ class TMC_UART:
 #-----------------------------------------------------------------------
     def write_reg_check(self, register, val, tries=10):
         ifcnt1 = self.read_int(reg.IFCNT)
+
+        if(ifcnt1 == 255):
+            ifcnt1 = -1
         
         while(True):
             self.write_reg(register, val)
@@ -188,7 +191,7 @@ class TMC_UART:
             else:
                 return True
             if(tries<=0):
-                print("TMC2209: after 10 tries not valid write access")
+                print("TMC2209: after 10 tries no valid write access")
                 self.handle_error()
                 return -1
 

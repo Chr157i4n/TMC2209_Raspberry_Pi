@@ -1,4 +1,8 @@
 # Changelog
+## version 0.2.2
+- added set_deinitialize_true
+- fixed ifcnt wrap around from 255 to 0 
+
 ## version 0.2.1
 - added setPDNdisable
 - added setMaxSpeed_fullstep and setAcceleration_fullstep
