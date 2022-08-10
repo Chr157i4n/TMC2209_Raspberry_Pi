@@ -1,4 +1,7 @@
 # Changelog
+## version 0.3
+- change code to snake_case
+
 ## version 0.2
 - Pin parameter order in constructor changed to EN, STEP, DIR
 - STEP and DIR pins are optional parameters
@@ -13,8 +16,8 @@
 
 ## version 0.1.7
 - updated README
-- added number of revolutions as parameter for do_homing
-- added output whether do_homing was successful or not
+- added number of revolutions as parameter for doHoming
+- added output whether doHoming was successful or not
 
 ## version 0.1.6
 -  added ability to invert direction in setVActual_rps with negative revolutions

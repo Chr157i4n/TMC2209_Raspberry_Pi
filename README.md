@@ -4,6 +4,7 @@
 [![PyPI version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/v/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 [![PyPI downloads TMC-2209-Raspberry-Pi](https://img.shields.io/pypi/dm/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 
+**Function names have been changed to snake_case in 0.3**
 **Pin parameter order in constructor has changed in version 0.2 to EN, STEP, DIR !**
 \
 \
