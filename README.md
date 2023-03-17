@@ -140,7 +140,9 @@ tmc.set_motor_enabled(False)
 
 
 ## Troubleshoot
-if you encounter any problem, feel free to open an issue
+If you encounter any problem, feel free to open an issue (ENG/GER).
+please don't send me E-Mails. Use Github, so that i don't need to answer the same question twice.
+I reserve the right to not answer E-Mails.
 
 Problem | Solution 
 -- | --
