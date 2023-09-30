@@ -5,6 +5,7 @@ import time
 from enum import Enum
 import math
 import statistics
+import threading
 
 
 
@@ -25,6 +26,13 @@ class Loglevel(Enum):
 class MovementAbsRel(Enum):
     ABSOLUTE = 0
     RELATIVE = 1
+
+
+class MovementPhase(Enum):
+    STANDSTILL = 0
+    ACCELERATING = 1
+    MAXSPEED = 2
+    DEACCELERATING = 3
     
 
 
@@ -76,6 +84,9 @@ class TMC_2209:
     _cmin = 0                       # Min step size in microseconds based on maxSpeed
     _sg_threshold = 100             # threshold for stallguard
     _movement_abs_rel = MovementAbsRel.ABSOLUTE
+    _movement_phase = MovementPhase.STANDSTILL
+
+    _movement_thread = None
 
     _deinit_finished = False
     
@@ -1054,8 +1065,15 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # stop the current movement
 #-----------------------------------------------------------------------
-    def stop(self, notneeded = None):
+    def stop(self):
         self._stop = True
+
+
+#-----------------------------------------------------------------------
+# return the current Movement Phase
+#-----------------------------------------------------------------------
+    def get_movement_phase(self):
+        return self._movement_phase
 
 
 #-----------------------------------------------------------------------
@@ -1066,12 +1084,10 @@ class TMC_2209:
 # when the movement was stopped
 #-----------------------------------------------------------------------
     def run_to_position_steps(self, steps, movement_abs_rel = None):
-        if(movement_abs_rel != None):
-            this_movement_abs_rel = movement_abs_rel
-        else:
-            this_movement_abs_rel = self._movement_abs_rel
+        if(movement_abs_rel == None):
+            movement_abs_rel = self._movement_abs_rel
 
-        if(this_movement_abs_rel == MovementAbsRel.RELATIVE):
+        if(movement_abs_rel == MovementAbsRel.RELATIVE):
             self._target_pos = self._current_pos + steps
         else:
             self._target_pos = steps
@@ -1083,6 +1099,7 @@ class TMC_2209:
         self.compute_new_speed()
         while (self.run() and not self._stop): #returns false, when target position is reached
             pass
+        self._movement_phase = MovementPhase.STANDSTILL
         return not self._stop
 
 
@@ -1094,6 +1111,37 @@ class TMC_2209:
     def run_to_position_revolutions(self, revolutions, movement_absolute_relative = None):
         return self.run_to_position_steps(round(revolutions * self._steps_per_revolution), movement_absolute_relative)
 
+
+#-----------------------------------------------------------------------
+# runs the motor to the given position.
+# with acceleration and deceleration
+# does not block the code
+# returns true when the movement if finshed normally and false,
+# when the movement was stopped
+#-----------------------------------------------------------------------
+    def run_to_position_steps_threaded(self, steps, movement_abs_rel = None):
+        self._movement_thread = threading.Thread(target=self.run_to_position_steps, args=(steps, movement_abs_rel))
+        self._movement_thread.start()
+
+
+#-----------------------------------------------------------------------
+# runs the motor to the given position.
+# with acceleration and deceleration
+# does not block the code
+#-----------------------------------------------------------------------
+    def run_to_position_revolutions_threaded(self, revolutions, movement_absolute_relative = None):
+        return self.run_to_position_steps_threaded(round(revolutions * self._steps_per_revolution), movement_absolute_relative)
+
+
+#-----------------------------------------------------------------------
+# wait for the motor to finish the movement,
+# if startet threaded
+# returns true when the movement if finshed normally and false,
+# when the movement was stopped
+#-----------------------------------------------------------------------
+    def wait_for_movement_finished_threaded(self):
+        self._movement_thread.join()
+        return not self._stop
 
 #-----------------------------------------------------------------------
 # calculates a new speed if a speed was made
@@ -1126,11 +1174,12 @@ class TMC_2209:
     def compute_new_speed(self):
         distance_to = self.distance_to_go() # +ve is clockwise from curent location
         steps_to_stop = (self._speed * self._speed) / (2.0 * self._acceleration) # Equation 16
-        if (distance_to == 0 and steps_to_stop <= 1):
+        if (distance_to == 0 and steps_to_stop <= 2):
             # We are at the target and its time to stop
             self._step_interval = 0
             self._speed = 0.0
             self._n = 0
+            self._movement_phase = MovementPhase.STANDSTILL
             self.log("time to stop", Loglevel.MOVEMENT.value)
             return
         
@@ -1141,10 +1190,12 @@ class TMC_2209:
                 # Currently accelerating, need to decel now? Or maybe going the wrong way?
                 if ((steps_to_stop >= distance_to) or self._direction == Direction.CCW):
                     self._n = -steps_to_stop # Start deceleration
+                    self._movement_phase = MovementPhase.DEACCELERATING
             elif (self._n < 0):
                 # Currently decelerating, need to accel again?
                 if ((steps_to_stop < distance_to) and self._direction == Direction.CW):
                     self._n = -self._n # Start accceleration
+                    self._movement_phase = MovementPhase.ACCELERATING
         elif (distance_to < 0):
             # We are clockwise from the target
             # Need to go anticlockwise from here, maybe decelerate
@@ -1152,10 +1203,12 @@ class TMC_2209:
                 # Currently accelerating, need to decel now? Or maybe going the wrong way?
                 if ((steps_to_stop >= -distance_to) or self._direction == Direction.CW):
                     self._n = -steps_to_stop # Start deceleration
+                    self._movement_phase = MovementPhase.DEACCELERATING
             elif (self._n < 0):
                 # Currently decelerating, need to accel again?
                 if ((steps_to_stop < -distance_to) and self._direction == Direction.CCW):
                     self._n = -self._n # Start accceleration
+                    self._movement_phase = MovementPhase.ACCELERATING
         # Need to accelerate or decelerate
         if (self._n == 0):
             # First step from stopped
@@ -1168,10 +1221,13 @@ class TMC_2209:
             else:
                 self.set_direction_pin(0)
                 self.log("going CCW", Loglevel.MOVEMENT.value)
+            self._movement_phase = MovementPhase.ACCELERATING
         else:
             # Subsequent step. Works for accel (n is +_ve) and decel (n is -ve).
             self._cn = self._cn - ((2.0 * self._cn) / ((4.0 * self._n) + 1)) # Equation 13
             self._cn = max(self._cn, self._cmin)
+            if(self._cn == self._cmin):
+                self._movement_phase = MovementPhase.MAXSPEED
         self._n += 1
         self._step_interval = self._cn
         self._speed = 1000000.0 / self._cn
