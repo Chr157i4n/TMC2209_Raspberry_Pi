@@ -33,6 +33,11 @@ class MovementPhase(Enum):
     ACCELERATING = 1
     MAXSPEED = 2
     DEACCELERATING = 3
+
+class StopMode(Enum):
+    NO = 0
+    SOFTSTOP = 1
+    HARDSTOP = 2
     
 
 
@@ -55,7 +60,7 @@ class TMC_2209:
 
     _direction = True
 
-    _stop = False
+    _stop = StopMode.NO
     _starttime = 0
     _sg_delay = 0
     _sg_callback = None
@@ -844,7 +849,7 @@ class TMC_2209:
 # 0: Normal operation. Driver reacts to STEP input
 #-----------------------------------------------------------------------
     def set_vactual(self, vactual, duration=0, acceleration=0, show_stallguard_result=False, show_tstep=False):
-        self._stop = False
+        self._stop = StopMode.NO
         current_vactual = 0
         sleeptime = 0.05
         if(vactual<0):
@@ -863,9 +868,13 @@ class TMC_2209:
         if(duration != 0):
             self._starttime = time.time()
             current_time = time.time()
-            while((not self._stop) and (current_time < self._starttime+duration)):
+            while((current_time < self._starttime+duration)):
+                if(self._stop == StopMode.HARDSTOP):
+                    break
                 if(acceleration != 0):
                     time_to_stop = self._starttime+duration-abs(current_vactual/acceleration)
+                    if(self._stop == StopMode.SOFTSTOP):
+                        time_to_stop = current_time-1
                     #self.log("cur: "+str(current_time)+ "\t| stop: "+str(time_to_stop)+ "\t| vac: "+str(current_vactual)+ "\t| acc: "+str(acceleration), Loglevel.INFO.value)
                 if(acceleration != 0 and current_time > time_to_stop):
                     current_vactual -= acceleration*sleeptime
@@ -884,7 +893,7 @@ class TMC_2209:
                     time.sleep(0.1)
                 current_time = time.time()
             self.tmc_uart.write_reg_check(reg.VACTUAL, 0)
-            return not self._stop
+            return self._stop
 
 
 #-----------------------------------------------------------------------
@@ -1065,8 +1074,8 @@ class TMC_2209:
 #-----------------------------------------------------------------------
 # stop the current movement
 #-----------------------------------------------------------------------
-    def stop(self):
-        self._stop = True
+    def stop(self, stop_mode = StopMode.HARDSTOP):
+        self._stop = stop_mode
 
 
 #-----------------------------------------------------------------------
@@ -1092,15 +1101,17 @@ class TMC_2209:
         else:
             self._target_pos = steps
 
-        self._stop = False
+        self._stop = StopMode.NO
         self._step_interval = 0
         self._speed = 0.0
         self._n = 0
         self.compute_new_speed()
-        while (self.run() and not self._stop): #returns false, when target position is reached
-            pass
+        while (self.run()): #returns false, when target position is reached
+             if(self._stop == StopMode.HARDSTOP):
+                break
+            
         self._movement_phase = MovementPhase.STANDSTILL
-        return not self._stop
+        return self._stop
 
 
 #-----------------------------------------------------------------------
@@ -1141,7 +1152,7 @@ class TMC_2209:
 #-----------------------------------------------------------------------
     def wait_for_movement_finished_threaded(self):
         self._movement_thread.join()
-        return not self._stop
+        return self._stop
 
 #-----------------------------------------------------------------------
 # calculates a new speed if a speed was made
@@ -1174,7 +1185,7 @@ class TMC_2209:
     def compute_new_speed(self):
         distance_to = self.distance_to_go() # +ve is clockwise from curent location
         steps_to_stop = (self._speed * self._speed) / (2.0 * self._acceleration) # Equation 16
-        if (distance_to == 0 and steps_to_stop <= 2):
+        if ((distance_to == 0 and steps_to_stop <= 2) or (self._stop == StopMode.SOFTSTOP and steps_to_stop <= 1)):
             # We are at the target and its time to stop
             self._step_interval = 0
             self._speed = 0.0
@@ -1188,7 +1199,7 @@ class TMC_2209:
             # Need to go clockwise from here, maybe decelerate now
             if (self._n > 0):
                 # Currently accelerating, need to decel now? Or maybe going the wrong way?
-                if ((steps_to_stop >= distance_to) or self._direction == Direction.CCW):
+                if ((steps_to_stop >= distance_to) or self._direction == Direction.CCW or self._stop == StopMode.SOFTSTOP):
                     self._n = -steps_to_stop # Start deceleration
                     self._movement_phase = MovementPhase.DEACCELERATING
             elif (self._n < 0):
@@ -1201,7 +1212,7 @@ class TMC_2209:
             # Need to go anticlockwise from here, maybe decelerate
             if (self._n > 0):
                 # Currently accelerating, need to decel now? Or maybe going the wrong way?
-                if ((steps_to_stop >= -distance_to) or self._direction == Direction.CW):
+                if ((steps_to_stop >= -distance_to) or self._direction == Direction.CW or self._stop == StopMode.SOFTSTOP):
                     self._n = -steps_to_stop # Start deceleration
                     self._movement_phase = MovementPhase.DEACCELERATING
             elif (self._n < 0):
