@@ -1,4 +1,11 @@
 # Changelog
+
+## version 0.3.1
+- added threaded movement
+- added test_script_07_threads.py
+- added softstop
+- added get_movement_phase()
+
 ## version 0.3
 - change code to snake_case
 

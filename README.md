@@ -4,9 +4,6 @@
 [![PyPI version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/v/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 [![PyPI downloads TMC-2209-Raspberry-Pi](https://img.shields.io/pypi/dm/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 
-**Function names have been changed to snake_case in 0.3**
-\
-**Pin parameter order in constructor has changed in version 0.2 to EN, STEP, DIR !**
 \
 \
 This is a library to drive a stepper motor with a TMC2209 stepper driver and a Raspberry Pi.
@@ -105,7 +102,10 @@ VACTUAL allows moving the motor by UART control. It gives the motor velocity in 
 
 ####  [test_script_06_multiple_drivers.py](tests/test_script_06_multiple_drivers.py)
 Multiple drivers can be addressed via UART by setting different addresses with the MS1 and MS2 pins.
-Simultaneous movement of multiple motors is currently not supported.
+Simultaneous movement of multiple motors can be done with threaded movement.
+
+####  [test_script_07_threads.py](tests/test_script_07_threads.py)
+In this script, the movement of a stepper with threads is shown. This can be used to do other task while moving a motor, or to move several motors simultaneous.
 
 \
 \
