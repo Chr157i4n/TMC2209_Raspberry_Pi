@@ -83,6 +83,16 @@ tmc.set_motor_enabled(True)
 
 
 #-----------------------------------------------------------------------
+# runs the motor 800 steps in a thread and
+# prints the stallguard result for each movement phase
+#-----------------------------------------------------------------------
+tmc.test_stallguard_threshold(800)
+
+
+
+
+
+#-----------------------------------------------------------------------
 # set a callback function for the stallguard interrupt based detection
 # 1. param: pin connected to the tmc DIAG output
 # 2. param: is the threshold StallGuard

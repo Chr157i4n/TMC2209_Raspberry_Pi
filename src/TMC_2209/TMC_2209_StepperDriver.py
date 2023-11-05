@@ -252,7 +252,7 @@ class TMC_2209:
         if(drvstatus & reg.otpw):
             self.log("Warning: Driver Overheating Prewarning!")
         
-        print("---")
+        self.log("---")
         return drvstatus
             
 
@@ -1162,8 +1162,8 @@ class TMC_2209:
     def run(self):
         if (self.run_speed()): #returns true, when a step is made
             self.compute_new_speed()
-            #print(self.get_stallguard_result())
-            #print(self.get_tstep())
+            #self.log(self.get_stallguard_result())
+            #self.log(self.get_tstep())
         return (self._speed != 0.0 and self.distance_to_go() != 0)
 
 
@@ -1333,20 +1333,20 @@ class TMC_2209:
 
         self.set_motor_enabled(False)
 
-        print("---")
+        self.log("---")
         if(pin_dir_ok):
-            print("Pin DIR: \tOK")
+            self.log("Pin DIR: \tOK")
         else:
-            print("Pin DIR: \tnot OK")
+            self.log("Pin DIR: \tnot OK")
         if(pin_step_ok):
-            print("Pin STEP: \tOK")
+            self.log("Pin STEP: \tOK")
         else:
-            print("Pin STEP: \tnot OK")
+            self.log("Pin STEP: \tnot OK")
         if(pin_en_ok):
-            print("Pin EN: \tOK")
+            self.log("Pin EN: \tOK")
         else:
-            print("Pin EN: \tnot OK")
-        print("---")
+            self.log("Pin EN: \tnot OK")
+        self.log("---")
 
 
 #-----------------------------------------------------------------------
@@ -1361,6 +1361,7 @@ class TMC_2209:
             time.sleep(0.001)
             GPIO.output(self._pin_step, GPIO.LOW)
             time.sleep(0.01)
+
 
 #-----------------------------------------------------------------------
 # test method
@@ -1402,3 +1403,43 @@ class TMC_2209:
         
         self.log("---")
         return True
+
+
+#-----------------------------------------------------------------------
+# test method for tuning stallguard threshold
+# run this function with your motor settings and your motor load
+# the function will determine the minimum stallguard results for each movement phase
+#-----------------------------------------------------------------------
+    def test_stallguard_threshold(self, steps):
+        
+        self.log("---", Loglevel.INFO.value)
+        self.log("test_stallguard_threshold", Loglevel.INFO.value)
+
+        self.set_spreadcycle(0)
+
+        min_stallguard_result_accel = 511
+        min_stallguard_result_maxspeed = 511
+        min_stallguard_result_deaccel = 511
+
+        self.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)        
+
+
+        while(self._movement_phase != MovementPhase.STANDSTILL):
+            stallguard_result = self.get_stallguard_result()
+
+            self.log(str(self._movement_phase) + " | " + str(stallguard_result), Loglevel.INFO.value)
+            
+            if(self._movement_phase == MovementPhase.ACCELERATING and stallguard_result < min_stallguard_result_accel):
+                min_stallguard_result_accel = stallguard_result
+            if(self._movement_phase == MovementPhase.MAXSPEED and stallguard_result < min_stallguard_result_maxspeed):
+                min_stallguard_result_maxspeed = stallguard_result
+            if(self._movement_phase == MovementPhase.DEACCELERATING and stallguard_result < min_stallguard_result_deaccel):
+                min_stallguard_result_deaccel = stallguard_result
+
+        self.wait_for_movement_finished_threaded()
+
+        self.log("---", Loglevel.INFO.value)
+        self.log("min StallGuard result during acceleration: " + str(min_stallguard_result_accel), Loglevel.INFO.value)
+        self.log("min StallGuard result during maxspeed: " + str(min_stallguard_result_maxspeed), Loglevel.INFO.value)
+        self.log("min StallGuard result during deacceleration: " + str(min_stallguard_result_deaccel), Loglevel.INFO.value)
+        self.log("---", Loglevel.INFO.value)
