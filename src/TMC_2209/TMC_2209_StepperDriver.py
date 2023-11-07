@@ -425,7 +425,7 @@ class TMC_2209:
         enables or disables the motor current output
         """
         GPIO.output(self._pin_en, not en)
-        self.log("Motor output active: {en}", Loglevel.INFO.value)
+        self.log(f"Motor output active: {en}", Loglevel.INFO.value)
 
 
 
