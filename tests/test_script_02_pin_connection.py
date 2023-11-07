@@ -1,3 +1,7 @@
+"""
+test file for testing the STEP, DIR, EN connection
+"""
+
 from src.TMC_2209.TMC_2209_StepperDriver import *
 import time
 
