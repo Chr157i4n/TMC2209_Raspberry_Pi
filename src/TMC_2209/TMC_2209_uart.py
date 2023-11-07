@@ -34,10 +34,10 @@ class TMC_UART:
         except Exception as e:
             errnum = e.args[0]
             print("TMC2209: SERIAL ERROR: "+str(e))
-            if(errnum == 2):
+            if errnum == 2:
                 print("""TMC2209: "+str(serialport)+" does not exist.
                       You need to activate the serial port with \"sudo raspi-config\"""")
-            if(errnum == 13):
+            if errnum == 13:
                 print("""TMC2209: you have no permission to use the serial port. You may need to add
                       your user to the dialout group with \"sudo usermod -a -G dialout pi\"""")
 
@@ -61,7 +61,7 @@ class TMC_UART:
         """
         destructor
         """
-        if(self.ser is not None):
+        if self.ser is not None:
             self.ser.close()
 
 
@@ -122,7 +122,7 @@ class TMC_UART:
         this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
         """
-        while(True):
+        while True:
             tries -= 1
             rtn = self.read_reg(register)
             rtn_data = rtn[7:11]
@@ -131,20 +131,20 @@ class TMC_UART:
             if(len(rtn)<12 or not_zero_count == 0):
                 print("TMC2209: UART Communication Error: "+str(len(rtn_data))+
                       " data bytes | "+str(len(rtn))+" total bytes")
-            elif(rtn[11] != self.compute_crc8_atm(rtn[4:11])):
+            elif rtn[11] != self.compute_crc8_atm(rtn[4:11]):
                 print("TMC2209: UART Communication Error: CRC MISMATCH")
             else:
                 break
-        
-            if(tries<=0):
+
+            if tries<=0:
                 print("TMC2209: after 10 tries not valid answer")
                 print("TMC2209: snd:\t"+str(bytes(self.r_frame)))
                 print("TMC2209: rtn:\t"+str(rtn))
                 self.handle_error()
                 return -1
-        
+ 
         val = struct.unpack(">i",rtn_data)[0]
-        return(val)
+        return val
 
 
 
@@ -189,19 +189,19 @@ class TMC_UART:
         """
         ifcnt1 = self.read_int(reg.IFCNT)
 
-        if(ifcnt1 == 255):
+        if ifcnt1 == 255:
             ifcnt1 = -1
 
-        while(True):
+        while True:
             self.write_reg(register, val)
             tries -= 1
             ifcnt2 = self.read_int(reg.IFCNT)
-            if(ifcnt1 >= ifcnt2):
+            if ifcnt1 >= ifcnt2:
                 print("TMC2209: writing not successful!")
                 print("TMC2209: ifcnt:",ifcnt1,ifcnt2)
             else:
                 return True
-            if(tries<=0):
+            if tries<=0:
                 print("TMC2209: after 10 tries no valid write access")
                 self.handle_error()
                 return -1
@@ -237,22 +237,22 @@ class TMC_UART:
         """
         error handling
         """
-        if(self.error_handler_running):
+        if self.error_handler_running:
             return
         self.error_handler_running = True
         gstat = self.read_int(reg.GSTAT)
         print("TMC2209: GSTAT Error check:")
-        if(gstat == -1):
+        if gstat == -1:
             print("TMC2209: No answer from Driver")
-        elif(gstat == 0):
+        elif gstat == 0:
             print("TMC2209: Everything looks fine in GSTAT")
         else:
-            if(gstat & reg.reset):
+            if gstat & reg.reset:
                 print("TMC2209: The Driver has been reset since the last read access to GSTAT")
-            if(gstat & reg.drv_err):
+            if gstat & reg.drv_err:
                 print("""TMC2209: The driver has been shut down due to overtemperature or short
                       circuit detection since the last read access""")
-            if(gstat & reg.uv_cp):
+            if gstat & reg.uv_cp:
                 print("""TMC2209: Undervoltage on the charge pump.
                       The driver is disabled in this case""")
         print("EXITING!")
