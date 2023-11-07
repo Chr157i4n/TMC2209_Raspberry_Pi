@@ -1,3 +1,6 @@
+#pylint: disable=wildcard-import
+#pylint: disable=unused-import
+#pylint: disable=duplicate-code
 """
 debug file for debuging the UART connection
 """

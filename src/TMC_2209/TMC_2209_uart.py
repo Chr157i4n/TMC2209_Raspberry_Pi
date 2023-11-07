@@ -1,3 +1,5 @@
+#pylint: disable=invalid-name
+#pylint: disable=import-error
 """
 TMC_UART stepper driver uart module
 """

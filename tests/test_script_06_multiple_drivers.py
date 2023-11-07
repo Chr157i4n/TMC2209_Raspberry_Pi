@@ -1,3 +1,6 @@
+#pylint: disable=wildcard-import
+#pylint: disable=unused-import
+#pylint: disable=duplicate-code
 """
 test file for testing multiple drivers via one UART connection
 """
