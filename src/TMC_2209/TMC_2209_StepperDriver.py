@@ -1450,7 +1450,7 @@ class TMC_2209:
         """
         self.set_direction_pin(1)
 
-        for i in range(100):
+        for _ in range(100):
             self._current_pos += 1
             GPIO.output(self._pin_step, GPIO.HIGH)
             time.sleep(0.001)
