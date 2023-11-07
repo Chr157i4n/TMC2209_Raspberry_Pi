@@ -2,8 +2,8 @@
 test file for testing the UART connection
 """
 
-from src.TMC_2209.TMC_2209_StepperDriver import *
 import time
+from src.TMC_2209.TMC_2209_StepperDriver import *
 
 
 print("---")
