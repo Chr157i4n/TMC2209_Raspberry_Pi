@@ -1191,7 +1191,8 @@ class TMC_2209:
         with acceleration and deceleration
         blocks the code until finished!
         """
-        return self.run_to_position_steps(round(revolutions * self._steps_per_revolution), movement_absolute_relative)
+        return self.run_to_position_steps(round(revolutions * self._steps_per_revolution),
+                                          movement_absolute_relative)
 
 
 
@@ -1203,7 +1204,8 @@ class TMC_2209:
         returns true when the movement if finshed normally and false,
         when the movement was stopped
         """
-        self._movement_thread = threading.Thread(target=self.run_to_position_steps, args=(steps, movement_abs_rel))
+        self._movement_thread = threading.Thread(target=self.run_to_position_steps,
+                                                 args=(steps, movement_abs_rel))
         self._movement_thread.start()
 
 
@@ -1279,7 +1281,8 @@ class TMC_2209:
             # Need to go clockwise from here, maybe decelerate now
             if (self._n > 0):
                 # Currently accelerating, need to decel now? Or maybe going the wrong way?
-                if ((steps_to_stop >= distance_to) or self._direction == Direction.CCW or self._stop == StopMode.SOFTSTOP):
+                if ((steps_to_stop >= distance_to) or self._direction == Direction.CCW or
+                    self._stop == StopMode.SOFTSTOP):
                     self._n = -steps_to_stop # Start deceleration
                     self._movement_phase = MovementPhase.DEACCELERATING
             elif (self._n < 0):
@@ -1292,7 +1295,8 @@ class TMC_2209:
             # Need to go anticlockwise from here, maybe decelerate
             if (self._n > 0):
                 # Currently accelerating, need to decel now? Or maybe going the wrong way?
-                if ((steps_to_stop >= -distance_to) or self._direction == Direction.CW or self._stop == StopMode.SOFTSTOP):
+                if ((steps_to_stop >= -distance_to) or self._direction == Direction.CW or
+                    self._stop == StopMode.SOFTSTOP):
                     self._n = -steps_to_stop # Start deceleration
                     self._movement_phase = MovementPhase.DEACCELERATING
             elif (self._n < 0):
@@ -1462,18 +1466,22 @@ class TMC_2209:
         self.log("length rtn: "+str(len(rtn)), Loglevel.DEBUG.value)
 
         if(len(rtn)==12):
-            self.log("the Raspberry Pi received the sended bits and the answer from the TMC", Loglevel.INFO.value)
+            self.log("the Raspberry Pi received the sended bits and the answer from the TMC",
+                     Loglevel.INFO.value)
         elif(len(rtn)==4):
             self.log("the Raspberry Pi received only the sended bits", Loglevel.INFO.value)
         elif(len(rtn)==0):
             self.log("the Raspberry Pi did not receive anything", Loglevel.INFO.value)
         else:
-            self.log("the Raspberry Pi received an unexpected amount of bits: "+str(len(rtn)), Loglevel.INFO.value)
+            self.log("the Raspberry Pi received an unexpected amount of bits: "+
+                     str(len(rtn)), Loglevel.INFO.value)
 
         if(snd[0:4] == rtn[0:4]):
-            self.log("the Raspberry Pi received exactly the bits it has send. the first 4 bits are the same", Loglevel.INFO.value)
+            self.log("""the Raspberry Pi received exactly the bits it has send.
+                     the first 4 bits are the same""", Loglevel.INFO.value)
         else:
-            self.log("the Raspberry Pi did not received the bits it has send. the first 4 bits are different", Loglevel.INFO.value)
+            self.log("""the Raspberry Pi did not received the bits it has send.
+                     the first 4 bits are different""", Loglevel.INFO.value)
 
 
         self.log("complete", Loglevel.DEBUG.value)
@@ -1512,19 +1520,26 @@ class TMC_2209:
         while(self._movement_phase != MovementPhase.STANDSTILL):
             stallguard_result = self.get_stallguard_result()
 
-            self.log(str(self._movement_phase) + " | " + str(stallguard_result), Loglevel.INFO.value)
+            self.log(str(self._movement_phase) + " | " + str(stallguard_result),
+                     Loglevel.INFO.value)
 
-            if(self._movement_phase == MovementPhase.ACCELERATING and stallguard_result < min_stallguard_result_accel):
+            if(self._movement_phase == MovementPhase.ACCELERATING and
+               stallguard_result < min_stallguard_result_accel):
                 min_stallguard_result_accel = stallguard_result
-            if(self._movement_phase == MovementPhase.MAXSPEED and stallguard_result < min_stallguard_result_maxspeed):
+            if(self._movement_phase == MovementPhase.MAXSPEED and
+               stallguard_result < min_stallguard_result_maxspeed):
                 min_stallguard_result_maxspeed = stallguard_result
-            if(self._movement_phase == MovementPhase.DEACCELERATING and stallguard_result < min_stallguard_result_deaccel):
+            if(self._movement_phase == MovementPhase.DEACCELERATING and
+               stallguard_result < min_stallguard_result_deaccel):
                 min_stallguard_result_deaccel = stallguard_result
 
         self.wait_for_movement_finished_threaded()
 
         self.log("---", Loglevel.INFO.value)
-        self.log("min StallGuard result during acceleration: " + str(min_stallguard_result_accel), Loglevel.INFO.value)
-        self.log("min StallGuard result during maxspeed: " + str(min_stallguard_result_maxspeed), Loglevel.INFO.value)
-        self.log("min StallGuard result during deacceleration: " + str(min_stallguard_result_deaccel), Loglevel.INFO.value)
+        self.log("min StallGuard result during acceleration: " +
+                 str(min_stallguard_result_accel), Loglevel.INFO.value)
+        self.log("min StallGuard result during maxspeed: " +
+                 str(min_stallguard_result_maxspeed), Loglevel.INFO.value)
+        self.log("min StallGuard result during deacceleration: " +
+                 str(min_stallguard_result_deaccel), Loglevel.INFO.value)
         self.log("---", Loglevel.INFO.value)
