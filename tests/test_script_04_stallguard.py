@@ -110,9 +110,10 @@ def my_callback(channel):
 tmc.set_stallguard_callback(26, 50, my_callback) # after this function call, StallGuard is active
 
 
-
-finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)        #uses STEP/DIR to move the motor
-# finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)                     #uses VActual Register to  move the motor
+#uses STEP/DIR to move the motor
+finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)
+#uses VActual Register to  move the motor
+# finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)
 
 
 if(finishedsuccessfully == True):

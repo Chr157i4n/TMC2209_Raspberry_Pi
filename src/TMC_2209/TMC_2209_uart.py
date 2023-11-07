@@ -129,7 +129,8 @@ class TMC_UART:
             not_zero_count = len([elem for elem in rtn if elem != 0])
 
             if(len(rtn)<12 or not_zero_count == 0):
-                print("TMC2209: UART Communication Error: "+str(len(rtn_data))+" data bytes | "+str(len(rtn))+" total bytes")
+                print("TMC2209: UART Communication Error: "+str(len(rtn_data))+
+                      " data bytes | "+str(len(rtn))+" total bytes")
             elif(rtn[11] != self.compute_crc8_atm(rtn[4:11])):
                 print("TMC2209: UART Communication Error: CRC MISMATCH")
             else:

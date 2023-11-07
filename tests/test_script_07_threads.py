@@ -56,19 +56,23 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # run part
 #-----------------------------------------------------------------------
-tmc1.run_to_position_steps_threaded(4000, MovementAbsRel.RELATIVE)    # move 4000 steps forward
+
+# move 4000 steps forward
+tmc1.run_to_position_steps_threaded(4000, MovementAbsRel.RELATIVE)
 
 time.sleep(1)
 tmc1.stop()     # stop the movement after 1 second
 
 tmc1.wait_for_movement_finished_threaded()
 
+# move 4000 steps backward
+tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
 
-tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)   # move 4000 steps backward
 
-
-while(tmc1.get_movement_phase() != MovementPhase.STANDSTILL):       # while the motor is still moving
-    print(tmc1.get_movement_phase())                                # print the current movement phase
+# while the motor is still moving
+while(tmc1.get_movement_phase() != MovementPhase.STANDSTILL):
+    # print the current movement phase
+    print(tmc1.get_movement_phase())                                
     time.sleep(0.02)
 
 tmc1.wait_for_movement_finished_threaded()
