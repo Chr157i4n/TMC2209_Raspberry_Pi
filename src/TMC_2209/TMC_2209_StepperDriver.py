@@ -294,8 +294,7 @@ class TMC_2209:
             self.log("VREF pin internally is driven to GND in this mode.")
             self.log("This will most likely destroy your driver!!!")
             raise SystemExit
-        else:
-            self.log("Operation with external sense resistors")
+        self.log("Operation with external sense resistors")
         if gconf & reg.en_spreadcycle:
             self.log("SpreadCycle mode enabled")
         else:
@@ -648,10 +647,9 @@ class TMC_2209:
             self.log("VREF pin internally is driven to GND in this mode.", Loglevel.INFO.value)
             self.log("This will most likely destroy your driver!!!", Loglevel.INFO.value)
             raise SystemExit
-            gconf = self.tmc_uart.set_bit(gconf, reg.internal_rsense)
-        else:
-            self.log("activated operation with external sense resistors", Loglevel.INFO.value)
-            gconf = self.tmc_uart.clear_bit(gconf, reg.internal_rsense)
+            # gconf = self.tmc_uart.set_bit(gconf, reg.internal_rsense)
+        self.log("activated operation with external sense resistors", Loglevel.INFO.value)
+        gconf = self.tmc_uart.clear_bit(gconf, reg.internal_rsense)
         self.tmc_uart.write_reg_check(reg.GCONF, gconf)
 
 
