@@ -7,7 +7,7 @@ from enum import Enum
 import math
 import statistics
 import threading
-import RPi.GPIO as GPIO
+from RPi import GPIO
 from .TMC_2209_uart import TMC_UART
 from . import TMC_2209_reg as reg
 
