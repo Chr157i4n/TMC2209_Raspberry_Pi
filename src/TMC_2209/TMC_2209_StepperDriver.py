@@ -923,34 +923,36 @@ class TMC_2209:
         if acceleration == 0:
             self.tmc_uart.write_reg_check(reg.VACTUAL, vactual)
 
-        if duration != 0:
-            self._starttime = time.time()
+        if duration == 0:
+            return -1
+
+        self._starttime = time.time()
+        current_time = time.time()
+        while current_time < self._starttime+duration:
+            if self._stop == StopMode.HARDSTOP:
+                break
+            if acceleration != 0:
+                time_to_stop = self._starttime+duration-abs(current_vactual/acceleration)
+                if self._stop == StopMode.SOFTSTOP:
+                    time_to_stop = current_time-1
+            if acceleration != 0 and current_time > time_to_stop:
+                current_vactual -= acceleration*sleeptime
+                self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(current_vactual)))
+                time.sleep(sleeptime)
+            elif acceleration != 0 and abs(current_vactual)<abs(vactual):
+                current_vactual += acceleration*sleeptime
+                self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(current_vactual)))
+                time.sleep(sleeptime)
+            if show_stallguard_result:
+                self.log("StallGuard result: "+str(self.get_stallguard_result()),
+                            Loglevel.INFO.value)
+                time.sleep(0.1)
+            if show_tstep:
+                self.log("TStep result: "+str(self.get_tstep()), Loglevel.INFO.value)
+                time.sleep(0.1)
             current_time = time.time()
-            while current_time < self._starttime+duration:
-                if self._stop == StopMode.HARDSTOP:
-                    break
-                if acceleration != 0:
-                    time_to_stop = self._starttime+duration-abs(current_vactual/acceleration)
-                    if self._stop == StopMode.SOFTSTOP:
-                        time_to_stop = current_time-1
-                if acceleration != 0 and current_time > time_to_stop:
-                    current_vactual -= acceleration*sleeptime
-                    self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(current_vactual)))
-                    time.sleep(sleeptime)
-                elif acceleration != 0 and abs(current_vactual)<abs(vactual):
-                    current_vactual += acceleration*sleeptime
-                    self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(current_vactual)))
-                    time.sleep(sleeptime)
-                if show_stallguard_result:
-                    self.log("StallGuard result: "+str(self.get_stallguard_result()),
-                             Loglevel.INFO.value)
-                    time.sleep(0.1)
-                if show_tstep:
-                    self.log("TStep result: "+str(self.get_tstep()), Loglevel.INFO.value)
-                    time.sleep(0.1)
-                current_time = time.time()
-            self.tmc_uart.write_reg_check(reg.VACTUAL, 0)
-            return self._stop
+        self.tmc_uart.write_reg_check(reg.VACTUAL, 0)
+        return self._stop
 
 
 
