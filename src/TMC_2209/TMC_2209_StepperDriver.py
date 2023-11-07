@@ -44,7 +44,7 @@ class StopMode(Enum):
     NO = 0
     SOFTSTOP = 1
     HARDSTOP = 2
-    
+
 
 
 class TMC_2209:
@@ -101,11 +101,13 @@ class TMC_2209:
 
 
 
-    def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
+    def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
+                 driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
         """
         constructor
         """
-        self.init(pin_en, pin_step, pin_dir, baudrate, serialport, driver_address, no_uart, gpio_mode, loglevel)
+        self.init(pin_en, pin_step, pin_dir, baudrate, serialport, driver_address, no_uart,
+                  gpio_mode, loglevel)
 
 
 
@@ -114,10 +116,11 @@ class TMC_2209:
         destructor
         """
         self.deinit()
-        
 
 
-    def init(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0", driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
+
+    def init(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
+    driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
         """
         init function
         """
@@ -245,10 +248,12 @@ class TMC_2209:
             self.log("Warning: Open load detected on phase A")
         
         if(drvstatus & reg.s2vsb):
-            self.log("Error: Short on low-side MOSFET detected on phase B. The driver becomes disabled")
+            self.log("""Error: Short on low-side MOSFET detected on phase B.
+                     The driver becomes disabled""")
 
         if(drvstatus & reg.s2vsa):
-            self.log("Error: Short on low-side MOSFET detected on phase A. The driver becomes disabled")
+            self.log("""Error: Short on low-side MOSFET detected on phase A.
+                     The driver becomes disabled""")
 
         if(drvstatus & reg.s2gb):
             self.log("Error: Short to GND detected on phase B. The driver becomes disabled.")
@@ -324,7 +329,8 @@ class TMC_2209:
         if(gstat & reg.reset):
             self.log("The Driver has been reset since the last read access to GSTAT")
         if(gstat & reg.drv_err):
-            self.log("The driver has been shut down due to overtemperature or short circuit detection since the last read access")
+            self.log("""The driver has been shut down due to overtemperature or
+                     short circuit detection since the last read access""")
         if(gstat & reg.uv_cp):
             self.log("Undervoltage on the charge pump. The driver is disabled in this case")
         self.log("---")
@@ -683,7 +689,8 @@ class TMC_2209:
 
 
 
-    def set_current(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10, use_vref=False, Vref = 1.2, pdn_disable = True):
+    def set_current(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10,
+                    use_vref=False, Vref = 1.2, pdn_disable = True):
         """
         sets the current flow for the motor
         run_current in mA
@@ -809,7 +816,8 @@ class TMC_2209:
         sets the current native microstep resolution (1,2,4,8,16,32,64,128,256)
         """
         chopconf = self.tmc_uart.read_int(reg.CHOPCONF)
-        chopconf = chopconf & (~reg.msres0 | ~reg.msres1 | ~reg.msres2 | ~reg.msres3) #setting all bits to zero
+        #setting all bits to zero
+        chopconf = chopconf & (~reg.msres0 | ~reg.msres1 | ~reg.msres2 | ~reg.msres3)
         msresdezimal = int(math.log(msres, 2))
         msresdezimal = 8 - msresdezimal
         chopconf = int(chopconf) & int(4043309055)
@@ -884,7 +892,8 @@ class TMC_2209:
 
 
 
-    def set_vactual(self, vactual, duration=0, acceleration=0, show_stallguard_result=False, show_tstep=False):
+    def set_vactual(self, vactual, duration=0, acceleration=0, show_stallguard_result=False,
+                    show_tstep=False):
         """
         sets the register bit "VACTUAL" to to a given value
         VACTUAL allows moving the motor by UART control.
@@ -917,18 +926,17 @@ class TMC_2209:
                     time_to_stop = self._starttime+duration-abs(current_vactual/acceleration)
                     if(self._stop == StopMode.SOFTSTOP):
                         time_to_stop = current_time-1
-                    #self.log("cur: "+str(current_time)+ "\t| stop: "+str(time_to_stop)+ "\t| vac: "+str(current_vactual)+ "\t| acc: "+str(acceleration), Loglevel.INFO.value)
                 if(acceleration != 0 and current_time > time_to_stop):
                     current_vactual -= acceleration*sleeptime
                     self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(current_vactual)))
                     time.sleep(sleeptime)
                 elif(acceleration != 0 and abs(current_vactual)<abs(vactual)):
                     current_vactual += acceleration*sleeptime
-                    #self.log("current_vactual: "+str(int(round(current_vactual))), Loglevel.INFO.value)
                     self.tmc_uart.write_reg_check(reg.VACTUAL, int(round(current_vactual)))
                     time.sleep(sleeptime)
                 if(show_stallguard_result):
-                    self.log("StallGuard result: "+str(self.get_stallguard_result()), Loglevel.INFO.value)
+                    self.log("StallGuard result: "+str(self.get_stallguard_result()),
+                             Loglevel.INFO.value)
                     time.sleep(0.1)
                 if(show_tstep):
                     self.log("TStep result: "+str(self.get_tstep()), Loglevel.INFO.value)
@@ -1005,24 +1013,27 @@ class TMC_2209:
 
 
 
-    def set_stallguard_callback(self, pin_stallguard, threshold, callback, min_speed = 2000, ignore_delay = 0):
+    def set_stallguard_callback(self, pin_stallguard, threshold, callback,
+                                min_speed = 2000, ignore_delay = 0):
         """
         set a function to call back, when the driver detects a stall 
         via stallguard
         high value on the diag pin can also mean a driver error
         """
         self.log("setup stallguard callback on GPIO"+str(pin_stallguard), Loglevel.INFO.value)
-        self.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+str(min_speed), Loglevel.INFO.value)
+        self.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+str(min_speed),
+                 Loglevel.INFO.value)
 
         self.set_stallguard_threshold(threshold)
         self.set_coolstep_threshold(min_speed)
         self._sg_delay = ignore_delay
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
-        
+
         GPIO.setup(self._pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    
-        GPIO.add_event_detect(self._pin_stallguard, GPIO.RISING, callback=self.stallguard_callback, bouncetime=300) 
+
+        GPIO.add_event_detect(self._pin_stallguard, GPIO.RISING, callback=self.stallguard_callback,
+                              bouncetime=300) 
 
 
 
@@ -1068,7 +1079,7 @@ class TMC_2209:
         sets the maximum motor speed in µsteps per second
         """
         if (speed < 0.0):
-           speed = -speed
+            speed = -speed
         if (self._max_speed != speed):
             self._max_speed = speed
             self._cmin = 1000000.0 / speed
@@ -1203,7 +1214,8 @@ class TMC_2209:
         with acceleration and deceleration
         does not block the code
         """
-        return self.run_to_position_steps_threaded(round(revolutions * self._steps_per_revolution), movement_absolute_relative)
+        return self.run_to_position_steps_threaded(round(revolutions * self._steps_per_revolution),
+                                                   movement_absolute_relative)
 
 
 
@@ -1252,7 +1264,8 @@ class TMC_2209:
         """
         distance_to = self.distance_to_go() # +ve is clockwise from curent location
         steps_to_stop = (self._speed * self._speed) / (2.0 * self._acceleration) # Equation 16
-        if ((distance_to == 0 and steps_to_stop <= 2) or (self._stop == StopMode.SOFTSTOP and steps_to_stop <= 1)):
+        if ((distance_to == 0 and steps_to_stop <= 2) or
+            (self._stop == StopMode.SOFTSTOP and steps_to_stop <= 1)):
             # We are at the target and its time to stop
             self._step_interval = 0
             self._speed = 0.0
@@ -1260,7 +1273,7 @@ class TMC_2209:
             self._movement_phase = MovementPhase.STANDSTILL
             self.log("time to stop", Loglevel.MOVEMENT.value)
             return
-        
+
         if (distance_to > 0):
             # We are anticlockwise from the target
             # Need to go clockwise from here, maybe decelerate now
@@ -1321,12 +1334,12 @@ class TMC_2209:
         # Dont do anything unless we actually have a step interval
         if (not self._step_interval):
             return False
-        
+
         curtime = time.time_ns()/1000
-        
+
         #self.log("current time: " + str(curtime))
         #self.log("last st time: " + str(self._last_step_time))
-        
+
         if (curtime - self._last_step_time >= self._step_interval):
 
             if (self._direction == 1): # Clockwise
@@ -1334,7 +1347,7 @@ class TMC_2209:
             else: # Anticlockwise 
                 self._current_pos -= 1
             self.make_a_step()
-            
+
             self._last_step_time = curtime # Caution: does not account for costs in step()
             return True
         else:
@@ -1363,7 +1376,7 @@ class TMC_2209:
         and checks the IOIN Register of the TMC meanwhile
         """
         pin_dir_ok = pin_step_ok = pin_en_ok = True
-        
+
         GPIO.output(self._pin_step, GPIO.HIGH)
         GPIO.output(self._pin_dir, GPIO.HIGH)
         GPIO.output(self._pin_en, GPIO.HIGH)
@@ -1424,7 +1437,7 @@ class TMC_2209:
         test method
         """
         self.set_direction_pin(1)
-        
+
         for i in range(100):
             self._current_pos += 1
             GPIO.output(self._pin_step, GPIO.HIGH)
@@ -1471,7 +1484,7 @@ class TMC_2209:
         self.log(str(snd[0:4].hex()), Loglevel.DEBUG.value)
         self.log(str(rtn[0:4].hex()), Loglevel.DEBUG.value)
 
-        
+
         self.log("---")
         return True
 
@@ -1483,7 +1496,7 @@ class TMC_2209:
         run this function with your motor settings and your motor load
         the function will determine the minimum stallguard results for each movement phase
         """
-        
+
         self.log("---", Loglevel.INFO.value)
         self.log("test_stallguard_threshold", Loglevel.INFO.value)
 
@@ -1500,7 +1513,7 @@ class TMC_2209:
             stallguard_result = self.get_stallguard_result()
 
             self.log(str(self._movement_phase) + " | " + str(stallguard_result), Loglevel.INFO.value)
-            
+
             if(self._movement_phase == MovementPhase.ACCELERATING and stallguard_result < min_stallguard_result_accel):
                 min_stallguard_result_accel = stallguard_result
             if(self._movement_phase == MovementPhase.MAXSPEED and stallguard_result < min_stallguard_result_maxspeed):
