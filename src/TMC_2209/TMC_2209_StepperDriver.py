@@ -196,7 +196,7 @@ class TMC_2209:
     def set_loglevel(self, loglevel):
         """
         set the loglevel. See the Enum Loglevel
-        """ 
+        """
         self._loglevel = loglevel
 
 
@@ -269,7 +269,7 @@ class TMC_2209:
 
         self.log("---")
         return drvstatus
-   
+
 
 
     def readGCONF(self):
@@ -344,10 +344,10 @@ class TMC_2209:
         """
         self.log("clearing GSTAT", Loglevel.INFO.value)
         gstat = self.tmc_uart.read_int(reg.GSTAT)
-        
+
         gstat = self.tmc_uart.set_bit(gstat, reg.reset)
         gstat = self.tmc_uart.set_bit(gstat, reg.drv_err)
-        
+
         self.tmc_uart.write_reg_check(reg.GSTAT, gstat)
 
 
@@ -393,12 +393,12 @@ class TMC_2209:
         self.log("CHOPPER CONTROL")
         chopconf = self.tmc_uart.read_int(reg.CHOPCONF)
         self.log(bin(chopconf), Loglevel.INFO.value)
-        
+
         self.log("native "+str(self.get_microstepping_resolution())+" microstep setting")
-        
+
         if chopconf & reg.intpol:
             self.log("interpolation to 256 microsteps")
-        
+
         if chopconf & reg.vsense:
             self.log("1: High sensitivity, low sense resistor voltage")
         else:
@@ -418,7 +418,7 @@ class TMC_2209:
 
 
 
-    def do_homing(self, diag_pin, revolutions, threshold=None):   
+    def do_homing(self, diag_pin, revolutions, threshold=None):
         """
         homes the motor in the given direction using stallguard
         1. param: DIAG pin
@@ -426,7 +426,7 @@ class TMC_2209:
         3. param(optional: StallGuard detection threshold
         returns true when homing was successful
         """
-        if threshold != None:
+        if threshold is not None:
             self._sg_threshold = threshold
 
         self.log("---", Loglevel.INFO.value)
@@ -637,7 +637,7 @@ class TMC_2209:
         sets which sense resistor voltage is used for current scaling
         0: Low sensitivity, high sense resistor voltage
         1: High sensitivity, low sense resistor voltage
-        """        
+        """
         gconf = self.tmc_uart.read_int(reg.GCONF)
         if en:
             self.log("activated internal sense resistors.", Loglevel.INFO.value)
@@ -649,7 +649,7 @@ class TMC_2209:
             self.log("activated operation with external sense resistors", Loglevel.INFO.value)
             gconf = self.tmc_uart.clear_bit(gconf, reg.internal_rsense)
         self.tmc_uart.write_reg_check(reg.GCONF, gconf)
-    
+
 
 
     def set_irun_ihold(self, IHold, IRun, ihold_delay):
@@ -659,7 +659,7 @@ class TMC_2209:
         IHold = 0-31; IRun = 0-31; ihold_delay = 0-15
         """
         ihold_irun = 0
-        
+
         ihold_irun = ihold_irun | IHold << 0
         ihold_irun = ihold_irun | IRun << 8
         ihold_irun = ihold_irun | ihold_delay << 16
@@ -1033,7 +1033,7 @@ class TMC_2209:
         GPIO.setup(self._pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
         GPIO.add_event_detect(self._pin_stallguard, GPIO.RISING, callback=self.stallguard_callback,
-                              bouncetime=300) 
+                              bouncetime=300)
 
 
 
@@ -1348,7 +1348,7 @@ class TMC_2209:
 
             if self._direction == 1: # Clockwise
                 self._current_pos += 1
-            else: # Anticlockwise 
+            else: # Anticlockwise
                 self._current_pos -= 1
             self.make_a_step()
 
@@ -1514,7 +1514,7 @@ class TMC_2209:
         min_stallguard_result_maxspeed = 511
         min_stallguard_result_deaccel = 511
 
-        self.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)        
+        self.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
 
 
         while self._movement_phase != MovementPhase.STANDSTILL:

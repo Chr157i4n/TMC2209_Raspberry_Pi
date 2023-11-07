@@ -48,7 +48,7 @@ class TMC_UART:
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
         self.ser.timeout = 20000/baudrate
-        # adjust per baud and hardware. Sequential reads without some delay fail.     
+        # adjust per baud and hardware. Sequential reads without some delay fail.
         self.communication_pause = 500/baudrate
 
 
@@ -104,7 +104,7 @@ class TMC_UART:
             return False
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
-        time.sleep(self.communication_pause)  
+        time.sleep(self.communication_pause)
 
         rtn = self.ser.read(12)
         #print("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
