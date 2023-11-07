@@ -1,3 +1,7 @@
+"""
+TMC_2209 stepper driver module
+"""
+
 import time
 from enum import Enum
 import math

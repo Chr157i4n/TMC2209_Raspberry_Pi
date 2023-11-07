@@ -1,3 +1,7 @@
+"""
+TMC_UART stepper driver uart module
+"""
+
 import time
 import sys
 import struct
