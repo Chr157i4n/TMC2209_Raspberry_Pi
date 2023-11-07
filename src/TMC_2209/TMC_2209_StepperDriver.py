@@ -781,10 +781,7 @@ class TMC_2209:
         return whether the tmc inbuilt interpolation is active
         """
         chopconf = self.tmc_uart.read_int(reg.CHOPCONF)
-        if chopconf & reg.intpol:
-            return True
-        else:
-            return False
+        return bool(chopconf & reg.intpol)
 
 
 
