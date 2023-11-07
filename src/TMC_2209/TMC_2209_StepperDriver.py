@@ -1363,8 +1363,7 @@ class TMC_2209:
 
             self._last_step_time = curtime # Caution: does not account for costs in step()
             return True
-        else:
-            return False
+        return False
 
 
 
