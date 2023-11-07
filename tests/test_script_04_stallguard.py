@@ -108,6 +108,8 @@ tmc.test_stallguard_threshold(800)
 # 4. param (optional): min speed threshold (in steptime measured  in  clock  cycles)
 #-----------------------------------------------------------------------
 def my_callback(channel):
+    """StallGuard callback"""
+    del channel
     print("StallGuard!")
     tmc.stop()
 
