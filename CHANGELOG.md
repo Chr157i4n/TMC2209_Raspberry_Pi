@@ -1,5 +1,9 @@
 # Changelog
 
+## version 0.3.2
+- add pylint github action
+- fixed code to pass pylint check
+
 ## version 0.3.1
 - added threaded movement
 - added test_script_07_threads.py

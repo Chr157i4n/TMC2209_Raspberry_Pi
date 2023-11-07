@@ -1,5 +1,13 @@
-from src.TMC_2209.TMC_2209_StepperDriver import *
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
+#pylint: disable=unused-import
+#pylint: disable=duplicate-code
+"""
+test file for testing the VActual
+"""
+
 import time
+from src.TMC_2209.TMC_2209_StepperDriver import *
 
 
 print("---")
@@ -119,9 +127,10 @@ tmc.set_motor_enabled(True)
 
 
 #-----------------------------------------------------------------------
-# set_vactual_rpm and set_vactual_rps accept "revolutions" and "duration" as keyword parameter
-# if duration is set the script will set VActual to that rpm for that duration and stop the motor afterwards
-# if revolutions the script will calculate the duration based on the speed and the revolutions
+# set_vactual_rpm and set_vactual_rps accept "revolutions" and "duration"
+# as keyword parameter if duration is set the script will set VActual
+# to that rpm for that duration and stop the motor afterwards if revolutions
+# the script will calculate the duration based on the speed and the revolutions
 # Movement of the Motor will not be very accurate with this way
 #-----------------------------------------------------------------------
 tmc.set_vactual_rpm(30, revolutions=2)

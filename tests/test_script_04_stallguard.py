@@ -1,5 +1,13 @@
-from src.TMC_2209.TMC_2209_StepperDriver import *
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
+#pylint: disable=unused-import
+#pylint: disable=duplicate-code
+"""
+test file for testing the StallGuard feature
+"""
+
 import time
+from src.TMC_2209.TMC_2209_StepperDriver import *
 
 
 print("---")
@@ -83,25 +91,38 @@ tmc.set_motor_enabled(True)
 
 
 #-----------------------------------------------------------------------
+# runs the motor 800 steps in a thread and
+# prints the stallguard result for each movement phase
+#-----------------------------------------------------------------------
+tmc.test_stallguard_threshold(800)
+
+
+
+
+
+#-----------------------------------------------------------------------
 # set a callback function for the stallguard interrupt based detection
 # 1. param: pin connected to the tmc DIAG output
 # 2. param: is the threshold StallGuard
 # 3. param: is the callback function (threaded)
 # 4. param (optional): min speed threshold (in steptime measured  in  clock  cycles)
 #-----------------------------------------------------------------------
-def my_callback(channel):  
+def my_callback(channel):
+    """StallGuard callback"""
+    del channel
     print("StallGuard!")
     tmc.stop()
 
 tmc.set_stallguard_callback(26, 50, my_callback) # after this function call, StallGuard is active
 
 
+#uses STEP/DIR to move the motor
+finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)
+#uses VActual Register to  move the motor
+# finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)
 
-finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)        #uses STEP/DIR to move the motor
-# finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)                     #uses VActual Register to  move the motor
 
-
-if(finishedsuccessfully == True):
+if finishedsuccessfully is True:
     print("Movement finished successfully")
 else:
     print("Movement was not completed")

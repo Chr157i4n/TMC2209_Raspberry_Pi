@@ -1,5 +1,13 @@
-from src.TMC_2209.TMC_2209_StepperDriver import *
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
+#pylint: disable=unused-import
+#pylint: disable=duplicate-code
+"""
+test file for testing movement of motors with threads
+"""
+
 import time
+from src.TMC_2209.TMC_2209_StepperDriver import *
 
 print("---")
 print("SCRIPT START")
@@ -41,7 +49,7 @@ for tmc in tmc_driverlist:
     tmc.set_microstepping_resolution(2)
     tmc.set_internal_rsense(False)
     tmc.set_motor_enabled(True)
-    
+
     tmc.set_acceleration_fullstep(1000)
     tmc.set_max_speed_fullstep(250)
 
@@ -52,19 +60,23 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # run part
 #-----------------------------------------------------------------------
-tmc1.run_to_position_steps_threaded(4000, MovementAbsRel.RELATIVE)    # move 4000 steps forward
+
+# move 4000 steps forward
+tmc1.run_to_position_steps_threaded(4000, MovementAbsRel.RELATIVE)
 
 time.sleep(1)
 tmc1.stop()     # stop the movement after 1 second
 
 tmc1.wait_for_movement_finished_threaded()
 
+# move 4000 steps backward
+tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
 
-tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)   # move 4000 steps backward
 
-
-while(tmc1.get_movement_phase() != MovementPhase.STANDSTILL):       # while the motor is still moving
-    print(tmc1.get_movement_phase())                                # print the current movement phase
+# while the motor is still moving
+while tmc1.get_movement_phase() != MovementPhase.STANDSTILL:
+    # print the current movement phase
+    print(tmc1.get_movement_phase())
     time.sleep(0.02)
 
 tmc1.wait_for_movement_finished_threaded()

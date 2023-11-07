@@ -1,5 +1,13 @@
-from src.TMC_2209.TMC_2209_StepperDriver import *
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
+#pylint: disable=unused-import
+#pylint: disable=duplicate-code
+"""
+test file for testing multiple drivers via one UART connection
+"""
+
 import time
+from src.TMC_2209.TMC_2209_StepperDriver import *
 
 
 print("---")
