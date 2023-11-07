@@ -535,7 +535,7 @@ class TMC_2209:
         reverses the motor shaft direction
         """
         self._direction = not self._direction
-        GPIO.output(self._pin_dir, self.direction)
+        GPIO.output(self._pin_dir, self._direction)
 
 
 
