@@ -574,7 +574,7 @@ class TMC_2209:
         return whether Vref (1) or 5V (0) is used for current scale
         """
         gconf = self.tmc_uart.read_int(reg.GCONF)
-        return (gconf & reg.i_scale_analog)
+        return gconf & reg.i_scale_analog
 
 
 
@@ -600,7 +600,7 @@ class TMC_2209:
         1: High sensitivity, low sense resistor voltage
         """
         chopconf = self.tmc_uart.read_int(reg.CHOPCONF)
-        return (chopconf & reg.vsense)
+        return chopconf & reg.vsense
 
 
 
