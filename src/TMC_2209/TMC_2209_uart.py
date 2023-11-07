@@ -6,7 +6,6 @@ TMC_UART stepper driver uart module
 """
 
 import time
-import sys
 import struct
 from bitstring import BitArray
 import serial
