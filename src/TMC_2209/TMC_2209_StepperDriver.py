@@ -130,7 +130,7 @@ class TMC_2209:
         """
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
 
-        if loglevel != None:
+        if loglevel is not None:
             self._loglevel = loglevel
 
         self.log("Init", Loglevel.INFO.value)
@@ -166,7 +166,7 @@ class TMC_2209:
         """
         deinit function
         """
-        if self._deinit_finished == False:
+        if self._deinit_finished is False:
             self.log("Deinit", Loglevel.INFO.value)
 
             self.set_motor_enabled(False)
@@ -465,7 +465,7 @@ class TMC_2209:
         """
         sg_results = []
 
-        if threshold != None:
+        if threshold is not None:
             self._sg_threshold = threshold
 
         self.log("---", Loglevel.INFO.value)
@@ -846,7 +846,7 @@ class TMC_2209:
         """
         gconf = self.tmc_uart.read_int(reg.GCONF)
 
-        if en == True:
+        if en is True:
             gconf = self.tmc_uart.set_bit(gconf, reg.mstep_reg_select)
         else:
             gconf = self.tmc_uart.clear_bit(gconf, reg.mstep_reg_select)
