@@ -107,7 +107,7 @@ class TMC_UART:
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):
-            print("TMC2209: Err in write {}".format(__), file=sys.stderr)
+            print("TMC2209: Err in write")
             return False
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
@@ -178,7 +178,7 @@ class TMC_UART:
 
         rtn = self.ser.write(self.w_frame)
         if rtn != len(self.w_frame):
-            print("TMC2209: Err in write {}".format(__), file=sys.stderr)
+            print("TMC2209: Err in write")
             return False
 
         time.sleep(self.communication_pause)
@@ -280,7 +280,7 @@ class TMC_UART:
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):
-            print("TMC2209: Err in write {}".format(__), file=sys.stderr)
+            print("TMC2209: Err in write")
             return False
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
