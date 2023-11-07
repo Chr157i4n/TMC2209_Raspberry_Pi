@@ -22,7 +22,7 @@ class TMC_UART:
     w_frame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
     communication_pause = 0
     error_handler_running = False
-    
+
 
 
     def __init__(self, serialport, baudrate, mtr_id = 0):
@@ -35,22 +35,26 @@ class TMC_UART:
             errnum = e.args[0]
             print("TMC2209: SERIAL ERROR: "+str(e))
             if(errnum == 2):
-                print("TMC2209: "+str(serialport)+" does not exist. You need to activate the serial port with \"sudo raspi-config\"")
+                print("""TMC2209: "+str(serialport)+" does not exist.
+                      You need to activate the serial port with \"sudo raspi-config\"""")
             if(errnum == 13):
-                print("TMC2209: you have no permission to use the serial port. You may need to add your user to the dialout group with \"sudo usermod -a -G dialout pi\"")
+                print("""TMC2209: you have no permission to use the serial port. You may need to add
+                      your user to the dialout group with \"sudo usermod -a -G dialout pi\"""")
 
         self.mtr_id = mtr_id
         self.ser.BYTESIZES = 1
         self.ser.PARITIES = serial.PARITY_NONE
         self.ser.STOPBITS = 1
 
-        self.ser.timeout = 20000/baudrate            # adjust per baud and hardware. Sequential reads without some delay fail.
-        self.communication_pause = 500/baudrate     # adjust per baud and hardware. Sequential reads without some delay fail.
+        # adjust per baud and hardware. Sequential reads without some delay fail.
+        self.ser.timeout = 20000/baudrate
+        # adjust per baud and hardware. Sequential reads without some delay fail.     
+        self.communication_pause = 500/baudrate
 
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
-        
+
 
 
     def __del__(self):
@@ -59,7 +63,7 @@ class TMC_UART:
         """
         if(self.ser is not None):
             self.ser.close()
-        
+
 
 
     def compute_crc8_atm(self, datagram, initial_value=0):
@@ -78,7 +82,7 @@ class TMC_UART:
                 # Shift to next bit
                 byte = byte >> 1
         return crc
-    
+
 
 
     def read_reg(self, register):
@@ -86,10 +90,10 @@ class TMC_UART:
         reads the registry on the TMC with a given address.
         returns the binary value of that register
         """
-        
+
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
-        
+
         self.r_frame[1] = self.mtr_id
         self.r_frame[2] = register
         self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
@@ -99,14 +103,15 @@ class TMC_UART:
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
-        time.sleep(self.communication_pause)  # adjust per baud and hardware. Sequential reads without some delay fail.
-        
+        # adjust per baud and hardware. Sequential reads without some delay fail.
+        time.sleep(self.communication_pause)  
+
         rtn = self.ser.read(12)
         #print("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
         #print(rtn.hex())
 
         time.sleep(self.communication_pause)
-        
+
         return(rtn)
         #return(rtn)
 
@@ -122,14 +127,14 @@ class TMC_UART:
             rtn = self.read_reg(register)
             rtn_data = rtn[7:11]
             not_zero_count = len([elem for elem in rtn if elem != 0])
-            
+
             if(len(rtn)<12 or not_zero_count == 0):
                 print("TMC2209: UART Communication Error: "+str(len(rtn_data))+" data bytes | "+str(len(rtn))+" total bytes")
             elif(rtn[11] != self.compute_crc8_atm(rtn[4:11])):
                 print("TMC2209: UART Communication Error: CRC MISMATCH")
             else:
                 break
-                        
+        
             if(tries<=0):
                 print("TMC2209: after 10 tries not valid answer")
                 print("TMC2209: snd:\t"+str(bytes(self.r_frame)))
@@ -149,18 +154,18 @@ class TMC_UART:
         2. then modify the settings as wished
         3. write them back to the driver with this function
         """
-        
+
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
-        
+
         self.w_frame[1] = self.mtr_id
-        self.w_frame[2] =  register | 0x80;  # set write bit
-        
+        self.w_frame[2] =  register | 0x80  # set write bit
+
         self.w_frame[3] = 0xFF & (val>>24)
         self.w_frame[4] = 0xFF & (val>>16)
         self.w_frame[5] = 0xFF & (val>>8)
         self.w_frame[6] = 0xFF & val
-        
+
         self.w_frame[7] = self.compute_crc8_atm(self.w_frame[:-1])
 
 
@@ -185,7 +190,7 @@ class TMC_UART:
 
         if(ifcnt1 == 255):
             ifcnt1 = -1
-        
+
         while(True):
             self.write_reg(register, val)
             tries -= 1
@@ -244,9 +249,11 @@ class TMC_UART:
             if(gstat & reg.reset):
                 print("TMC2209: The Driver has been reset since the last read access to GSTAT")
             if(gstat & reg.drv_err):
-                print("TMC2209: The driver has been shut down due to overtemperature or short circuit detection since the last read access")
+                print("""TMC2209: The driver has been shut down due to overtemperature or short
+                      circuit detection since the last read access""")
             if(gstat & reg.uv_cp):
-                print("TMC2209: Undervoltage on the charge pump. The driver is disabled in this case")
+                print("""TMC2209: Undervoltage on the charge pump.
+                      The driver is disabled in this case""")
         print("EXITING!")
         raise SystemExit
 
@@ -256,10 +263,10 @@ class TMC_UART:
         """
         test UART connection
         """
-        
+
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
-        
+
         self.r_frame[1] = self.mtr_id
         self.r_frame[2] = register
         self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
@@ -269,8 +276,9 @@ class TMC_UART:
             print("TMC2209: Err in write {}".format(__), file=sys.stderr)
             return False
 
-        time.sleep(self.communication_pause)  # adjust per baud and hardware. Sequential reads without some delay fail.
-        
+        # adjust per baud and hardware. Sequential reads without some delay fail.
+        time.sleep(self.communication_pause)
+
         rtn = self.ser.read(12)
         print("TMC2209: received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
         print("TMC2209: hex: "+str(rtn.hex()))
@@ -278,5 +286,5 @@ class TMC_UART:
         print("TMC2209: bin: "+str(c.bin))
 
         time.sleep(self.communication_pause)
-        
+
         return bytes(self.r_frame), rtn
