@@ -112,8 +112,7 @@ class TMC_UART:
 
         time.sleep(self.communication_pause)
 
-        return(rtn)
-        #return(rtn)
+        return rtn
 
 
 

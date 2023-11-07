@@ -70,7 +70,7 @@ tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
 
 
 # while the motor is still moving
-while(tmc1.get_movement_phase() != MovementPhase.STANDSTILL):
+while tmc1.get_movement_phase() != MovementPhase.STANDSTILL:
     # print the current movement phase
     print(tmc1.get_movement_phase())                                
     time.sleep(0.02)

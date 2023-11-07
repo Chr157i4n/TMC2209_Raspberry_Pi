@@ -550,7 +550,7 @@ class TMC_2209:
         returns the motor shaft direction: 0 = CCW; 1 = CW
         """
         gconf = self.tmc_uart.read_int(reg.GCONF)
-        return (gconf & reg.shaft)
+        return gconf & reg.shaft
 
 
 
@@ -628,7 +628,7 @@ class TMC_2209:
         1: High sensitivity, low sense resistor voltage
         """
         gconf = self.tmc_uart.read_int(reg.GCONF)
-        return (gconf & reg.internal_rsense)
+        return gconf & reg.internal_rsense
 
 
 
@@ -747,7 +747,7 @@ class TMC_2209:
         return whether spreadcycle (1) is active or stealthchop (0)
         """
         gconf = self.tmc_uart.read_int(reg.GCONF)
-        return (gconf & reg.en_spreadcycle)
+        return gconf & reg.en_spreadcycle
 
 
 
@@ -919,7 +919,7 @@ class TMC_2209:
         if duration != 0:
             self._starttime = time.time()
             current_time = time.time()
-            while (current_time < self._starttime+duration):
+            while current_time < self._starttime+duration:
                 if self._stop == StopMode.HARDSTOP:
                     break
                 if acceleration != 0:

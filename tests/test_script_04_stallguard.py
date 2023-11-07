@@ -116,7 +116,7 @@ finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)
 # finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)
 
 
-if(finishedsuccessfully == True):
+if finishedsuccessfully == True:
     print("Movement finished successfully")
 else:
     print("Movement was not completed")
