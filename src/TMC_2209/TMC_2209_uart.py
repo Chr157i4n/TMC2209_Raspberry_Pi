@@ -141,7 +141,7 @@ class TMC_UART:
                 print("TMC2209: rtn:\t"+str(rtn))
                 self.handle_error()
                 return -1
- 
+
         val = struct.unpack(">i",rtn_data)[0]
         return val
 

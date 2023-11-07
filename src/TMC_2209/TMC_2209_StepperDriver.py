@@ -148,7 +148,7 @@ class TMC_2209:
             GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
 
         self.log("GPIO Init finished", Loglevel.INFO.value)
-        
+
         if not no_uart:
             self.read_steps_per_revolution()
             self.clearGSTAT()
@@ -177,22 +177,22 @@ class TMC_2209:
             if self._pin_stallguard != -1:
                 GPIO.remove_event_detect(self._pin_stallguard)
                 GPIO.cleanup(self._pin_stallguard)
-            
+
             self.log("Deinit finished", Loglevel.INFO.value)
             self._deinit_finished= True
         else:
             self.log("Deinit already finished", Loglevel.INFO.value)
 
 
-      
+
     def set_deinitialize_true(self):
         """
         set deinitialize to true
-        """ 
+        """
         self._deinit_finished = True
-        
 
-      
+
+
     def set_loglevel(self, loglevel):
         """
         set the loglevel. See the Enum Loglevel
@@ -200,21 +200,21 @@ class TMC_2209:
         self._loglevel = loglevel
 
 
-      
+
     def log(self, message, loglevel=Loglevel.NONE.value):
         """
         logs a message
-        """ 
+        """
         if self._loglevel.value >= loglevel:
             print(self._logprefix+"_"+str(self.tmc_uart.mtr_id)+": "+message)
 
-    
-    
+
+
     def set_movement_abs_rel(self, movement_abs_rel):
         """
         set whether the movment should be relative or absolute by default.
         See the Enum MovementAbsoluteRelative
-        """   
+        """
         self._movement_abs_rel = movement_abs_rel
 
 
@@ -243,10 +243,10 @@ class TMC_2209:
 
         if drvstatus & reg.olb:
             self.log("Warning: Open load detected on phase B")
-        
+
         if drvstatus & reg.ola:
             self.log("Warning: Open load detected on phase A")
-        
+
         if drvstatus & reg.s2vsb:
             self.log("""Error: Short on low-side MOSFET detected on phase B.
                      The driver becomes disabled""")
@@ -257,19 +257,19 @@ class TMC_2209:
 
         if drvstatus & reg.s2gb:
             self.log("Error: Short to GND detected on phase B. The driver becomes disabled.")
-        
+
         if drvstatus & reg.s2ga:
             self.log("Error: Short to GND detected on phase A. The driver becomes disabled.")
-        
+
         if drvstatus & reg.ot:
             self.log("Error: Driver Overheating!")
-        
+
         if drvstatus & reg.otpw:
             self.log("Warning: Driver Overheating Prewarning!")
-        
+
         self.log("---")
         return drvstatus
-            
+   
 
 
     def readGCONF(self):
@@ -312,7 +312,7 @@ class TMC_2209:
             self.log("Microstep resolution selected by MSTEP register")
         else:
             self.log("Microstep resolution selected by pins MS1, MS2")
-        
+
         self.log("---")
         return gconf
 
@@ -350,7 +350,7 @@ class TMC_2209:
         
         self.tmc_uart.write_reg_check(reg.GSTAT, gstat)
 
- 
+
 
     def readIOIN(self):
         """
@@ -379,7 +379,7 @@ class TMC_2209:
             self.log("en is high")
         else:
             self.log("en is low")
-        
+
         self.log("---")
         return ioin
 
@@ -415,7 +415,7 @@ class TMC_2209:
         """
         GPIO.output(self._pin_en, not en)
         self.log("Motor output active: {}".format(en), Loglevel.INFO.value)
-      
+
 
 
     def do_homing(self, diag_pin, revolutions, threshold=None):   
@@ -425,10 +425,10 @@ class TMC_2209:
         2. param: maximum number of revolutions. Can be negative for inverse direction
         3. param(optional: StallGuard detection threshold
         returns true when homing was successful
-        """     
+        """
         if threshold != None:
             self._sg_threshold = threshold
-        
+
         self.log("---", Loglevel.INFO.value)
         self.log("homing", Loglevel.INFO.value)
 
@@ -437,19 +437,19 @@ class TMC_2209:
         self.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG.value)
 
         self.set_stallguard_callback(diag_pin, self._sg_threshold, self.stop)
-        
+
         homing_failed = self.set_vactual_rpm(30, revolutions=revolutions)
 
         if homing_failed:
             self.log("homing failed", Loglevel.ERROR.value)
         else:
             self.log("homing successful",Loglevel.INFO.value)
-        
+
         self._current_pos = 0
-        
+
         self.log("---", Loglevel.INFO.value)
         return not homing_failed
-        
+
 
 
     def do_homing2(self, direction, threshold=None):
@@ -460,15 +460,15 @@ class TMC_2209:
         2. param(optional: StallGuard detection threshold
         """
         sg_results = []
-        
+
         if threshold != None:
             self._sg_threshold = threshold
-        
+
         self.log("---", Loglevel.INFO.value)
         self.log("homing", Loglevel.INFO.value)
-        
+
         self.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG.value)
-        
+
         self.set_direction_pin(direction)
         self.set_spreadcycle(0)
 
@@ -506,9 +506,9 @@ class TMC_2209:
             self.log("homing failed", Loglevel.ERROR.value)
             self.log("Stepcounter: "+str(step_counter), Loglevel.DEBUG.value)
             self.log(str(sg_results),Loglevel.DEBUG.value)
-        
+
         self.log("---", Loglevel.INFO.value)
-        
+
 
 
     def get_current_position(self):
@@ -525,7 +525,7 @@ class TMC_2209:
         """
         self._current_pos = new_pos
 
-       
+
 
     def reverse_direction_pin(self):
         """
@@ -557,7 +557,7 @@ class TMC_2209:
     def set_direction_reg(self, direction):
         """
         sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
-        """     
+        """
         gconf = self.tmc_uart.read_int(reg.GCONF)
         if direction:
             self.log("write inverse motor direction", Loglevel.INFO.value)
@@ -566,7 +566,7 @@ class TMC_2209:
             self.log("write normal motor direction", Loglevel.INFO.value)
             gconf = self.tmc_uart.clear_bit(gconf, reg.shaft)
         self.tmc_uart.write_reg_check(reg.GCONF, gconf)
-  
+
 
 
     def get_iscale_analog(self):
@@ -581,7 +581,7 @@ class TMC_2209:
     def set_iscale_analog(self,en):
         """
         sets Vref (1) or 5V (0) for current scale
-        """     
+        """
         gconf = self.tmc_uart.read_int(reg.GCONF)
         if en:
             self.log("activated Vref for current scale", Loglevel.INFO.value)
@@ -776,7 +776,7 @@ class TMC_2209:
         else:
             return False
 
-    
+
 
     def set_interpolation(self, en):
         """
@@ -799,14 +799,14 @@ class TMC_2209:
         returns the current native microstep resolution (1-256)
         """
         chopconf = self.tmc_uart.read_int(reg.CHOPCONF)
-        
+
         msresdezimal = chopconf & (reg.msres0 | reg.msres1 | reg.msres2 | reg.msres3)
-        
+
         msresdezimal = msresdezimal >> 24
         msresdezimal = 8 - msresdezimal
-                
+
         self._msres = int(math.pow(2, msresdezimal))
-        
+
         return self._msres
 
 
@@ -822,16 +822,16 @@ class TMC_2209:
         msresdezimal = 8 - msresdezimal
         chopconf = int(chopconf) & int(4043309055)
         chopconf = chopconf | msresdezimal <<24
-        
+
         self.log("writing "+str(msres)+" microstep setting", Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(reg.CHOPCONF, chopconf)
-        
+
         self.set_mstep_resolution_reg_select(True)
 
         self.read_steps_per_revolution()
 
         return True
-        
+
 
 
     def set_mstep_resolution_reg_select(self, en):
@@ -839,9 +839,9 @@ class TMC_2209:
         sets the register bit "mstep_reg_select" to 1 or 0 depending to the given value.
         this is needed to set the microstep resolution via UART
         this method is called by "set_microstepping_resolution"
-        """         
+        """
         gconf = self.tmc_uart.read_int(reg.GCONF)
-        
+
         if en == True:
             gconf = self.tmc_uart.set_bit(gconf, reg.mstep_reg_select)
         else:
@@ -849,7 +849,7 @@ class TMC_2209:
 
         self.log("writing MStep Reg Select: "+str(en), Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(reg.GCONF, gconf)
-        
+
 
 
     def read_steps_per_revolution(self):
@@ -1179,7 +1179,7 @@ class TMC_2209:
         while self.run(): #returns false, when target position is reached
             if self._stop == StopMode.HARDSTOP:
                 break
-            
+
         self._movement_phase = MovementPhase.STANDSTILL
         return self._stop
 
