@@ -140,6 +140,8 @@ tmc.set_motor_enabled(False)
 
 
 ## Troubleshoot
+If you have questions please check out the [Wiki](https://github.com/Chr157i4n/TMC2209_Raspberry_Pi/wiki) and the other issues.
+
 If you encounter any problems, feel free to open an issue (ENG/GER).
 Please don't send any E-Mails to me. Pls use Github, so that i don't need to answer the same question multiple times.
 I reserve the right not to answer E-Mails.
