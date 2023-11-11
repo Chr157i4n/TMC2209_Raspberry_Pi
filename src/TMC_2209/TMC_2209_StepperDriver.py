@@ -47,7 +47,7 @@ class MovementPhase(Enum):
     STANDSTILL = 0
     ACCELERATING = 1
     MAXSPEED = 2
-    DEACCELERATING = 3
+    DECELERATING = 3
 
 
 class StopMode(Enum):
@@ -1292,7 +1292,7 @@ class TMC_2209:
                 if ((steps_to_stop >= distance_to) or self._direction == Direction.CCW or
                     self._stop == StopMode.SOFTSTOP):
                     self._n = -steps_to_stop # Start deceleration
-                    self._movement_phase = MovementPhase.DEACCELERATING
+                    self._movement_phase = MovementPhase.DECELERATING
             elif self._n < 0:
                 # Currently decelerating, need to accel again?
                 if (steps_to_stop < distance_to) and self._direction == Direction.CW:
@@ -1306,7 +1306,7 @@ class TMC_2209:
                 if (((steps_to_stop >= -distance_to) or self._direction == Direction.CW or
                     self._stop == StopMode.SOFTSTOP)):
                     self._n = -steps_to_stop # Start deceleration
-                    self._movement_phase = MovementPhase.DEACCELERATING
+                    self._movement_phase = MovementPhase.DECELERATING
             elif self._n < 0:
                 # Currently decelerating, need to accel again?
                 if (steps_to_stop < -distance_to) and self._direction == Direction.CCW:
@@ -1519,7 +1519,7 @@ class TMC_2209:
 
         min_stallguard_result_accel = 511
         min_stallguard_result_maxspeed = 511
-        min_stallguard_result_deaccel = 511
+        min_stallguard_result_decel = 511
 
         self.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
 
@@ -1536,9 +1536,9 @@ class TMC_2209:
             if (self._movement_phase == MovementPhase.MAXSPEED and
                stallguard_result < min_stallguard_result_maxspeed):
                 min_stallguard_result_maxspeed = stallguard_result
-            if (self._movement_phase == MovementPhase.DEACCELERATING and
-               stallguard_result < min_stallguard_result_deaccel):
-                min_stallguard_result_deaccel = stallguard_result
+            if (self._movement_phase == MovementPhase.DECELERATING and
+               stallguard_result < min_stallguard_result_decel):
+                min_stallguard_result_decel = stallguard_result
 
         self.wait_for_movement_finished_threaded()
 
@@ -1547,6 +1547,6 @@ class TMC_2209:
                  str(min_stallguard_result_accel), Loglevel.INFO.value)
         self.log("min StallGuard result during maxspeed: " +
                  str(min_stallguard_result_maxspeed), Loglevel.INFO.value)
-        self.log("min StallGuard result during deacceleration: " +
-                 str(min_stallguard_result_deaccel), Loglevel.INFO.value)
+        self.log("min StallGuard result during deceleration: " +
+                 str(min_stallguard_result_decel), Loglevel.INFO.value)
         self.log("---", Loglevel.INFO.value)
