@@ -1022,7 +1022,7 @@ class TMC_2209:
 
 
     def set_stallguard_callback(self, pin_stallguard, threshold, callback,
-                                min_speed = 2000, ignore_delay = 0):
+                                min_speed = 100, ignore_delay = 0):
         """
         set a function to call back, when the driver detects a stall 
         via stallguard
@@ -1033,7 +1033,7 @@ class TMC_2209:
                  Loglevel.INFO.value)
 
         self.set_stallguard_threshold(threshold)
-        self.set_coolstep_threshold(min_speed)
+        self.set_coolstep_threshold(int(round(12000000 / (min_speed * 256 / self._msres))))
         self._sg_delay = ignore_delay
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
