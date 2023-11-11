@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
 #pylint: disable=import-error
-#pylint: disable=too-many-arguments
 #pylint: disable=too-many-lines
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
@@ -48,7 +47,7 @@ class MovementPhase(Enum):
     STANDSTILL = 0
     ACCELERATING = 1
     MAXSPEED = 2
-    DEACCELERATING = 3
+    DECELERATING = 3
 
 
 class StopMode(Enum):
@@ -986,6 +985,9 @@ class TMC_2209:
         return the current stallguard result
         its will be calculated with every fullstep
         higher values means a lower motor load
+
+            Returns:
+                sg_result (int): StallGuard Result
         """
         sg_result = self.tmc_uart.read_int(reg.SG_RESULT)
         return sg_result
@@ -998,6 +1000,9 @@ class TMC_2209:
         this is needed for the stallguard interrupt callback
         SG_RESULT becomes compared to the double of this threshold.
         SG_RESULT ≤ SGTHRS*2
+
+            Parameters:
+                threshold (int): value for SGTHRS
         """
 
         self.log("sgthrs", Loglevel.INFO.value)
@@ -1023,18 +1028,24 @@ class TMC_2209:
 
 
     def set_stallguard_callback(self, pin_stallguard, threshold, callback,
-                                min_speed = 2000, ignore_delay = 0):
+                                min_speed = 100, ignore_delay = 0):
         """
         set a function to call back, when the driver detects a stall 
         via stallguard
         high value on the diag pin can also mean a driver error
+
+            Parameters:
+                pin_stallguard (int): pin needs to be connected to DIAG
+                threshold (int): value for SGTHRS
+                callback (function): will be called on StallGuard trigger
+                min_speed (int): min speed [steps/s] for StallGuard
         """
         self.log("setup stallguard callback on GPIO"+str(pin_stallguard), Loglevel.INFO.value)
         self.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+str(min_speed),
                  Loglevel.INFO.value)
 
         self.set_stallguard_threshold(threshold)
-        self.set_coolstep_threshold(min_speed)
+        self.set_coolstep_threshold(int(round(12000000 / (min_speed * 256 / self._msres))))
         self._sg_delay = ignore_delay
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
@@ -1293,7 +1304,7 @@ class TMC_2209:
                 if ((steps_to_stop >= distance_to) or self._direction == Direction.CCW or
                     self._stop == StopMode.SOFTSTOP):
                     self._n = -steps_to_stop # Start deceleration
-                    self._movement_phase = MovementPhase.DEACCELERATING
+                    self._movement_phase = MovementPhase.DECELERATING
             elif self._n < 0:
                 # Currently decelerating, need to accel again?
                 if (steps_to_stop < distance_to) and self._direction == Direction.CW:
@@ -1307,7 +1318,7 @@ class TMC_2209:
                 if (((steps_to_stop >= -distance_to) or self._direction == Direction.CW or
                     self._stop == StopMode.SOFTSTOP)):
                     self._n = -steps_to_stop # Start deceleration
-                    self._movement_phase = MovementPhase.DEACCELERATING
+                    self._movement_phase = MovementPhase.DECELERATING
             elif self._n < 0:
                 # Currently decelerating, need to accel again?
                 if (steps_to_stop < -distance_to) and self._direction == Direction.CCW:
@@ -1520,7 +1531,7 @@ class TMC_2209:
 
         min_stallguard_result_accel = 511
         min_stallguard_result_maxspeed = 511
-        min_stallguard_result_deaccel = 511
+        min_stallguard_result_decel = 511
 
         self.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
 
@@ -1537,9 +1548,9 @@ class TMC_2209:
             if (self._movement_phase == MovementPhase.MAXSPEED and
                stallguard_result < min_stallguard_result_maxspeed):
                 min_stallguard_result_maxspeed = stallguard_result
-            if (self._movement_phase == MovementPhase.DEACCELERATING and
-               stallguard_result < min_stallguard_result_deaccel):
-                min_stallguard_result_deaccel = stallguard_result
+            if (self._movement_phase == MovementPhase.DECELERATING and
+               stallguard_result < min_stallguard_result_decel):
+                min_stallguard_result_decel = stallguard_result
 
         self.wait_for_movement_finished_threaded()
 
@@ -1548,6 +1559,6 @@ class TMC_2209:
                  str(min_stallguard_result_accel), Loglevel.INFO.value)
         self.log("min StallGuard result during maxspeed: " +
                  str(min_stallguard_result_maxspeed), Loglevel.INFO.value)
-        self.log("min StallGuard result during deacceleration: " +
-                 str(min_stallguard_result_deaccel), Loglevel.INFO.value)
+        self.log("min StallGuard result during deceleration: " +
+                 str(min_stallguard_result_decel), Loglevel.INFO.value)
         self.log("---", Loglevel.INFO.value)
