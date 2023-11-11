@@ -985,6 +985,9 @@ class TMC_2209:
         return the current stallguard result
         its will be calculated with every fullstep
         higher values means a lower motor load
+
+            Returns:
+                sg_result (int): StallGuard Result
         """
         sg_result = self.tmc_uart.read_int(reg.SG_RESULT)
         return sg_result
@@ -997,6 +1000,9 @@ class TMC_2209:
         this is needed for the stallguard interrupt callback
         SG_RESULT becomes compared to the double of this threshold.
         SG_RESULT ≤ SGTHRS*2
+
+            Parameters:
+                threshold (int): value for SGTHRS
         """
 
         self.log("sgthrs", Loglevel.INFO.value)
@@ -1027,6 +1033,12 @@ class TMC_2209:
         set a function to call back, when the driver detects a stall 
         via stallguard
         high value on the diag pin can also mean a driver error
+
+            Parameters:
+                pin_stallguard (int): pin needs to be connected to DIAG
+                threshold (int): value for SGTHRS
+                callback (function): will be called on StallGuard trigger
+                min_speed (int): min speed [steps/s] for StallGuard
         """
         self.log("setup stallguard callback on GPIO"+str(pin_stallguard), Loglevel.INFO.value)
         self.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+str(min_speed),
