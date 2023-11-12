@@ -134,6 +134,17 @@ class TMC_2209:
     driver_address=0, no_uart=False, gpio_mode=GPIO.BCM, loglevel = None):
         """
         init function
+        
+            Parameters:
+                pin_en (int): Pin number of EN pin
+                pin_step (int): Pin number of STEP pin
+                pin_dir (int): Pin number of DIR pin
+                baudrate (int): baudrate exp: 9600, 115200
+                serialport (string): win: 'COM1'; linux: 'dev/serial0'
+                driver_address (int): 0 - 3
+                no_uart=False (bool): skip UART init, if only STEP/DIR is used
+                gpio_mode (enum): numbering system for the GPIO pins
+                loglevel (enum): level for which to log
         """
         self.tmc_uart = TMC_UART(serialport, baudrate, driver_address)
 
@@ -207,6 +218,9 @@ class TMC_2209:
     def set_loglevel(self, loglevel):
         """
         set the loglevel. See the Enum Loglevel
+
+            Parameters:
+                loglevel (enum): level for which to log
         """
         self._loglevel = loglevel
 
@@ -215,6 +229,10 @@ class TMC_2209:
     def log(self, message, loglevel=Loglevel.NONE.value):
         """
         logs a message
+
+            Parameters:
+                message (string): message to log
+                loglevel (enum): level for which to log
         """
         if self._loglevel.value >= loglevel:
             print(self._logprefix+"_"+str(self.tmc_uart.mtr_id)+": "+message)
@@ -225,6 +243,9 @@ class TMC_2209:
         """
         set whether the movment should be relative or absolute by default.
         See the Enum MovementAbsoluteRelative
+
+            Paramters:
+                movement_abs_rel (enum): whether the movment should be relative or absolute
         """
         self._movement_abs_rel = movement_abs_rel
 
@@ -232,7 +253,11 @@ class TMC_2209:
 
     def readDRVSTATUS(self):
         """
-        read the register Adress "DRVSTATUS" and prints all current setting
+        read the register Adress "DRV_STATUS" and prints all current setting
+
+            Returns:
+                drvstatus (int): 32bit DRV_STATUS Register
+
         """
         self.log("---")
         self.log("DRIVER STATUS:")
@@ -286,6 +311,9 @@ class TMC_2209:
     def readGCONF(self):
         """
         read the register Adress "GCONF" and prints all current setting
+
+            Returns:
+                gconf (int): 10bit GCONF Register
         """
         self.log("---")
         self.log("GENERAL CONFIG")
@@ -331,6 +359,9 @@ class TMC_2209:
     def readGSTAT(self):
         """
         read the register Adress "GSTAT" and prints all current setting
+
+            Returns:
+                gstat (int): 3bit GSTAT Register
         """
         self.log("---")
         self.log("GSTAT")
@@ -365,6 +396,9 @@ class TMC_2209:
     def readIOIN(self):
         """
         read the register Adress "IOIN" and prints all current setting
+
+            Returns:
+                ioin (int): 10+8bit IOIN Register
         """
         self.log("---")
         self.log("INPUTS")
@@ -398,6 +432,9 @@ class TMC_2209:
     def readCHOPCONF(self):
         """
         read the register Adress "CHOPCONF" and prints all current setting
+
+            Returns:
+                chopconf (int): 3bit CHOPCONF Register
         """
         self.log("---")
         self.log("CHOPPER CONTROL")
@@ -422,6 +459,9 @@ class TMC_2209:
     def set_motor_enabled(self, en):
         """
         enables or disables the motor current output
+
+            Parameters:
+                en (bool): whether the motor current output should be enabled
         """
         GPIO.output(self._pin_en, not en)
         self.log(f"Motor output active: {en}", Loglevel.INFO.value)
@@ -431,10 +471,14 @@ class TMC_2209:
     def do_homing(self, diag_pin, revolutions, threshold=None):
         """
         homes the motor in the given direction using stallguard
-        1. param: DIAG pin
-        2. param: maximum number of revolutions. Can be negative for inverse direction
-        3. param(optional: StallGuard detection threshold
-        returns true when homing was successful
+
+            Parameters
+                diag_pin (int): DIAG pin number
+                revolutions (int): max number of revolutions. Can be negative for inverse direction
+                threshold (int): optional; StallGuard detection threshold
+
+            Returns:
+                homing_failed (bool): true when homing was successful
         """
         if threshold is not None:
             self._sg_threshold = threshold
@@ -466,8 +510,10 @@ class TMC_2209:
         """
         homes the motor in the given direction using stallguard
         old function, uses STEP/DIR 
-        1. param: direction
-        2. param(optional: StallGuard detection threshold
+
+            Parameters
+                revolutions (int): max number of revolutions. Can be negative for inverse direction
+                threshold (int): optional; StallGuard detection threshold
         """
         sg_results = []
 
@@ -880,6 +926,9 @@ class TMC_2209:
         reads the interface transmission counter from the tmc register
         this value is increased on every succesfull write access
         can be used to verify a write access
+
+            Returns:
+                ifcnt (int): 8bit IFCNT Register
         """
         ifcnt = self.tmc_uart.read_int(reg.IFCNT)
         self.log("Interface Transmission Counter: "+str(ifcnt), Loglevel.INFO.value)
@@ -889,9 +938,7 @@ class TMC_2209:
 
     def get_tstep(self):
         """
-        return the current stallguard result
-        its will be calculated with every fullstep
-        higher values means a lower motor load
+        reads the current tstep from the driver register
         """
         tstep = self.tmc_uart.read_int(reg.TSTEP)
         return tstep
