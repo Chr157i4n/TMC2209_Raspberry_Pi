@@ -1,7 +1,12 @@
 # Changelog
 
+## version 0.3.4
+- fixed do_homing()
+- added minspeed to do_homing()
+- added TMC_2209_math.py
+
 ## version 0.3.3
-- added correct StallGuard min_speed calculation 
+- added correct StallGuard min_speed calculation
 
 ## version 0.3.2
 - add pylint github action

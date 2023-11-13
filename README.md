@@ -91,20 +91,20 @@ if not, check the connection of the pin.
 #### [test_script_03_basic_movement.py](tests/test_script_03_basic_movement.py)
 This script should move the motor 6 times, one revolution back and forth.
 
-####  [test_script_04_stallguard.py](tests/test_script_04_stallguard.py)
+#### [test_script_04_stallguard.py](tests/test_script_04_stallguard.py)
 In this script the stallguard feature of the TMC2209 is beeing setup.
 A funtion will be called, if the driver detects a stall. The function stops the current movement.
 The motor will be moved 10 revolutions. If the movement is finished unhindered, the script outputs ```Movement finished successfully```.
 If you block the motor with pliers or something similar, the the motor will stop and the script outputs ```StallGuard!``` and ```Movement was not completed```
 
-####  [test_script_05_vactual.py](tests/test_script_05_vactual.py)
+#### [test_script_05_vactual.py](tests/test_script_05_vactual.py)
 VACTUAL allows moving the motor by UART control. It gives the motor velocity in +-(2^23)-1 [μsteps / t]
 
-####  [test_script_06_multiple_drivers.py](tests/test_script_06_multiple_drivers.py)
+#### [test_script_06_multiple_drivers.py](tests/test_script_06_multiple_drivers.py)
 Multiple drivers can be addressed via UART by setting different addresses with the MS1 and MS2 pins.
 Simultaneous movement of multiple motors can be done with threaded movement.
 
-####  [test_script_07_threads.py](tests/test_script_07_threads.py)
+#### [test_script_07_threads.py](tests/test_script_07_threads.py)
 In this script, the movement of a stepper with threads is shown. This can be used to do other task while moving a motor, or to move several motors simultaneous.
 
 \
