@@ -32,7 +32,7 @@ tmc_driverlist = [tmc1]
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.set_loglevel(Loglevel.DEBUG)
+tmc1.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 

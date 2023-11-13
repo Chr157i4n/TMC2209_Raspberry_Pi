@@ -16,6 +16,7 @@ import statistics
 import threading
 from RPi import GPIO
 from .TMC_2209_uart import TMC_UART as tmc_uart
+from .TMC_2209_logger import TMC_logger as tmc_logger, Loglevel
 from . import TMC_2209_reg as tmc_reg
 from . import TMC_2209_math as tmc_math
 
@@ -25,16 +26,6 @@ class Direction(Enum):
     """movement direction of the motor"""
     CCW = 0
     CW = 1
-
-
-class Loglevel(Enum):
-    """loglevel"""
-    NONE = 0
-    ERROR = 10
-    INFO = 20
-    DEBUG = 30
-    MOVEMENT = 40
-    ALL = 100
 
 
 class MovementAbsRel(Enum):
@@ -69,6 +60,7 @@ class TMC_2209:
     """
 
     tmc_uart = None
+    tmc_logger = None
     _pin_step = -1
     _pin_dir = -1
     _pin_en = -1
@@ -81,13 +73,9 @@ class TMC_2209:
     _sg_delay = 0
     _sg_callback = None
 
-
     _msres = -1
     _steps_per_rev = 0
     _fullsteps_per_rev = 200
-
-    _loglevel = Loglevel.INFO
-    _logprefix = "TMC2209"
 
     _current_pos = 0                 # current position of stepper in steps
     _target_pos = 0                  # the target position in steps
@@ -149,36 +137,37 @@ class TMC_2209:
                 loglevel (enum): level for which to log
         """
         self.tmc_uart = tmc_uart(serialport, baudrate, driver_address)
+        self.tmc_logger = tmc_logger(Loglevel.INFO, "TMC2209 "+str(driver_address))
 
         if loglevel is not None:
             self._loglevel = loglevel
 
-        self.log("Init", Loglevel.INFO.value)
+        self.tmc_logger.log("Init", Loglevel.INFO.value)
         GPIO.setwarnings(False)
         GPIO.setmode(gpio_mode)
 
-        self.log("EN Pin: " + str(pin_en), Loglevel.DEBUG.value)
+        self.tmc_logger.log("EN Pin: " + str(pin_en), Loglevel.DEBUG.value)
         self._pin_en = pin_en
         GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
 
-        self.log("STEP Pin: " + str(pin_step), Loglevel.DEBUG.value)
+        self.tmc_logger.log("STEP Pin: " + str(pin_step), Loglevel.DEBUG.value)
         if pin_step != -1:
             self._pin_step = pin_step
             GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
 
-        self.log("DIR Pin: " + str(pin_dir), Loglevel.DEBUG.value)
+        self.tmc_logger.log("DIR Pin: " + str(pin_dir), Loglevel.DEBUG.value)
         if pin_dir != -1:
             self._pin_dir = pin_dir
             GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
 
-        self.log("GPIO Init finished", Loglevel.INFO.value)
+        self.tmc_logger.log("GPIO Init finished", Loglevel.INFO.value)
 
         if not no_uart:
             self.read_steps_per_rev()
             self.clearGSTAT()
 
         self.tmc_uart.flush_serial_buffer()
-        self.log("Init finished", Loglevel.INFO.value)
+        self.tmc_logger.log("Init finished", Loglevel.INFO.value)
 
 
 
@@ -187,11 +176,11 @@ class TMC_2209:
         deinit function
         """
         if self._deinit_finished is False:
-            self.log("Deinit", Loglevel.INFO.value)
+            self.tmc_logger.log("Deinit", Loglevel.INFO.value)
 
             self.set_motor_enabled(False)
 
-            self.log("GPIO cleanup")
+            self.tmc_logger.log("GPIO cleanup")
             if self._pin_step != -1:
                 GPIO.cleanup(self._pin_step)
             if self._pin_dir != -1:
@@ -202,10 +191,10 @@ class TMC_2209:
                 GPIO.remove_event_detect(self._pin_stallguard)
                 GPIO.cleanup(self._pin_stallguard)
 
-            self.log("Deinit finished", Loglevel.INFO.value)
+            self.tmc_logger.log("Deinit finished", Loglevel.INFO.value)
             self._deinit_finished= True
         else:
-            self.log("Deinit already finished", Loglevel.INFO.value)
+            self.tmc_logger.log("Deinit already finished", Loglevel.INFO.value)
 
 
 
@@ -214,30 +203,6 @@ class TMC_2209:
         set deinitialize to true
         """
         self._deinit_finished = True
-
-
-
-    def set_loglevel(self, loglevel):
-        """
-        set the loglevel. See the Enum Loglevel
-
-            Parameters:
-                loglevel (enum): level for which to log
-        """
-        self._loglevel = loglevel
-
-
-
-    def log(self, message, loglevel=Loglevel.NONE.value):
-        """
-        logs a message
-
-            Parameters:
-                message (string): message to log
-                loglevel (enum): level for which to log
-        """
-        if self._loglevel.value >= loglevel:
-            print(self._logprefix+"_"+str(self.tmc_uart.mtr_id)+": "+message)
 
 
 
@@ -261,51 +226,53 @@ class TMC_2209:
                 drvstatus (int): 32bit DRV_STATUS Register
 
         """
-        self.log("---")
-        self.log("DRIVER STATUS:")
+        self.tmc_logger.log("---")
+        self.tmc_logger.log("DRIVER STATUS:")
         drvstatus =self.tmc_uart.read_int(tmc_reg.DRVSTATUS)
-        self.log(bin(drvstatus), Loglevel.INFO.value)
+        self.tmc_logger.log(bin(drvstatus), Loglevel.INFO.value)
         if drvstatus & tmc_reg.stst:
-            self.log("Info: motor is standing still")
+            self.tmc_logger.log("Info: motor is standing still")
         else:
-            self.log("Info: motor is running")
+            self.tmc_logger.log("Info: motor is running")
 
         if drvstatus & tmc_reg.stealth:
-            self.log("Info: motor is running on StealthChop")
+            self.tmc_logger.log("Info: motor is running on StealthChop")
         else:
-            self.log("Info: motor is running on SpreadCycle")
+            self.tmc_logger.log("Info: motor is running on SpreadCycle")
 
         cs_actual = drvstatus & tmc_reg.cs_actual
         cs_actual = cs_actual >> 16
-        self.log("CS actual: "+str(cs_actual))
+        self.tmc_logger.log("CS actual: "+str(cs_actual))
 
         if drvstatus & tmc_reg.olb:
-            self.log("Warning: Open load detected on phase B")
+            self.tmc_logger.log("Warning: Open load detected on phase B")
 
         if drvstatus & tmc_reg.ola:
-            self.log("Warning: Open load detected on phase A")
+            self.tmc_logger.log("Warning: Open load detected on phase A")
 
         if drvstatus & tmc_reg.s2vsb:
-            self.log("""Error: Short on low-side MOSFET detected on phase B.
+            self.tmc_logger.log("""Error: Short on low-side MOSFET detected on phase B.
                      The driver becomes disabled""")
 
         if drvstatus & tmc_reg.s2vsa:
-            self.log("""Error: Short on low-side MOSFET detected on phase A.
+            self.tmc_logger.log("""Error: Short on low-side MOSFET detected on phase A.
                      The driver becomes disabled""")
 
         if drvstatus & tmc_reg.s2gb:
-            self.log("Error: Short to GND detected on phase B. The driver becomes disabled.")
+            self.tmc_logger.log("""Error: Short to GND detected on phase B.
+                                The driver becomes disabled.""")
 
         if drvstatus & tmc_reg.s2ga:
-            self.log("Error: Short to GND detected on phase A. The driver becomes disabled.")
+            self.tmc_logger.log("""Error: Short to GND detected on phase A.
+                                The driver becomes disabled.""")
 
         if drvstatus & tmc_reg.ot:
-            self.log("Error: Driver Overheating!")
+            self.tmc_logger.log("Error: Driver Overheating!")
 
         if drvstatus & tmc_reg.otpw:
-            self.log("Warning: Driver Overheating Prewarning!")
+            self.tmc_logger.log("Warning: Driver Overheating Prewarning!")
 
-        self.log("---")
+        self.tmc_logger.log("---")
         return drvstatus
 
 
@@ -317,43 +284,43 @@ class TMC_2209:
             Returns:
                 gconf (int): 10bit GCONF Register
         """
-        self.log("---")
-        self.log("GENERAL CONFIG")
+        self.tmc_logger.log("---")
+        self.tmc_logger.log("GENERAL CONFIG")
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
-        self.log(bin(gconf), Loglevel.INFO.value)
+        self.tmc_logger.log(bin(gconf), Loglevel.INFO.value)
 
         if gconf & tmc_reg.i_scale_analog:
-            self.log("Driver is using voltage supplied to VREF as current reference")
+            self.tmc_logger.log("Driver is using voltage supplied to VREF as current reference")
         else:
-            self.log("Driver is using internal reference derived from 5VOUT")
+            self.tmc_logger.log("Driver is using internal reference derived from 5VOUT")
         if gconf & tmc_reg.internal_rsense:
-            self.log("Internal sense resistors. Use current supplied into VREF as reference.")
-            self.log("VREF pin internally is driven to GND in this mode.")
-            self.log("This will most likely destroy your driver!!!")
+            self.tmc_logger.log("Internal sense resistors. Use current supplied into VREF as reference.")
+            self.tmc_logger.log("VREF pin internally is driven to GND in this mode.")
+            self.tmc_logger.log("This will most likely destroy your driver!!!")
             raise SystemExit
-        self.log("Operation with external sense resistors")
+        self.tmc_logger.log("Operation with external sense resistors")
         if gconf & tmc_reg.en_spreadcycle:
-            self.log("SpreadCycle mode enabled")
+            self.tmc_logger.log("SpreadCycle mode enabled")
         else:
-            self.log("StealthChop PWM mode enabled")
+            self.tmc_logger.log("StealthChop PWM mode enabled")
         if gconf & tmc_reg.shaft:
-            self.log("Inverse motor direction")
+            self.tmc_logger.log("Inverse motor direction")
         else:
-            self.log("normal motor direction")
+            self.tmc_logger.log("normal motor direction")
         if gconf & tmc_reg.index_otpw:
-            self.log("INDEX pin outputs overtemperature prewarning flag")
+            self.tmc_logger.log("INDEX pin outputs overtemperature prewarning flag")
         else:
-            self.log("INDEX shows the first microstep position of sequencer")
+            self.tmc_logger.log("INDEX shows the first microstep position of sequencer")
         if gconf & tmc_reg.index_step:
-            self.log("INDEX output shows step pulses from internal pulse generator")
+            self.tmc_logger.log("INDEX output shows step pulses from internal pulse generator")
         else:
-            self.log("INDEX output as selected by index_otpw")
+            self.tmc_logger.log("INDEX output as selected by index_otpw")
         if gconf & tmc_reg.mstep_reg_select:
-            self.log("Microstep resolution selected by MSTEP register")
+            self.tmc_logger.log("Microstep resolution selected by MSTEP register")
         else:
-            self.log("Microstep resolution selected by pins MS1, MS2")
+            self.tmc_logger.log("Microstep resolution selected by pins MS1, MS2")
 
-        self.log("---")
+        self.tmc_logger.log("---")
         return gconf
 
 
@@ -365,18 +332,18 @@ class TMC_2209:
             Returns:
                 gstat (int): 3bit GSTAT Register
         """
-        self.log("---")
-        self.log("GSTAT")
+        self.tmc_logger.log("---")
+        self.tmc_logger.log("GSTAT")
         gstat = self.tmc_uart.read_int(tmc_reg.GSTAT)
-        self.log(bin(gstat), Loglevel.INFO.value)
+        self.tmc_logger.log(bin(gstat), Loglevel.INFO.value)
         if gstat & tmc_reg.reset:
-            self.log("The Driver has been reset since the last read access to GSTAT")
+            self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT")
         if gstat & tmc_reg.drv_err:
-            self.log("""The driver has been shut down due to overtemperature or
+            self.tmc_logger.log("""The driver has been shut down due to overtemperature or
                      short circuit detection since the last read access""")
         if gstat & tmc_reg.uv_cp:
-            self.log("Undervoltage on the charge pump. The driver is disabled in this case")
-        self.log("---")
+            self.tmc_logger.log("Undervoltage on the charge pump. The driver is disabled in this case")
+        self.tmc_logger.log("---")
         return gstat
 
 
@@ -385,7 +352,7 @@ class TMC_2209:
         """
         read the register Adress "GSTAT" and prints all current setting
         """
-        self.log("clearing GSTAT", Loglevel.INFO.value)
+        self.tmc_logger.log("clearing GSTAT", Loglevel.INFO.value)
         gstat = self.tmc_uart.read_int(tmc_reg.GSTAT)
 
         gstat = self.tmc_uart.set_bit(gstat, tmc_reg.reset)
@@ -402,31 +369,31 @@ class TMC_2209:
             Returns:
                 ioin (int): 10+8bit IOIN Register
         """
-        self.log("---")
-        self.log("INPUTS")
+        self.tmc_logger.log("---")
+        self.tmc_logger.log("INPUTS")
         ioin = self.tmc_uart.read_int(tmc_reg.IOIN)
-        self.log(bin(ioin), Loglevel.INFO.value)
+        self.tmc_logger.log(bin(ioin), Loglevel.INFO.value)
         if ioin & tmc_reg.io_spread:
-            self.log("spread is high")
+            self.tmc_logger.log("spread is high")
         else:
-            self.log("spread is low")
+            self.tmc_logger.log("spread is low")
 
         if ioin & tmc_reg.io_dir:
-            self.log("dir is high")
+            self.tmc_logger.log("dir is high")
         else:
-            self.log("dir is low")
+            self.tmc_logger.log("dir is low")
 
         if ioin & tmc_reg.io_step:
-            self.log("step is high")
+            self.tmc_logger.log("step is high")
         else:
-            self.log("step is low")
+            self.tmc_logger.log("step is low")
 
         if ioin & tmc_reg.io_enn:
-            self.log("en is high")
+            self.tmc_logger.log("en is high")
         else:
-            self.log("en is low")
+            self.tmc_logger.log("en is low")
 
-        self.log("---")
+        self.tmc_logger.log("---")
         return ioin
 
 
@@ -438,22 +405,22 @@ class TMC_2209:
             Returns:
                 chopconf (int): 3bit CHOPCONF Register
         """
-        self.log("---")
-        self.log("CHOPPER CONTROL")
+        self.tmc_logger.log("---")
+        self.tmc_logger.log("CHOPPER CONTROL")
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
-        self.log(bin(chopconf), Loglevel.INFO.value)
+        self.tmc_logger.log(bin(chopconf), Loglevel.INFO.value)
 
-        self.log("native "+str(self.get_microstepping_resolution())+" microstep setting")
+        self.tmc_logger.log("native "+str(self.get_microstepping_resolution())+" microstep setting")
 
         if chopconf & tmc_reg.intpol:
-            self.log("interpolation to 256 microsteps")
+            self.tmc_logger.log("interpolation to 256 microsteps")
 
         if chopconf & tmc_reg.vsense:
-            self.log("1: High sensitivity, low sense resistor voltage")
+            self.tmc_logger.log("1: High sensitivity, low sense resistor voltage")
         else:
-            self.log("0: Low sensitivity, high sense resistor voltage")
+            self.tmc_logger.log("0: Low sensitivity, high sense resistor voltage")
 
-        self.log("---")
+        self.tmc_logger.log("---")
         return chopconf
 
 
@@ -466,7 +433,7 @@ class TMC_2209:
                 en (bool): whether the motor current output should be enabled
         """
         GPIO.output(self._pin_en, not en)
-        self.log(f"Motor output active: {en}", Loglevel.INFO.value)
+        self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO.value)
 
 
 
@@ -489,13 +456,13 @@ class TMC_2209:
         if speed_rpm is None:
             speed_rpm = tmc_math.steps_to_rps(self._max_speed_homing, self._steps_per_rev)*60
 
-        self.log("---", Loglevel.INFO.value)
-        self.log("homing", Loglevel.INFO.value)
+        self.tmc_logger.log("---", Loglevel.INFO.value)
+        self.tmc_logger.log("homing", Loglevel.INFO.value)
 
         # StallGuard only works with StealthChop
         self.set_spreadcycle(0)
 
-        self.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG.value)
+        self.tmc_logger.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG.value)
 
         self.set_stallguard_callback(diag_pin, self._sg_threshold, self.stop,
                                      0.5*tmc_math.rps_to_steps(speed_rpm/60, self._steps_per_rev))
@@ -503,13 +470,13 @@ class TMC_2209:
         homing_failed = self.set_vactual_rpm(speed_rpm, revolutions=revolutions)
 
         if homing_failed:
-            self.log("homing failed", Loglevel.INFO.value)
+            self.tmc_logger.log("homing failed", Loglevel.INFO.value)
         else:
-            self.log("homing successful",Loglevel.INFO.value)
+            self.tmc_logger.log("homing successful",Loglevel.INFO.value)
 
         self._current_pos = 0
 
-        self.log("---", Loglevel.INFO.value)
+        self.tmc_logger.log("---", Loglevel.INFO.value)
         return not homing_failed
 
 
@@ -529,10 +496,10 @@ class TMC_2209:
         if threshold is not None:
             self._sg_threshold = threshold
 
-        self.log("---", Loglevel.INFO.value)
-        self.log("homing", Loglevel.INFO.value)
+        self.tmc_logger.log("---", Loglevel.INFO.value)
+        self.tmc_logger.log("homing", Loglevel.INFO.value)
 
-        self.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG.value)
+        self.tmc_logger.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG.value)
 
         self.set_direction_pin(revolutions > 0)
 
@@ -551,7 +518,7 @@ class TMC_2209:
 
 
         step_counter=0
-        #self.log("Steps per Revolution: "+str(self._steps_per_rev))
+        #self.tmc_logger.log("Steps per Revolution: "+str(self._steps_per_rev))
         while step_counter<self._target_pos:
             if self.run_speed(): #returns true, when a step is made
                 step_counter += 1
@@ -564,16 +531,16 @@ class TMC_2209:
                         break
 
         if step_counter<self._steps_per_rev:
-            self.log("homing successful",Loglevel.INFO.value)
-            self.log("Stepcounter: "+str(step_counter),Loglevel.DEBUG.value)
-            self.log(str(sg_results),Loglevel.DEBUG.value)
+            self.tmc_logger.log("homing successful",Loglevel.INFO.value)
+            self.tmc_logger.log("Stepcounter: "+str(step_counter),Loglevel.DEBUG.value)
+            self.tmc_logger.log(str(sg_results),Loglevel.DEBUG.value)
             self._current_pos = 0
         else:
-            self.log("homing failed", Loglevel.INFO.value)
-            self.log("Stepcounter: "+str(step_counter), Loglevel.DEBUG.value)
-            self.log(str(sg_results),Loglevel.DEBUG.value)
+            self.tmc_logger.log("homing failed", Loglevel.INFO.value)
+            self.tmc_logger.log("Stepcounter: "+str(step_counter), Loglevel.DEBUG.value)
+            self.tmc_logger.log(str(sg_results),Loglevel.DEBUG.value)
 
-        self.log("---", Loglevel.INFO.value)
+        self.tmc_logger.log("---", Loglevel.INFO.value)
 
 
 
@@ -641,10 +608,10 @@ class TMC_2209:
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if direction:
-            self.log("write inverse motor direction", Loglevel.INFO.value)
+            self.tmc_logger.log("write inverse motor direction", Loglevel.INFO.value)
             gconf = self.tmc_uart.set_bit(gconf, tmc_reg.shaft)
         else:
-            self.log("write normal motor direction", Loglevel.INFO.value)
+            self.tmc_logger.log("write normal motor direction", Loglevel.INFO.value)
             gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.shaft)
         self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
 
@@ -671,10 +638,10 @@ class TMC_2209:
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if en:
-            self.log("activated Vref for current scale", Loglevel.INFO.value)
+            self.tmc_logger.log("activated Vref for current scale", Loglevel.INFO.value)
             gconf = self.tmc_uart.set_bit(gconf, tmc_reg.i_scale_analog)
         else:
-            self.log("activated 5V-out for current scale", Loglevel.INFO.value)
+            self.tmc_logger.log("activated 5V-out for current scale", Loglevel.INFO.value)
             gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.i_scale_analog)
         self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
 
@@ -705,10 +672,12 @@ class TMC_2209:
         """
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
         if en:
-            self.log("activated High sensitivity, low sense resistor voltage", Loglevel.INFO.value)
+            self.tmc_logger.log("activated High sensitivity, low sense resistor voltage",
+                                Loglevel.INFO.value)
             chopconf = self.tmc_uart.set_bit(chopconf, tmc_reg.vsense)
         else:
-            self.log("activated Low sensitivity, high sense resistor voltage", Loglevel.INFO.value)
+            self.tmc_logger.log("activated Low sensitivity, high sense resistor voltage",
+                                Loglevel.INFO.value)
             chopconf = self.tmc_uart.clear_bit(chopconf, tmc_reg.vsense)
         self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf)
 
@@ -743,12 +712,16 @@ class TMC_2209:
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if en:
-            self.log("activated internal sense resistors.", Loglevel.INFO.value)
-            self.log("VREF pin internally is driven to GND in this mode.", Loglevel.INFO.value)
-            self.log("This will most likely destroy your driver!!!", Loglevel.INFO.value)
+            self.tmc_logger.log("activated internal sense resistors.",
+                                Loglevel.INFO.value)
+            self.tmc_logger.log("VREF pin internally is driven to GND in this mode.",
+                                Loglevel.INFO.value)
+            self.tmc_logger.log("This will most likely destroy your driver!!!",
+                                Loglevel.INFO.value)
             raise SystemExit
             # gconf = self.tmc_uart.set_bit(gconf, tmc_reg.internal_rsense)
-        self.log("activated operation with external sense resistors", Loglevel.INFO.value)
+        self.tmc_logger.log("activated operation with external sense resistors",
+                            Loglevel.INFO.value)
         gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.internal_rsense)
         self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
 
@@ -769,10 +742,10 @@ class TMC_2209:
         ihold_irun = ihold_irun | ihold << 0
         ihold_irun = ihold_irun | irun << 8
         ihold_irun = ihold_irun | ihold_delay << 16
-        self.log("ihold_irun", Loglevel.INFO.value)
-        self.log(str(bin(ihold_irun)), Loglevel.INFO.value)
+        self.tmc_logger.log("ihold_irun", Loglevel.INFO.value)
+        self.tmc_logger.log(str(bin(ihold_irun)), Loglevel.INFO.value)
 
-        self.log("writing ihold_irun", Loglevel.INFO.value)
+        self.tmc_logger.log("writing ihold_irun", Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(tmc_reg.IHOLD_IRUN, ihold_irun)
 
 
@@ -789,10 +762,10 @@ class TMC_2209:
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if pdn_disable:
-            self.log("enabled PDN_UART", Loglevel.INFO.value)
+            self.tmc_logger.log("enabled PDN_UART", Loglevel.INFO.value)
             gconf = self.tmc_uart.set_bit(gconf, tmc_reg.pdn_disable)
         else:
-            self.log("disabled PDN_UART", Loglevel.INFO.value)
+            self.tmc_logger.log("disabled PDN_UART", Loglevel.INFO.value)
             gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.pdn_disable)
         self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
 
@@ -826,12 +799,12 @@ class TMC_2209:
 
         # If Current Scale is too low, turn on high sensitivity VSsense and calculate again
         if cs_irun < 16:
-            self.log("CS too low; switching to VSense True", Loglevel.INFO.value)
+            self.tmc_logger.log("CS too low; switching to VSense True", Loglevel.INFO.value)
             vfs = 0.180 * vref / 2.5
             cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
             self.setvsense(True)
         else: # If CS >= 16, turn off high_senser
-            self.log("CS in range; using VSense False", Loglevel.INFO.value)
+            self.tmc_logger.log("CS in range; using VSense False", Loglevel.INFO.value)
             self.setvsense(False)
 
         cs_irun = min(cs_irun, 31)
@@ -843,13 +816,14 @@ class TMC_2209:
         CS_IHold = round(CS_IHold)
         hold_current_delay = round(hold_current_delay)
 
-        self.log("cs_irun: " + str(cs_irun), Loglevel.INFO.value)
-        self.log("CS_IHold: " + str(CS_IHold), Loglevel.INFO.value)
-        self.log("Delay: " + str(hold_current_delay), Loglevel.INFO.value)
+        self.tmc_logger.log("cs_irun: " + str(cs_irun), Loglevel.INFO.value)
+        self.tmc_logger.log("CS_IHold: " + str(CS_IHold), Loglevel.INFO.value)
+        self.tmc_logger.log("Delay: " + str(hold_current_delay), Loglevel.INFO.value)
 
         # return (float)(CS+1)/32.0 * (vsense() ? 0.180 : 0.325)/(rsense+0.02) / 1.41421 * 1000;
         run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
-        self.log("actual current: "+str(round(run_current_actual))+" mA", Loglevel.INFO.value)
+        self.tmc_logger.log("actual current: "+str(round(run_current_actual))+" mA",
+                            Loglevel.INFO.value)
 
         self.set_irun_ihold(CS_IHold, cs_irun, hold_current_delay)
 
@@ -878,10 +852,10 @@ class TMC_2209:
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if en_spread:
-            self.log("activated Spreadcycle", Loglevel.INFO.value)
+            self.tmc_logger.log("activated Spreadcycle", Loglevel.INFO.value)
             gconf = self.tmc_uart.set_bit(gconf, tmc_reg.en_spreadcycle)
         else:
-            self.log("activated Stealthchop", Loglevel.INFO.value)
+            self.tmc_logger.log("activated Stealthchop", Loglevel.INFO.value)
             gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.en_spreadcycle)
         self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
 
@@ -913,7 +887,8 @@ class TMC_2209:
         else:
             chopconf = self.tmc_uart.clear_bit(chopconf, tmc_reg.intpol)
 
-        self.log("writing microstep interpolation setting: "+str(en), Loglevel.INFO.value)
+        self.tmc_logger.log("writing microstep interpolation setting: "+str(en),
+                            Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf)
 
 
@@ -955,7 +930,7 @@ class TMC_2209:
         chopconf = int(chopconf) & int(4043309055)
         chopconf = chopconf | msresdezimal <<24
 
-        self.log("writing "+str(msres)+" microstep setting", Loglevel.INFO.value)
+        self.tmc_logger.log("writing "+str(msres)+" microstep setting", Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf)
 
         self.set_mstep_resolution_reg_select(True)
@@ -982,7 +957,7 @@ class TMC_2209:
         else:
             gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.mstep_reg_select)
 
-        self.log("writing MStep Reg Select: "+str(en), Loglevel.INFO.value)
+        self.tmc_logger.log("writing MStep Reg Select: "+str(en), Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
 
 
@@ -1022,7 +997,7 @@ class TMC_2209:
                 ifcnt (int): 8bit IFCNT Register
         """
         ifcnt = self.tmc_uart.read_int(tmc_reg.IFCNT)
-        self.log("Interface Transmission Counter: "+str(ifcnt), Loglevel.INFO.value)
+        self.tmc_logger.log("Interface Transmission Counter: "+str(ifcnt), Loglevel.INFO.value)
         return ifcnt
 
 
@@ -1064,12 +1039,13 @@ class TMC_2209:
             acceleration = -acceleration
 
         if duration != 0:
-            self.log("vactual: "+str(vactual)+" for "+str(duration)+" sec", Loglevel.INFO.value)
+            self.tmc_logger.log("vactual: "+str(vactual)+" for "+str(duration)+" sec",
+                                Loglevel.INFO.value)
         else:
-            self.log("vactual: "+str(vactual), Loglevel.INFO.value)
-        self.log(str(bin(vactual)), Loglevel.INFO.value)
+            self.tmc_logger.log("vactual: "+str(vactual), Loglevel.INFO.value)
+        self.tmc_logger.log(str(bin(vactual)), Loglevel.INFO.value)
 
-        self.log("writing vactual", Loglevel.INFO.value)
+        self.tmc_logger.log("writing vactual", Loglevel.INFO.value)
         if acceleration == 0:
             self.tmc_uart.write_reg_check(tmc_reg.VACTUAL, vactual)
 
@@ -1094,11 +1070,11 @@ class TMC_2209:
                 self.tmc_uart.write_reg_check(tmc_reg.VACTUAL, int(round(current_vactual)))
                 time.sleep(sleeptime)
             if show_stallguard_result:
-                self.log("StallGuard result: "+str(self.get_stallguard_result()),
+                self.tmc_logger.log("StallGuard result: "+str(self.get_stallguard_result()),
                             Loglevel.INFO.value)
                 time.sleep(0.1)
             if show_tstep:
-                self.log("TStep result: "+str(self.get_tstep()), Loglevel.INFO.value)
+                self.tmc_logger.log("TStep result: "+str(self.get_tstep()), Loglevel.INFO.value)
                 time.sleep(0.1)
             current_time = time.time()
         self.tmc_uart.write_reg_check(tmc_reg.VACTUAL, 0)
@@ -1176,10 +1152,10 @@ class TMC_2209:
                 threshold (int): value for SGTHRS
         """
 
-        self.log("sgthrs", Loglevel.INFO.value)
-        self.log(str(bin(threshold)), Loglevel.INFO.value)
+        self.tmc_logger.log("sgthrs", Loglevel.INFO.value)
+        self.tmc_logger.log(str(bin(threshold)), Loglevel.INFO.value)
 
-        self.log("writing sgthrs", Loglevel.INFO.value)
+        self.tmc_logger.log("writing sgthrs", Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(tmc_reg.SGTHRS, threshold)
 
 
@@ -1193,10 +1169,10 @@ class TMC_2209:
                 threshold (int): threshold  velocity
         """
 
-        self.log("tcoolthrs", Loglevel.INFO.value)
-        self.log(str(bin(threshold)), Loglevel.INFO.value)
+        self.tmc_logger.log("tcoolthrs", Loglevel.INFO.value)
+        self.tmc_logger.log(str(bin(threshold)), Loglevel.INFO.value)
 
-        self.log("writing tcoolthrs", Loglevel.INFO.value)
+        self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO.value)
         self.tmc_uart.write_reg_check(tmc_reg.TCOOLTHRS, threshold)
 
 
@@ -1214,9 +1190,10 @@ class TMC_2209:
                 callback (function): will be called on StallGuard trigger
                 min_speed (int): min speed [steps/s] for StallGuard
         """
-        self.log("setup stallguard callback on GPIO"+str(pin_stallguard), Loglevel.INFO.value)
-        self.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+str(min_speed),
-                 Loglevel.INFO.value)
+        self.tmc_logger.log("setup stallguard callback on GPIO"+str(pin_stallguard),
+                            Loglevel.INFO.value)
+        self.tmc_logger.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+
+                            str(min_speed), Loglevel.INFO.value)
 
         self.set_stallguard_threshold(threshold)
         self.set_coolstep_threshold(tmc_math.steps_to_tstep(min_speed, self._msres))
@@ -1242,7 +1219,7 @@ class TMC_2209:
         """
         del gpio_pin
         if self._sg_callback is None:
-            self.log("StallGuard callback is None", Loglevel.DEBUG.value)
+            self.tmc_logger.log("StallGuard callback is None", Loglevel.DEBUG.value)
             return
         if time.time()<=self._starttime+self._sg_delay and self._sg_delay != 0:
             return
@@ -1503,8 +1480,8 @@ class TMC_2209:
         """
         if self.run_speed(): #returns true, when a step is made
             self.compute_new_speed()
-            #self.log(self.get_stallguard_result())
-            #self.log(self.get_tstep())
+            #self.tmc_logger.log(self.get_stallguard_result())
+            #self.tmc_logger.log(self.get_tstep())
         return (self._speed != 0.0 and self.distance_to_go() != 0)
 
 
@@ -1535,7 +1512,7 @@ class TMC_2209:
             self._speed = 0.0
             self._n = 0
             self._movement_phase = MovementPhase.STANDSTILL
-            self.log("time to stop", Loglevel.MOVEMENT.value)
+            self.tmc_logger.log("time to stop", Loglevel.MOVEMENT.value)
             return
 
         if distance_to > 0:
@@ -1571,13 +1548,13 @@ class TMC_2209:
             # First step from stopped
             self._cn = self._c0
             GPIO.output(self._pin_step, GPIO.LOW)
-            #self.log("distance to: " + str(distance_to))
+            #self.tmc_logger.log("distance to: " + str(distance_to))
             if distance_to > 0:
                 self.set_direction_pin(1)
-                self.log("going CW", Loglevel.MOVEMENT.value)
+                self.tmc_logger.log("going CW", Loglevel.MOVEMENT.value)
             else:
                 self.set_direction_pin(0)
-                self.log("going CCW", Loglevel.MOVEMENT.value)
+                self.tmc_logger.log("going CCW", Loglevel.MOVEMENT.value)
             self._movement_phase = MovementPhase.ACCELERATING
         else:
             # Subsequent step. Works for accel (n is +_ve) and decel (n is -ve).
@@ -1603,8 +1580,8 @@ class TMC_2209:
 
         curtime = time.time_ns()/1000
 
-        #self.log("current time: " + str(curtime))
-        #self.log("last st time: " + str(self._last_step_time))
+        #self.tmc_logger.log("current time: " + str(curtime))
+        #self.tmc_logger.log("last st time: " + str(self._last_step_time))
 
         if curtime - self._last_step_time >= self._step_interval:
 
@@ -1630,7 +1607,7 @@ class TMC_2209:
         GPIO.output(self._pin_step, GPIO.LOW)
         time.sleep(1/1000/1000)
 
-        self.log("one step", Loglevel.MOVEMENT.value)
+        self.tmc_logger.log("one step", Loglevel.MOVEMENT.value)
 
 
 
@@ -1680,20 +1657,20 @@ class TMC_2209:
 
         self.set_motor_enabled(False)
 
-        self.log("---")
+        self.tmc_logger.log("---")
         if pin_dir_ok:
-            self.log("Pin DIR: \tOK")
+            self.tmc_logger.log("Pin DIR: \tOK")
         else:
-            self.log("Pin DIR: \tnot OK")
+            self.tmc_logger.log("Pin DIR: \tnot OK")
         if pin_step_ok:
-            self.log("Pin STEP: \tOK")
+            self.tmc_logger.log("Pin STEP: \tOK")
         else:
-            self.log("Pin STEP: \tnot OK")
+            self.tmc_logger.log("Pin STEP: \tnot OK")
         if pin_en_ok:
-            self.log("Pin EN: \tOK")
+            self.tmc_logger.log("Pin EN: \tOK")
         else:
-            self.log("Pin EN: \tnot OK")
-        self.log("---")
+            self.tmc_logger.log("Pin EN: \tnot OK")
+        self.tmc_logger.log("---")
 
 
 
@@ -1716,45 +1693,47 @@ class TMC_2209:
         """
         test method
         """
-        self.log("---")
-        self.log("TEST UART")
+        self.tmc_logger.log("---")
+        self.tmc_logger.log("TEST UART")
         result = self.tmc_uart.test_uart(tmc_reg.IOIN)
 
         snd = result[0]
         rtn = result[1]
 
-        self.log("length snd: "+str(len(snd)), Loglevel.DEBUG.value)
-        self.log("length rtn: "+str(len(rtn)), Loglevel.DEBUG.value)
+        self.tmc_logger.log("length snd: "+str(len(snd)), Loglevel.DEBUG.value)
+        self.tmc_logger.log("length rtn: "+str(len(rtn)), Loglevel.DEBUG.value)
 
         if len(rtn)==12:
-            self.log("the Raspberry Pi received the sended bits and the answer from the TMC",
-                     Loglevel.INFO.value)
+            self.tmc_logger.log("""the Raspberry Pi received the sended 
+                                bits and the answer from the TMC""",Loglevel.INFO.value)
         elif len(rtn)==4:
-            self.log("the Raspberry Pi received only the sended bits", Loglevel.INFO.value)
+            self.tmc_logger.log("the Raspberry Pi received only the sended bits",
+                                Loglevel.INFO.value)
         elif len(rtn)==0:
-            self.log("the Raspberry Pi did not receive anything", Loglevel.INFO.value)
+            self.tmc_logger.log("the Raspberry Pi did not receive anything",
+                                Loglevel.INFO.value)
         else:
-            self.log("the Raspberry Pi received an unexpected amount of bits: "+
+            self.tmc_logger.log("the Raspberry Pi received an unexpected amount of bits: "+
                      str(len(rtn)), Loglevel.INFO.value)
 
         if snd[0:4] == rtn[0:4]:
-            self.log("""the Raspberry Pi received exactly the bits it has send.
+            self.tmc_logger.log("""the Raspberry Pi received exactly the bits it has send.
                      the first 4 bits are the same""", Loglevel.INFO.value)
         else:
-            self.log("""the Raspberry Pi did not received the bits it has send.
+            self.tmc_logger.log("""the Raspberry Pi did not received the bits it has send.
                      the first 4 bits are different""", Loglevel.INFO.value)
 
 
-        self.log("complete", Loglevel.DEBUG.value)
-        self.log(str(snd.hex()), Loglevel.DEBUG.value)
-        self.log(str(rtn.hex()), Loglevel.DEBUG.value)
+        self.tmc_logger.log("complete", Loglevel.DEBUG.value)
+        self.tmc_logger.log(str(snd.hex()), Loglevel.DEBUG.value)
+        self.tmc_logger.log(str(rtn.hex()), Loglevel.DEBUG.value)
 
-        self.log("just the first 4 bits", Loglevel.DEBUG.value)
-        self.log(str(snd[0:4].hex()), Loglevel.DEBUG.value)
-        self.log(str(rtn[0:4].hex()), Loglevel.DEBUG.value)
+        self.tmc_logger.log("just the first 4 bits", Loglevel.DEBUG.value)
+        self.tmc_logger.log(str(snd[0:4].hex()), Loglevel.DEBUG.value)
+        self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG.value)
 
 
-        self.log("---")
+        self.tmc_logger.log("---")
         return True
 
 
@@ -1769,8 +1748,8 @@ class TMC_2209:
                 steps (int): amount of steps; can be negative
         """
 
-        self.log("---", Loglevel.INFO.value)
-        self.log("test_stallguard_threshold", Loglevel.INFO.value)
+        self.tmc_logger.log("---", Loglevel.INFO.value)
+        self.tmc_logger.log("test_stallguard_threshold", Loglevel.INFO.value)
 
         self.set_spreadcycle(0)
 
@@ -1784,7 +1763,7 @@ class TMC_2209:
         while self._movement_phase != MovementPhase.STANDSTILL:
             stallguard_result = self.get_stallguard_result()
 
-            self.log(str(self._movement_phase) + " | " + str(stallguard_result),
+            self.tmc_logger.log(str(self._movement_phase) + " | " + str(stallguard_result),
                      Loglevel.INFO.value)
 
             if (self._movement_phase == MovementPhase.ACCELERATING and
@@ -1799,11 +1778,11 @@ class TMC_2209:
 
         self.wait_for_movement_finished_threaded()
 
-        self.log("---", Loglevel.INFO.value)
-        self.log("min StallGuard result during acceleration: " +
+        self.tmc_logger.log("---", Loglevel.INFO.value)
+        self.tmc_logger.log("min StallGuard result during acceleration: " +
                  str(min_stallguard_result_accel), Loglevel.INFO.value)
-        self.log("min StallGuard result during maxspeed: " +
+        self.tmc_logger.log("min StallGuard result during maxspeed: " +
                  str(min_stallguard_result_maxspeed), Loglevel.INFO.value)
-        self.log("min StallGuard result during deceleration: " +
+        self.tmc_logger.log("min StallGuard result during deceleration: " +
                  str(min_stallguard_result_decel), Loglevel.INFO.value)
-        self.log("---", Loglevel.INFO.value)
+        self.tmc_logger.log("---", Loglevel.INFO.value)

@@ -33,7 +33,7 @@ tmc = TMC_2209(21, 16, 20)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.set_loglevel(Loglevel.DEBUG)
+tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
@@ -107,9 +107,8 @@ tmc.test_stallguard_threshold(800)
 # 3. param: is the callback function (threaded)
 # 4. param (optional): min speed threshold (in steptime measured  in  clock  cycles)
 #-----------------------------------------------------------------------
-def my_callback(channel):
+def my_callback():
     """StallGuard callback"""
-    del channel
     print("StallGuard!")
     tmc.stop()
 
