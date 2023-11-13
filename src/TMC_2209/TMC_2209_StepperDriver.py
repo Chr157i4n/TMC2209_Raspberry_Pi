@@ -472,7 +472,8 @@ class TMC_2209:
 
     def do_homing(self, diag_pin, revolutions = 10, threshold = None, speed_rpm = None):
         """
-        homes the motor in the given direction using stallguard
+        homes the motor in the given direction using stallguard.
+        this method is using vactual to move the motor and an interrupt on the DIAG pin
 
             Parameters
                 diag_pin (int): DIAG pin number
@@ -516,7 +517,8 @@ class TMC_2209:
     def do_homing2(self, revolutions, threshold=None):
         """
         homes the motor in the given direction using stallguard
-        old function, uses STEP/DIR 
+        old function, uses STEP/DIR to move the motor and pulls the StallGuard result
+        from the interface
 
             Parameters
                 revolutions (int): max number of revolutions. Can be negative for inverse direction
@@ -578,6 +580,9 @@ class TMC_2209:
     def get_current_position(self):
         """
         returns the current motor position in microsteps
+
+            Returns:
+                current_pos (bool): current motor position
         """
         return self._current_pos
 
@@ -586,6 +591,9 @@ class TMC_2209:
     def set_current_position(self, new_pos):
         """
         overwrites the current motor position in microsteps
+
+            Parameters:
+                new_pos (bool): new position
         """
         self._current_pos = new_pos
 
@@ -603,6 +611,9 @@ class TMC_2209:
     def set_direction_pin(self, direction):
         """
         sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
+
+            Parameters:
+                direction (bool): motor shaft direction: 0 = CCW; 1 = CW
         """
         self._direction = direction
         GPIO.output(self._pin_dir, direction)
@@ -612,6 +623,9 @@ class TMC_2209:
     def get_direction_reg(self):
         """
         returns the motor shaft direction: 0 = CCW; 1 = CW
+
+            Returns:
+                direction (bool): motor shaft direction: 0 = CCW; 1 = CW
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         return gconf & tmc_reg.shaft
@@ -621,6 +635,9 @@ class TMC_2209:
     def set_direction_reg(self, direction):
         """
         sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
+
+            Parameters:
+                direction (bool): motor shaft direction: 0 = CCW; 1 = CW
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if direction:
@@ -636,6 +653,9 @@ class TMC_2209:
     def get_iscale_analog(self):
         """
         return whether Vref (1) or 5V (0) is used for current scale
+
+            Returns:
+                en (bool): whether Vref (1) or 5V (0) is used for current scale
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         return gconf & tmc_reg.i_scale_analog
@@ -645,6 +665,9 @@ class TMC_2209:
     def set_iscale_analog(self,en):
         """
         sets Vref (1) or 5V (0) for current scale
+
+            Parameters:
+                en (bool): whether Vref (1) or 5V (0) is used for current scale
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if en:
@@ -662,6 +685,9 @@ class TMC_2209:
         returns which sense resistor voltage is used for current scaling
         0: Low sensitivity, high sense resistor voltage
         1: High sensitivity, low sense resistor voltage
+
+            Returns:
+                en (bool): whether high sensitivity should is used
         """
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
         return chopconf & tmc_reg.vsense
@@ -673,6 +699,9 @@ class TMC_2209:
         sets which sense resistor voltage is used for current scaling
         0: Low sensitivity, high sense resistor voltage
         1: High sensitivity, low sense resistor voltage
+
+            Parameters:
+                en (bool): whether high sensitivity should be used
         """
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
         if en:
@@ -688,8 +717,13 @@ class TMC_2209:
     def get_internal_rsense(self):
         """
         returns which sense resistor voltage is used for current scaling
-        0: Low sensitivity, high sense resistor voltage
-        1: High sensitivity, low sense resistor voltage
+        0: Operation with external sense resistors
+        1: Internal sense resistors. Use current supplied into
+        VREF as reference for internal sense resistor. VREF
+        pin internally is driven to GND in this mode.
+
+            Returns:
+                en (bool): which sense resistor voltage is used
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         return gconf & tmc_reg.internal_rsense
@@ -699,8 +733,13 @@ class TMC_2209:
     def set_internal_rsense(self,en):
         """
         sets which sense resistor voltage is used for current scaling
-        0: Low sensitivity, high sense resistor voltage
-        1: High sensitivity, low sense resistor voltage
+        0: Operation with external sense resistors
+        1: Internal sense resistors. Use current supplied into
+        VREF as reference for internal sense resistor. VREF
+        pin internally is driven to GND in this mode.
+
+            Parameters:
+                en (bool):which sense resistor voltage is used; true will propably destroy your tmc
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if en:
@@ -715,16 +754,20 @@ class TMC_2209:
 
 
 
-    def set_irun_ihold(self, IHold, IRun, ihold_delay):
+    def set_irun_ihold(self, ihold, irun, ihold_delay):
         """
         sets the current scale (CS) for Running and Holding
         and the delay, when to be switched to Holding current
-        IHold = 0-31; IRun = 0-31; ihold_delay = 0-15
+
+            Parameters:
+                ihold (int): 0-31
+                irun (int): 0-31
+                ihold_delay (int): 0-15
         """
         ihold_irun = 0
 
-        ihold_irun = ihold_irun | IHold << 0
-        ihold_irun = ihold_irun | IRun << 8
+        ihold_irun = ihold_irun | ihold << 0
+        ihold_irun = ihold_irun | irun << 8
         ihold_irun = ihold_irun | ihold_delay << 16
         self.log("ihold_irun", Loglevel.INFO.value)
         self.log(str(bin(ihold_irun)), Loglevel.INFO.value)
@@ -740,6 +783,9 @@ class TMC_2209:
         0: PDN_UART controls standstill current reduction
         1: PDN_UART input function disabled. Set this bit,
         when using the UART interface!
+
+            Parameters:
+                pdn_disable (bool): whether pdn should be disabled
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if pdn_disable:
@@ -753,11 +799,17 @@ class TMC_2209:
 
 
     def set_current(self, run_current, hold_current_multiplier = 0.5, hold_current_delay = 10,
-                    use_vref=False, Vref = 1.2, pdn_disable = True):
+                    use_vref=False, vref = 1.2, pdn_disable = True):
         """
-        sets the current flow for the motor
-        run_current in mA
-        check whether Vref is actually 1.2V
+        sets the current flow for the motor. 
+
+            Parameters:
+                run_current (int): current during movement in mA
+                hold_current_multiplier (int): current multiplier during standstill
+                hold_current_delay (int): delay after standstill after which the current drops
+                use_vref (int): most driver have a trimpotentiometer to set the vref. optional
+                Vref (int): if you want to use Vref, you need to set the Vref Voltage
+                pdn_disable (bool): should be disabled if UART is used
         """
         cs_irun = 0
         rsense = 0.11
@@ -766,16 +818,16 @@ class TMC_2209:
         if use_vref:
             self.set_iscale_analog(True)
         else:
-            Vref=2.5
+            vref=2.5
             self.set_iscale_analog(False)
 
-        vfs = 0.325 * Vref / 2.5
+        vfs = 0.325 * vref / 2.5
         cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
 
         # If Current Scale is too low, turn on high sensitivity VSsense and calculate again
         if cs_irun < 16:
             self.log("CS too low; switching to VSense True", Loglevel.INFO.value)
-            vfs = 0.180 * Vref / 2.5
+            vfs = 0.180 * vref / 2.5
             cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
             self.setvsense(True)
         else: # If CS >= 16, turn off high_senser
@@ -808,6 +860,9 @@ class TMC_2209:
     def get_spreadcycle(self):
         """
         return whether spreadcycle (1) is active or stealthchop (0)
+
+            Parameters:
+                en_spread (bool): true = spreadcycle; false = stealthchop
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         return gconf & tmc_reg.en_spreadcycle
@@ -817,6 +872,9 @@ class TMC_2209:
     def set_spreadcycle(self,en_spread):
         """
         enables spreadcycle (1) or stealthchop (0)
+
+            Parameters:
+                en_spread (bool): true to enable spreadcycle; false to enable stealthchop
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
         if en_spread:
@@ -832,6 +890,9 @@ class TMC_2209:
     def get_interpolation(self):
         """
         return whether the tmc inbuilt interpolation is active
+
+            Returns:
+                en (bool): true if internal µstep interpolation is enabled
         """
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
         return bool(chopconf & tmc_reg.intpol)
@@ -841,6 +902,9 @@ class TMC_2209:
     def set_interpolation(self, en):
         """
         enables the tmc inbuilt interpolation of the steps to 256 microsteps
+
+            Parameters:
+                en (bool): true to enable internal µstep interpolation
         """
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
 
@@ -857,6 +921,9 @@ class TMC_2209:
     def get_microstepping_resolution(self):
         """
         returns the current native microstep resolution (1-256)
+
+            Returns:
+                msres (int): µstep resolution
         """
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
 
@@ -875,6 +942,9 @@ class TMC_2209:
     def set_microstepping_resolution(self, msres):
         """
         sets the current native microstep resolution (1,2,4,8,16,32,64,128,256)
+
+            Parameters:
+                msres (int): µstep resolution; has to be a power of 2 or 1 for fullstep
         """
         chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
         #setting all bits to zero
@@ -901,6 +971,9 @@ class TMC_2209:
         sets the register bit "mstep_reg_select" to 1 or 0 depending to the given value.
         this is needed to set the microstep resolution via UART
         this method is called by "set_microstepping_resolution"
+
+            Parameters:
+                en (bool): true to set µstep resolution via UART
         """
         gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
 
@@ -916,7 +989,11 @@ class TMC_2209:
 
     def read_steps_per_rev(self):
         """
-        returns how many steps are needed for one revolution
+        returns how many steps are needed for one revolution.
+        this reads the value from the tmc driver.
+
+            Returns:
+                steps_per_rev (int): Steps per revolution
         """
         self._steps_per_rev = self._fullsteps_per_rev*self.get_microstepping_resolution()
         return self._steps_per_rev
@@ -925,7 +1002,11 @@ class TMC_2209:
 
     def get_steps_per_rev(self):
         """
-        returns how many steps are needed for one revolution
+        returns how many steps are needed for one revolution.
+        this gets the cached value from the library.
+
+            Returns:
+                steps_per_rev (int): Steps per revolution
         """
         return self._steps_per_rev
 
@@ -949,6 +1030,9 @@ class TMC_2209:
     def get_tstep(self):
         """
         reads the current tstep from the driver register
+
+            Returns:
+                tstep (int): TStep time
         """
         tstep = self.tmc_uart.read_int(tmc_reg.TSTEP)
         return tstep
@@ -962,6 +1046,16 @@ class TMC_2209:
         VACTUAL allows moving the motor by UART control.
         It gives the motor velocity in +-(2^23)-1 [μsteps / t]
         0: Normal operation. Driver reacts to STEP input
+
+            Parameters:
+                vactual (int): value for vactual
+                duration (int): after this vactual will be set to 0
+                acceleration (int): use this for a velocity ramp
+                show_stallguard_result (bool): prints StallGuard Result during movement
+                show_tstep (bool): prints TStep during movement
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         self._stop = StopMode.NO
         current_vactual = 0
@@ -1018,6 +1112,15 @@ class TMC_2209:
         rotation speed in revolutions per second
         With internal oscillator:
         VACTUAL[2209] = v[Hz] / 0.715Hz
+
+            Parameters:
+                rps (int): value for vactual in rps
+                duration (int): after this vactual will be set to 0
+                revolutions (int): after this vactual will be set to 0
+                acceleration (int): use this for a velocity ramp
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         if revolutions == 0:
             return -1
@@ -1034,6 +1137,15 @@ class TMC_2209:
         """
         converts the rps parameter to a vactual value which represents
         rotation speed in revolutions per minute
+
+            Parameters:
+                rpm (int): value for vactual in rpm
+                duration (int): after this vactual will be set to 0
+                revolutions (int): after this vactual will be set to 0
+                acceleration (int): use this for a velocity ramp
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         return self.set_vactual_rps(rpm/60, duration, revolutions, acceleration)
 
@@ -1076,6 +1188,9 @@ class TMC_2209:
         """
         This  is  the  lower  threshold  velocity  for  switching  
         on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
+
+            Parameters:
+                threshold (int): threshold  velocity
         """
 
         self.log("tcoolthrs", Loglevel.INFO.value)
@@ -1121,6 +1236,9 @@ class TMC_2209:
         the callback function for StallGuard.
         only checks whether the duration of the current movement is longer than
         _sg_delay and then calls the actual callback
+
+            Parameters:
+                gpio_pin (int): pin number of the interrupt pin
         """
         del gpio_pin
         if self._sg_callback is None:
@@ -1136,6 +1254,9 @@ class TMC_2209:
         """
         returns the current Microstep counter.
         Indicates actual position in the microstep table for CUR_A
+
+            Returns:
+                mscnt (int): current Microstep counter
         """
         mscnt = self.tmc_uart.read_int(tmc_reg.MSCNT)
         return mscnt
@@ -1146,6 +1267,12 @@ class TMC_2209:
         """
         returns the current Microstep counter.
         Indicates actual position in the microstep table for CUR_A
+
+            Parameters:
+                offset (int): offset added to the current step counter
+
+            Returns:
+                step (int): current Microstep counter convertet to steps
         """
         step = (self.get_microstep_counter()-64)*(self._msres*4)/1024
         step = (4*self._msres)-step-1
@@ -1157,6 +1284,9 @@ class TMC_2209:
     def set_max_speed(self, speed):
         """
         sets the maximum motor speed in µsteps per second
+
+            Parameters:
+                speed (int): maximum speed in microsteps/sec
         """
         if speed < 0.0:
             speed = -speed
@@ -1173,6 +1303,9 @@ class TMC_2209:
     def set_max_speed_fullstep(self, speed):
         """
         sets the maximum motor speed in fullsteps per second
+
+            Parameters:
+                speed (int): maximum speed in fullsteps/sec
         """
         self.set_max_speed(speed*self._msres)
 
@@ -1181,6 +1314,9 @@ class TMC_2209:
     def get_max_speed(self):
         """
         returns the maximum motor speed in steps per second
+
+            Returns:
+                max_speed (int): current maximum speed in steps/sec
         """
         return self._max_speed
 
@@ -1189,6 +1325,9 @@ class TMC_2209:
     def set_acceleration(self, acceleration):
         """
         sets the motor acceleration/decceleration in µsteps per sec per sec
+
+            Parameters:
+                acceleration (int): acceleration/decceleration in µsteps per sec per sec
         """
         if acceleration == 0.0:
             return
@@ -1206,6 +1345,9 @@ class TMC_2209:
     def set_acceleration_fullstep(self, acceleration):
         """
         sets the motor acceleration/decceleration in fullsteps per sec per sec
+
+            Parameters:
+                acceleration (int): acceleration/decceleration in fullsteps per sec per sec
         """
         self.set_acceleration(acceleration*self._msres)
 
@@ -1214,6 +1356,9 @@ class TMC_2209:
     def get_acceleration(self):
         """
         returns the motor acceleration/decceleration in steps per sec per sec
+
+            Returns:
+                acceleration (int): acceleration/decceleration in µsteps per sec per sec
         """
         return self._acceleration
 
@@ -1233,6 +1378,9 @@ class TMC_2209:
     def get_movement_phase(self):
         """
         return the current Movement Phase
+
+            Returns:
+                movement_phase (enum): current Movement Phase
         """
         return self._movement_phase
 
@@ -1245,6 +1393,13 @@ class TMC_2209:
         blocks the code until finished or stopped from a different thread!
         returns true when the movement if finshed normally and false,
         when the movement was stopped
+
+            Parameters:
+                steps (int): amount of steps; can be negative
+                movement_abs_rel (enum): whether the movement should be absolut or relative
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         if movement_abs_rel is None:
             movement_abs_rel = self._movement_abs_rel
@@ -1273,6 +1428,13 @@ class TMC_2209:
         runs the motor to the given position.
         with acceleration and deceleration
         blocks the code until finished!
+
+            Parameters:
+                revolutions (int): amount of revs; can be negative
+                movement_abs_rel (enum): whether the movement should be absolut or relative
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         return self.run_to_position_steps(round(revolutions * self._steps_per_rev),
                                           movement_absolute_relative)
@@ -1286,6 +1448,13 @@ class TMC_2209:
         does not block the code
         returns true when the movement if finshed normally and false,
         when the movement was stopped
+
+            Parameters:
+                steps (int): amount of steps; can be negative
+                movement_abs_rel (enum): whether the movement should be absolut or relative
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         self._movement_thread = threading.Thread(target=self.run_to_position_steps,
                                                  args=(steps, movement_abs_rel))
@@ -1298,6 +1467,13 @@ class TMC_2209:
         runs the motor to the given position.
         with acceleration and deceleration
         does not block the code
+
+            Parameters:
+                revolutions (int): amount of revs; can be negative
+                movement_abs_rel (enum): whether the movement should be absolut or relative
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         return self.run_to_position_steps_threaded(round(revolutions * self._steps_per_rev),
                                                    movement_absolute_relative)
@@ -1310,6 +1486,9 @@ class TMC_2209:
         if startet threaded
         returns true when the movement if finshed normally and false,
         when the movement was stopped
+
+            Returns:
+                stop (enum): how the movement was finished
         """
         self._movement_thread.join()
         return self._stop
@@ -1585,6 +1764,9 @@ class TMC_2209:
         test method for tuning stallguard threshold
         run this function with your motor settings and your motor load
         the function will determine the minimum stallguard results for each movement phase
+
+            Parameters:
+                steps (int): amount of steps; can be negative
         """
 
         self.log("---", Loglevel.INFO.value)
