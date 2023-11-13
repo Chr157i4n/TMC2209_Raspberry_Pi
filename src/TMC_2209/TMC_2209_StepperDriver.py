@@ -1122,6 +1122,7 @@ class TMC_2209:
         only checks whether the duration of the current movement is longer than
         _sg_delay and then calls the actual callback
         """
+        del gpio_pin
         if self._sg_callback is None:
             self.log("StallGuard callback is None", Loglevel.DEBUG.value)
             return
