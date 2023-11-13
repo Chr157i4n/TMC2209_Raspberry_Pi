@@ -294,7 +294,8 @@ class TMC_2209:
         else:
             self.tmc_logger.log("Driver is using internal reference derived from 5VOUT")
         if gconf & tmc_reg.internal_rsense:
-            self.tmc_logger.log("Internal sense resistors. Use current supplied into VREF as reference.")
+            self.tmc_logger.log("""Internal sense resistors.
+                                Use current supplied into VREF as reference.""")
             self.tmc_logger.log("VREF pin internally is driven to GND in this mode.")
             self.tmc_logger.log("This will most likely destroy your driver!!!")
             raise SystemExit
@@ -342,7 +343,8 @@ class TMC_2209:
             self.tmc_logger.log("""The driver has been shut down due to overtemperature or
                      short circuit detection since the last read access""")
         if gstat & tmc_reg.uv_cp:
-            self.tmc_logger.log("Undervoltage on the charge pump. The driver is disabled in this case")
+            self.tmc_logger.log("""Undervoltage on the charge pump.
+                                The driver is disabled in this case""")
         self.tmc_logger.log("---")
         return gstat
 
@@ -1704,7 +1706,7 @@ class TMC_2209:
         self.tmc_logger.log("length rtn: "+str(len(rtn)), Loglevel.DEBUG.value)
 
         if len(rtn)==12:
-            self.tmc_logger.log("""the Raspberry Pi received the sended 
+            self.tmc_logger.log("""the Raspberry Pi received the sended
                                 bits and the answer from the TMC""",Loglevel.INFO.value)
         elif len(rtn)==4:
             self.tmc_logger.log("the Raspberry Pi received only the sended bits",
