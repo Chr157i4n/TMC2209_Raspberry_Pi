@@ -1116,7 +1116,7 @@ class TMC_2209:
 
 
 
-    def stallguard_callback(self, channel):
+    def stallguard_callback(self, gpio_pin):
         """
         the callback function for StallGuard.
         only checks whether the duration of the current movement is longer than
@@ -1127,7 +1127,7 @@ class TMC_2209:
             return
         if time.time()<=self._starttime+self._sg_delay and self._sg_delay != 0:
             return
-        self._sg_callback(channel)
+        self._sg_callback()
 
 
 
@@ -1221,6 +1221,9 @@ class TMC_2209:
     def stop(self, stop_mode = StopMode.HARDSTOP):
         """
         stop the current movement
+
+            Parameters:
+                stop_mode (enum): whether the movement should be stopped immediatly or softly
         """
         self._stop = stop_mode
 
