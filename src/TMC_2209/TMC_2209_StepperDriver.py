@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
 #pylint: disable=import-error
-#pylint: disable=too-many-lines
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
 #pylint: disable=too-many-branches
