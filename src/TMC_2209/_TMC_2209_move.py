@@ -43,6 +43,39 @@ class StopMode(Enum):
     HARDSTOP = 2
 
 
+def set_movement_abs_rel(self, movement_abs_rel):
+    """
+    set whether the movment should be relative or absolute by default.
+    See the Enum MovementAbsoluteRelative
+
+        Paramters:
+            movement_abs_rel (enum): whether the movment should be relative or absolute
+    """
+    self._movement_abs_rel = movement_abs_rel
+
+
+
+def get_current_position(self):
+    """
+    returns the current motor position in microsteps
+
+        Returns:
+            current_pos (bool): current motor position
+    """
+    return self._current_pos
+
+
+
+def set_current_position(self, new_pos):
+    """
+    overwrites the current motor position in microsteps
+
+        Parameters:
+            new_pos (bool): new position
+    """
+    self._current_pos = new_pos
+
+
 
 def set_max_speed(self, speed):
     """
