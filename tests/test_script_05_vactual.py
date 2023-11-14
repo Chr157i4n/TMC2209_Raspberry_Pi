@@ -60,10 +60,10 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # these functions read and print the current settings in the TMC register
 #-----------------------------------------------------------------------
-tmc.readIOIN()
-tmc.readCHOPCONF()
-tmc.readDRVSTATUS()
-tmc.readGCONF()
+tmc.read_ioin()
+tmc.read_chopconf()
+tmc.read_drv_status()
+tmc.read_gconf()
 
 print("---\n---")
 
@@ -84,13 +84,13 @@ tmc.set_motor_enabled(True)
 # move the motor for 1 second forward, stop for 1 second
 # and then move backwards for 1 second
 #-----------------------------------------------------------------------
-#tmc.set_vactual(400)
+#tmc.set_vactual_dur(400)
 #time.sleep(1)
-#tmc.set_vactual(0)
+#tmc.set_vactual_dur(0)
 #time.sleep(1)
-#tmc.set_vactual(-400)
+#tmc.set_vactual_dur(-400)
 #time.sleep(1)
-#tmc.set_vactual(0)
+#tmc.set_vactual_dur(0)
 
 
 

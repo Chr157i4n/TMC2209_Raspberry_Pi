@@ -38,8 +38,12 @@ class TMC_logger:
                 logprefix (string): new logprefix
                 loglevel (enum): level for which to log
         """
-        self._loglevel = loglevel
-        self._logprefix = logprefix
+        if loglevel is not None:
+            self._loglevel = loglevel
+        if logprefix is not None:
+            self._logprefix = logprefix
+        else:
+            self._logprefix = "TMC2209"
 
 
 
@@ -65,7 +69,7 @@ class TMC_logger:
 
 
 
-    def log(self, message, loglevel=Loglevel.NONE.value):
+    def log(self, message, loglevel=Loglevel.NONE):
         """
         logs a message
 
@@ -73,5 +77,5 @@ class TMC_logger:
                 message (string): message to log
                 loglevel (enum): level for which to log
         """
-        if self._loglevel.value >= loglevel:
+        if self._loglevel.value >= loglevel.value:
             print(self._logprefix+": " +message)
