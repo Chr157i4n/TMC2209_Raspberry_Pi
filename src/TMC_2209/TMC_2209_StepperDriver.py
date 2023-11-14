@@ -152,7 +152,7 @@ class TMC_2209:
 
         self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
 
-        if skip_uart_init:
+        if not skip_uart_init:
             self.read_steps_per_rev()
             self.clear_gstat()
 
@@ -379,7 +379,7 @@ class TMC_2209:
             Returns:
                 steps_per_rev (int): Steps per revolution
         """
-        self._steps_per_rev = self._fullsteps_per_rev*self.get_microstepping_resolution()
+        self._steps_per_rev = self._fullsteps_per_rev*self.read_microstepping_resolution()
         return self._steps_per_rev
 
 
@@ -483,11 +483,9 @@ class TMC_2209:
             Returns:
                 stop (enum): how the movement was finished
         """
-        if revolutions == 0:
-            return -1
-        print("vactual")
         vactual = tmc_math.rps_to_vactual(rps, self._steps_per_rev)
-        duration = abs(revolutions/rps)
+        if revolutions!=0:
+            duration = abs(revolutions/rps)
         if revolutions<0:
             vactual = -vactual
         return self.set_vactual_dur(vactual, duration, acceleration=acceleration)
