@@ -94,12 +94,12 @@ class TMC_2209:
 
 
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-                 driver_address=0, gpio_mode=GPIO.BCM, loglevel = None):
+                 driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
         """
         constructor
         """
         self.init(pin_en, pin_step, pin_dir, baudrate, serialport, driver_address,
-                  gpio_mode, loglevel)
+                  gpio_mode, loglevel, skip_uart_init)
 
 
 
@@ -114,7 +114,7 @@ class TMC_2209:
 
 
     def init(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-    driver_address=0, gpio_mode=GPIO.BCM, loglevel = None):
+    driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
         """
         init function
         
@@ -153,8 +153,9 @@ class TMC_2209:
 
         self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
 
-        self.read_steps_per_rev()
-        self.clear_gstat()
+        if skip_uart_init:
+            self.read_steps_per_rev()
+            self.clear_gstat()
 
         self.tmc_uart.flush_serial_buffer()
         self.tmc_logger.log("Init finished", Loglevel.INFO)

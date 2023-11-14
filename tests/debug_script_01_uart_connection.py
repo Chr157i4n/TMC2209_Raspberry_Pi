@@ -22,7 +22,7 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21, 16, 20, no_uart=True)
+tmc = TMC_2209(21, 16, 20, skip_uart_init=True)
 
 
 

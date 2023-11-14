@@ -1,6 +1,8 @@
 #pylint: disable=invalid-name
 #pylint: disable=too-many-public-methods
 #pylint: disable=too-many-branches
+#pylint: disable=import-error
+#pylint: disable=protected-access
 """
 TMC_2209 stepper driver communication module
 """
