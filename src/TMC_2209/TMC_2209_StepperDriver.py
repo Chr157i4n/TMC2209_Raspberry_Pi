@@ -19,7 +19,6 @@ except:
 from ._TMC_2209_uart import TMC_UART as tmc_uart
 from ._TMC_2209_logger import TMC_logger, Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase, StopMode
-from . import _TMC_2209_reg as tmc_reg
 from . import _TMC_2209_math as tmc_math
 
 
