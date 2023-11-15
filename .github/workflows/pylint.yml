@@ -19,6 +19,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install RPi.GPIO
+        pip install Mock.GPIO
+        pip install mock
+        pip install bitstring
+        pip install pyserial
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py') --disable=C0103 --extension-pkg-whitelist=RPi
