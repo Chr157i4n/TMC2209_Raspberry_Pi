@@ -408,7 +408,7 @@ def set_pdn_disable(self,pdn_disable):
 def set_current(self, run_current, hold_current_multiplier = 0.5,
                 hold_current_delay = 10, pdn_disable = True):
     """
-    sets the current flow for the motor. 
+    sets the current flow for the motor.
 
         Parameters:
             run_current (int): current during movement in mA
@@ -681,7 +681,7 @@ def set_stallguard_threshold(self, threshold):
 
 def set_coolstep_threshold(self, threshold):
     """
-    This  is  the  lower  threshold  velocity  for  switching  
+    This  is  the  lower  threshold  velocity  for  switching
     on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
 
         Parameters:

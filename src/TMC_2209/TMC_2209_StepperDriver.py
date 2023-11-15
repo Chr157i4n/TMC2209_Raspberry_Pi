@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-#pylint: disable=import-error
+#pylint: disable=no-member
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
 #pylint: disable=too-many-branches
@@ -121,7 +121,7 @@ class TMC_2209:
     driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
         """
         init function
-        
+
             Parameters:
                 pin_en (int): Pin number of EN pin
                 pin_step (int): Pin number of STEP pin
@@ -484,7 +484,7 @@ class TMC_2209:
     def set_stallguard_callback(self, pin_stallguard, threshold, callback,
                                 min_speed = 100, ignore_delay = 0):
         """
-        set a function to call back, when the driver detects a stall 
+        set a function to call back, when the driver detects a stall
         via stallguard
         high value on the diag pin can also mean a driver error
 

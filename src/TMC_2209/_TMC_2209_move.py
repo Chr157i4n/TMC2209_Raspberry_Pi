@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name
 #pylint: disable=too-many-public-methods
 #pylint: disable=too-many-branches
-#pylint: disable=import-error
+#pylint: disable=no-member
 #pylint: disable=protected-access
 """
 TMC_2209 stepper driver communication module
@@ -301,7 +301,7 @@ def run(self):
         self.compute_new_speed()
         #self.tmc_logger.log(self.get_stallguard_result())
         #self.tmc_logger.log(self.get_tstep())
-    return (self._speed != 0.0 and self.distance_to_go() != 0)
+    return self._speed != 0.0 and self.distance_to_go() != 0
 
 
 
@@ -316,7 +316,7 @@ def distance_to_go(self):
 def compute_new_speed(self):
     """
     returns the calculated current speed depending on the acceleration
-    this code is based on: 
+    this code is based on:
     "Generate stepper-motor speed profiles in real time" by David Austin
 
     https://www.embedded.com/generate-stepper-motor-speed-profiles-in-real-time/
