@@ -164,6 +164,9 @@ class TMC_2209:
         self.tmc_uart.flush_serial_buffer()
         self.tmc_logger.log("Init finished", Loglevel.INFO)
 
+        self.set_max_speed_fullstep(100)
+        self.set_acceleration_fullstep(100)
+
 
 
     def deinit(self):
