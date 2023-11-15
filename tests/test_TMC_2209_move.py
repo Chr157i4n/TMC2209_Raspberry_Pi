@@ -27,31 +27,38 @@ class TestTMCMove(unittest.TestCase):
 
         self.tmc.run_to_position_steps(400, MovementAbsRel.RELATIVE)
         pos = self.tmc.get_current_position()
-        self.assertEqual(pos, 400, "run_to_position_steps is wrong")
+        self.assertEqual(pos, 400, "run_to_position_steps relative movement is wrong")
 
         self.tmc.run_to_position_steps(-200, MovementAbsRel.RELATIVE)
         pos = self.tmc.get_current_position()
-        self.assertEqual(pos, 200, "run_to_position_steps is wrong")
+        self.assertEqual(pos, 200, "run_to_position_steps relative movement is wrong")
 
         self.tmc.run_to_position_steps(400)
         pos = self.tmc.get_current_position()
-        self.assertEqual(pos, 400, "run_to_position_steps is wrong")
+        self.assertEqual(pos, 400, "run_to_position_steps absolute movement is wrong")
 
     def test_run_to_position_steps_threaded(self):
         self.tmc.run_to_position_steps_threaded(400, MovementAbsRel.RELATIVE)
         self.tmc.wait_for_movement_finished_threaded()
         pos = self.tmc.get_current_position()
-        self.assertEqual(pos, 400, "run_to_position_steps_threaded is wrong")
+        self.assertEqual(pos, 400, "run_to_position_steps_threaded relative movement is wrong")
 
         self.tmc.run_to_position_steps_threaded(-200, MovementAbsRel.RELATIVE)
         self.tmc.wait_for_movement_finished_threaded()
         pos = self.tmc.get_current_position()
-        self.assertEqual(pos, 200, "run_to_position_steps_threaded is wrong")
+        self.assertEqual(pos, 200, "run_to_position_steps_threaded relative movement is wrong")
 
         self.tmc.run_to_position_steps_threaded(400)
         self.tmc.wait_for_movement_finished_threaded()
         pos = self.tmc.get_current_position()
-        self.assertEqual(pos, 400, "run_to_position_steps_threaded is wrong")
+        self.assertEqual(pos, 400, "run_to_position_steps_threaded absolute movement is wrong")
+
+        self.tmc.run_to_position_steps_threaded(800)
+        time.sleep(0.05)
+        self.tmc.stop()
+        pos = self.tmc.get_current_position()
+        print(f"motorposition: {pos}")
+        self.assertTrue(400 < pos < 800, "run_to_position_steps_threaded stop movement is wrong")
 
 if __name__ == '__main__':
     unittest.main()
