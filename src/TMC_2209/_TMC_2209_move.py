@@ -303,8 +303,6 @@ def run(self):
     """
     if self.run_speed(): #returns true, when a step is made
         self.compute_new_speed()
-        #self.tmc_logger.log(self.get_stallguard_result())
-        #self.tmc_logger.log(self.get_tstep())
     return self._speed != 0.0 and self.distance_to_go() != 0
 
 
@@ -371,7 +369,6 @@ def compute_new_speed(self):
         # First step from stopped
         self._cn = self._c0
         GPIO.output(self._pin_step, GPIO.LOW)
-        #self.tmc_logger.log("distance to: " + str(distance_to))
         if distance_to > 0:
             self.set_direction_pin(1)
             self.tmc_logger.log("going CW", Loglevel.MOVEMENT)
@@ -402,9 +399,6 @@ def run_speed(self):
         return False
 
     curtime = time.time_ns()/1000
-
-    #self.tmc_logger.log("current time: " + str(curtime))
-    #self.tmc_logger.log("last st time: " + str(self._last_step_time))
 
     if curtime - self._last_step_time >= self._step_interval:
 

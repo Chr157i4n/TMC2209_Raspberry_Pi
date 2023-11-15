@@ -43,9 +43,9 @@ class TMC_UART:
             self.ser = serial.Serial (serialport, baudrate)
         except Exception as e:
             errnum = e.args[0]
-            self.tmc_logger.log("SERIAL ERROR: "+str(e))
+            self.tmc_logger.log(f"SERIAL ERROR: {e}")
             if errnum == 2:
-                self.tmc_logger.log(""""+str(serialport)+" does not exist.
+                self.tmc_logger.log(f""""{serialport} does not exist.
                       You need to activate the serial port with \"sudo raspi-config\"""")
             if errnum == 13:
                 self.tmc_logger.log("""you have no permission to use the serial port.
@@ -118,7 +118,7 @@ class TMC_UART:
         time.sleep(self.communication_pause)
 
         rtn = self.ser.read(12)
-        #self.tmc_logger.log("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
+        #self.tmc_logger.log(f"received {len(rtn)} bytes; {len(rtn*8)} bits")
         #self.tmc_logger.log(rtn.hex())
 
         time.sleep(self.communication_pause)
@@ -139,8 +139,8 @@ class TMC_UART:
             not_zero_count = len([elem for elem in rtn if elem != 0])
 
             if(len(rtn)<12 or not_zero_count == 0):
-                self.tmc_logger.log("UART Communication Error: "+str(len(rtn_data))+
-                      " data bytes | "+str(len(rtn))+" total bytes")
+                self.tmc_logger.log(f"""UART Communication Error:
+                                    {len(rtn_data)} data bytes | {len(rtn)} total bytes""")
             elif rtn[11] != self.compute_crc8_atm(rtn[4:11]):
                 self.tmc_logger.log("UART Communication Error: CRC MISMATCH")
             else:
@@ -148,8 +148,8 @@ class TMC_UART:
 
             if tries<=0:
                 self.tmc_logger.log("after 10 tries not valid answer")
-                self.tmc_logger.log("snd:\t"+str(bytes(self.r_frame)))
-                self.tmc_logger.log("rtn:\t"+str(rtn))
+                self.tmc_logger.log(f"snd:\t{bytes(self.r_frame)}")
+                self.tmc_logger.log(f"rtn:\t{rtn}")
                 self.handle_error()
                 return -1
 
@@ -293,10 +293,10 @@ class TMC_UART:
         time.sleep(self.communication_pause)
 
         rtn = self.ser.read(12)
-        self.tmc_logger.log("received "+str(len(rtn))+" bytes; "+str(len(rtn)*8)+" bits")
-        self.tmc_logger.log("hex: "+str(rtn.hex()))
+        self.tmc_logger.log(f"received {len(rtn)} bytes; {len(rtn)*8} bits")
+        self.tmc_logger.log(f"hex: {rtn.hex()}")
         c = BitArray(hex=rtn.hex())
-        self.tmc_logger.log("bin: "+str(c.bin))
+        self.tmc_logger.log(f"bin: {c.bin}")
 
         time.sleep(self.communication_pause)
 

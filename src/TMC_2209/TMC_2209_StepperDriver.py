@@ -137,7 +137,7 @@ class TMC_2209:
                 gpio_mode (enum): numbering system for the GPIO pins
                 loglevel (enum): level for which to log
         """
-        self.tmc_logger = TMC_logger(loglevel, "TMC2209 "+str(driver_address))
+        self.tmc_logger = TMC_logger(loglevel, f"TMC2209 {driver_address}")
         self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
 
 
@@ -145,16 +145,16 @@ class TMC_2209:
         GPIO.setwarnings(False)
         GPIO.setmode(gpio_mode)
 
-        self.tmc_logger.log("EN Pin: " + str(pin_en), Loglevel.DEBUG)
+        self.tmc_logger.log("EN Pin: {pin_en}", Loglevel.DEBUG)
         self._pin_en = pin_en
         GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
 
-        self.tmc_logger.log("STEP Pin: " + str(pin_step), Loglevel.DEBUG)
+        self.tmc_logger.log("STEP Pin: {pin_step}", Loglevel.DEBUG)
         if pin_step != -1:
             self._pin_step = pin_step
             GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
 
-        self.tmc_logger.log("DIR Pin: " + str(pin_dir), Loglevel.DEBUG)
+        self.tmc_logger.log("DIR Pin: {pin_dir}", Loglevel.DEBUG)
         if pin_dir != -1:
             self._pin_dir = pin_dir
             GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
@@ -245,7 +245,7 @@ class TMC_2209:
         # StallGuard only works with StealthChop
         self.set_spreadcycle(0)
 
-        self.tmc_logger.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG)
+        self.tmc_logger.log(f"Stallguard threshold: {self._sg_threshold}", Loglevel.DEBUG)
 
         self.set_stallguard_callback(diag_pin, self._sg_threshold, self.stop,
                                      0.5*tmc_math.rps_to_steps(speed_rpm/60, self._steps_per_rev))
@@ -282,7 +282,7 @@ class TMC_2209:
         self.tmc_logger.log("---", Loglevel.INFO)
         self.tmc_logger.log("homing", Loglevel.INFO)
 
-        self.tmc_logger.log("Stallguard threshold:"+str(self._sg_threshold), Loglevel.DEBUG)
+        self.tmc_logger.log(f"Stallguard threshold: {self._sg_threshold}", Loglevel.DEBUG)
 
         self.set_direction_pin(revolutions > 0)
 
@@ -302,7 +302,7 @@ class TMC_2209:
 
 
         step_counter=0
-        #self.tmc_logger.log("Steps per Revolution: "+str(self._steps_per_rev))
+        #self.tmc_logger.log("Steps per Revolution: {self._steps_per_rev}"")
         while step_counter<self._target_pos:
             if self.run_speed(): #returns true, when a step is made
                 step_counter += 1
@@ -316,12 +316,12 @@ class TMC_2209:
 
         if step_counter<self._steps_per_rev:
             self.tmc_logger.log("homing successful",Loglevel.INFO)
-            self.tmc_logger.log("Stepcounter: "+str(step_counter),Loglevel.DEBUG)
+            self.tmc_logger.log(f"Stepcounter: {step_counter}",Loglevel.DEBUG)
             self.tmc_logger.log(str(sg_results),Loglevel.DEBUG)
             self._current_pos = 0
         else:
             self.tmc_logger.log("homing failed", Loglevel.INFO)
-            self.tmc_logger.log("Stepcounter: "+str(step_counter), Loglevel.DEBUG)
+            self.tmc_logger.log(f"Stepcounter: {step_counter}", Loglevel.DEBUG)
             self.tmc_logger.log(str(sg_results),Loglevel.DEBUG)
 
         self.tmc_logger.log("---", Loglevel.INFO)
@@ -399,15 +399,15 @@ class TMC_2209:
             acceleration = -acceleration
 
         if duration != 0:
-            self.tmc_logger.log("vactual: "+str(vactual)+" for "+str(duration)+" sec",
+            self.tmc_logger.log(f"vactual: {vactual} for {duration} sec",
                                 Loglevel.INFO)
         else:
-            self.tmc_logger.log("vactual: "+str(vactual), Loglevel.INFO)
+            self.tmc_logger.log(f"vactual: {vactual}", Loglevel.INFO)
         self.tmc_logger.log(str(bin(vactual)), Loglevel.INFO)
 
         self.tmc_logger.log("writing vactual", Loglevel.INFO)
         if acceleration == 0:
-            self.tmc_uart.write_reg_check(tmc_reg.VACTUAL, vactual)
+            self.set_vactual(int(round(vactual)))
 
         if duration == 0:
             return -1
@@ -423,24 +423,22 @@ class TMC_2209:
                     time_to_stop = current_time-1
             if acceleration != 0 and current_time > time_to_stop:
                 current_vactual -= acceleration*sleeptime
-                self.tmc_uart.write_reg_check(tmc_reg.VACTUAL,
-                                                       int(round(current_vactual)))
+                self.set_vactual(int(round(current_vactual)))
                 time.sleep(sleeptime)
             elif acceleration != 0 and abs(current_vactual)<abs(vactual):
                 current_vactual += acceleration*sleeptime
-                self.tmc_uart.write_reg_check(tmc_reg.VACTUAL,
-                                                       int(round(current_vactual)))
+                self.set_vactual(int(round(current_vactual)))
                 time.sleep(sleeptime)
             if show_stallguard_result:
-                self.tmc_logger.log("StallGuard result: "+
-                                    str(self.get_stallguard_result()), Loglevel.INFO)
+                self.tmc_logger.log(f"StallGuard result: {self.get_stallguard_result()}",
+                                    Loglevel.INFO)
                 time.sleep(0.1)
             if show_tstep:
-                self.tmc_logger.log("TStep result: "+str(self.get_tstep()),
+                self.tmc_logger.log(f"TStep result: {self.get_tstep()}",
                                     Loglevel.INFO)
                 time.sleep(0.1)
             current_time = time.time()
-        self.tmc_uart.write_reg_check(tmc_reg.VACTUAL, 0)
+        self.set_vactual(0)
         return self._stop
 
 
@@ -501,10 +499,10 @@ class TMC_2209:
                 callback (function): will be called on StallGuard trigger
                 min_speed (int): min speed [steps/s] for StallGuard
         """
-        self.tmc_logger.log("setup stallguard callback on GPIO"+str(pin_stallguard),
+        self.tmc_logger.log(f"setup stallguard callback on GPIO {pin_stallguard}",
                             Loglevel.INFO)
-        self.tmc_logger.log("StallGuard Threshold: "+str(threshold)+"\tminimum Speed: "+
-                            str(min_speed), Loglevel.INFO)
+        self.tmc_logger.log(f"""StallGuard Threshold: {threshold}
+                            minimum Speed: {min_speed}""", Loglevel.INFO)
 
         self.set_stallguard_threshold(threshold)
         self.set_coolstep_threshold(tmc_math.steps_to_tstep(

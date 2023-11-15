@@ -36,7 +36,7 @@ def read_drv_status(self):
 
     cs_actual = drvstatus & tmc_reg.cs_actual
     cs_actual = cs_actual >> 16
-    self.tmc_logger.log("CS actual: "+str(cs_actual))
+    self.tmc_logger.log(f"CS actual: {cs_actual}")
 
     if drvstatus & tmc_reg.olb:
         self.tmc_logger.log("Warning: Open load detected on phase B")
@@ -206,7 +206,7 @@ def read_chopconf(self):
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     self.tmc_logger.log(bin(chopconf), Loglevel.INFO)
 
-    self.tmc_logger.log("native "+str(self.get_microstepping_resolution())+" microstep setting")
+    self.tmc_logger.log(f"native {self.get_microstepping_resolution()} microstep setting")
 
     if chopconf & tmc_reg.intpol:
         self.tmc_logger.log("interpolation to 256 microsteps")
@@ -376,8 +376,7 @@ def set_irun_ihold(self, ihold, irun, ihold_delay):
     ihold_irun = ihold_irun | ihold << 0
     ihold_irun = ihold_irun | irun << 8
     ihold_irun = ihold_irun | ihold_delay << 16
-    self.tmc_logger.log("ihold_irun", Loglevel.INFO)
-    self.tmc_logger.log(str(bin(ihold_irun)), Loglevel.INFO)
+    self.tmc_logger.log(f"ihold_irun: {bin(ihold_irun)}", Loglevel.INFO)
 
     self.tmc_logger.log("writing ihold_irun", Loglevel.INFO)
     self.tmc_uart.write_reg_check(tmc_reg.IHOLD_IRUN, ihold_irun)
@@ -446,13 +445,13 @@ def set_current(self, run_current, hold_current_multiplier = 0.5,
     CS_IHold = round(CS_IHold)
     hold_current_delay = round(hold_current_delay)
 
-    self.tmc_logger.log("cs_irun: " + str(cs_irun), Loglevel.INFO)
-    self.tmc_logger.log("CS_IHold: " + str(CS_IHold), Loglevel.INFO)
-    self.tmc_logger.log("Delay: " + str(hold_current_delay), Loglevel.INFO)
+    self.tmc_logger.log(f"cs_irun: {cs_irun}", Loglevel.INFO)
+    self.tmc_logger.log(f"CS_IHold: {CS_IHold}", Loglevel.INFO)
+    self.tmc_logger.log(f"Delay: {hold_current_delay}", Loglevel.INFO)
 
     # return (float)(CS+1)/32.0 * (vsense() ? 0.180 : 0.325)/(rsense+0.02) / 1.41421 * 1000;
     run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
-    self.tmc_logger.log("actual current: "+str(round(run_current_actual))+" mA",
+    self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
                         Loglevel.INFO)
 
     self.set_irun_ihold(CS_IHold, cs_irun, hold_current_delay)
@@ -517,7 +516,7 @@ def set_interpolation(self, en):
     else:
         chopconf = self.tmc_uart.clear_bit(chopconf, tmc_reg.intpol)
 
-    self.tmc_logger.log("writing microstep interpolation setting: "+str(en),
+    self.tmc_logger.log(f"writing microstep interpolation setting: {str(en)}",
                         Loglevel.INFO)
     self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf)
 
@@ -573,7 +572,7 @@ def set_microstepping_resolution(self, msres):
     chopconf = int(chopconf) & int(4043309055)
     chopconf = chopconf | msresdezimal <<24
 
-    self.tmc_logger.log("writing "+str(msres)+" microstep setting", Loglevel.INFO)
+    self.tmc_logger.log(f"writing {msres} microstep setting", Loglevel.INFO)
     self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf)
 
     self._msres = msres
@@ -600,7 +599,7 @@ def set_mstep_resolution_reg_select(self, en):
     else:
         gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.mstep_reg_select)
 
-    self.tmc_logger.log("writing MStep Reg Select: "+str(en), Loglevel.INFO)
+    self.tmc_logger.log(f"writing MStep Reg Select: {en}", Loglevel.INFO)
     self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
 
 
@@ -615,7 +614,7 @@ def get_interface_transmission_counter(self):
             ifcnt (int): 8bit IFCNT Register
     """
     ifcnt = self.tmc_uart.read_int(tmc_reg.IFCNT)
-    self.tmc_logger.log("Interface Transmission Counter: "+str(ifcnt), Loglevel.INFO)
+    self.tmc_logger.log(f"Interface Transmission Counter: {ifcnt}", Loglevel.INFO)
     return ifcnt
 
 
@@ -671,8 +670,7 @@ def set_stallguard_threshold(self, threshold):
             threshold (int): value for SGTHRS
     """
 
-    self.tmc_logger.log("sgthrs", Loglevel.INFO)
-    self.tmc_logger.log(str(bin(threshold)), Loglevel.INFO)
+    self.tmc_logger.log(f"sgthrs {bin(threshold)}", Loglevel.INFO)
 
     self.tmc_logger.log("writing sgthrs", Loglevel.INFO)
     self.tmc_uart.write_reg_check(tmc_reg.SGTHRS, threshold)
@@ -688,8 +686,7 @@ def set_coolstep_threshold(self, threshold):
             threshold (int): threshold  velocity
     """
 
-    self.tmc_logger.log("tcoolthrs", Loglevel.INFO)
-    self.tmc_logger.log(str(bin(threshold)), Loglevel.INFO)
+    self.tmc_logger.log(f"tcoolthrs {bin(threshold)}", Loglevel.INFO)
 
     self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO)
     self.tmc_uart.write_reg_check(tmc_reg.TCOOLTHRS, threshold)

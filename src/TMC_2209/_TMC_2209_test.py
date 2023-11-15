@@ -108,8 +108,8 @@ def test_uart(self):
     snd = result[0]
     rtn = result[1]
 
-    self.tmc_logger.log("length snd: "+str(len(snd)), Loglevel.DEBUG)
-    self.tmc_logger.log("length rtn: "+str(len(rtn)), Loglevel.DEBUG)
+    self.tmc_logger.log(f"length snd: {len(snd)}", Loglevel.DEBUG)
+    self.tmc_logger.log(f"length rtn: {len(rtn)}", Loglevel.DEBUG)
 
     if len(rtn)==12:
         self.tmc_logger.log("""the Raspberry Pi received the sended
@@ -121,8 +121,8 @@ def test_uart(self):
         self.tmc_logger.log("the Raspberry Pi did not receive anything",
                             Loglevel.INFO)
     else:
-        self.tmc_logger.log("the Raspberry Pi received an unexpected amount of bits: "+
-                    str(len(rtn)), Loglevel.INFO)
+        self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bits: {len(rtn)}",
+                            Loglevel.INFO)
 
     if snd[0:4] == rtn[0:4]:
         self.tmc_logger.log("""the Raspberry Pi received exactly the bits it has send.
@@ -171,7 +171,7 @@ def test_stallguard_threshold(self, steps):
     while self._movement_phase != MovementPhase.STANDSTILL:
         stallguard_result = self.get_stallguard_result()
 
-        self.tmc_logger.log(str(self._movement_phase) + " | " + str(stallguard_result),
+        self.tmc_logger.log(f"{self._movement_phase} | {stallguard_result}",
                     Loglevel.INFO)
 
         if (self._movement_phase == MovementPhase.ACCELERATING and
@@ -187,10 +187,10 @@ def test_stallguard_threshold(self, steps):
     self.wait_for_movement_finished_threaded()
 
     self.tmc_logger.log("---", Loglevel.INFO)
-    self.tmc_logger.log("min StallGuard result during acceleration: " +
-                str(min_stallguard_result_accel), Loglevel.INFO)
-    self.tmc_logger.log("min StallGuard result during maxspeed: " +
-                str(min_stallguard_result_maxspeed), Loglevel.INFO)
-    self.tmc_logger.log("min StallGuard result during deceleration: " +
-                str(min_stallguard_result_decel), Loglevel.INFO)
+    self.tmc_logger.log(f"min StallGuard result during accel: {min_stallguard_result_accel}",
+                        Loglevel.INFO)
+    self.tmc_logger.log(f"min StallGuard result during maxspeed: {min_stallguard_result_maxspeed}",
+    Loglevel.INFO)
+    self.tmc_logger.log(f"min StallGuard result during decel: {min_stallguard_result_decel}",
+                        Loglevel.INFO)
     self.tmc_logger.log("---", Loglevel.INFO)
