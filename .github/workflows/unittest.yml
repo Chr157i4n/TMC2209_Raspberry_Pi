@@ -20,7 +20,7 @@ jobs:
         pip install RPi.GPIO
         pip install Mock.GPIO
         pip install bitstring
-        pip install serial
+        pip install pyserial
     - name: Run unittests
       run: |
         python -m unittest

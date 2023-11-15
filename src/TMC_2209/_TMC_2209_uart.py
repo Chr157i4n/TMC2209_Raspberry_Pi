@@ -37,6 +37,8 @@ class TMC_UART:
         constructor
         """
         self.tmc_logger = tmc_logger
+        if serialport is None:
+            return
         try:
             self.ser = serial.Serial (serialport, baudrate)
         except Exception as e:
@@ -220,6 +222,8 @@ class TMC_UART:
         """
         this function clear the communication buffers of the Raspberry Pi
         """
+        if self.ser is None:
+            return
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
 

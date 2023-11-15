@@ -15,7 +15,7 @@ from src.TMC_2209.TMC_2209_StepperDriver import *
 class TestTMCMove(unittest.TestCase):
 
     def setUp(self):
-        self.tmc = TMC_2209(21, 16, 20, skip_uart_init=True)
+        self.tmc = TMC_2209(21, 16, 20, serialport=None, skip_uart_init=True)
         self.tmc.set_acceleration_fullstep(100000)
         self.tmc.set_max_speed_fullstep(10000)
         self.tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)

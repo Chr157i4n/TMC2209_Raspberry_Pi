@@ -3,6 +3,7 @@
 #pylint: disable=too-many-branches
 #pylint: disable=no-member
 #pylint: disable=protected-access
+#pylint: disable=bare-except
 """
 TMC_2209 stepper driver communication module
 """
