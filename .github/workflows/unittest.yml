@@ -18,6 +18,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install RPi.GPIO
+        pip install Mock.GPIO
+        pip install bitstring
+        pip install serial
     - name: Run unittests
       run: |
         python -m unittest

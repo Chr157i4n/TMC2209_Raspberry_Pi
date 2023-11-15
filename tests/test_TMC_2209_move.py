@@ -1,6 +1,10 @@
 #pylint: disable=invalid-name
 #pylint: disable=missing-function-docstring
 #pylint: disable=missing-class-docstring
+#pylint: disable=wildcard-import
+#pylint: disable=pointless-statement
+#pylint: disable=unused-wildcard-import
+#pylint: disable=bare-except
 """
 test for TMC_2209_move.py
 """

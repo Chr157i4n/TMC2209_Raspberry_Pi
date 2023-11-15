@@ -5,13 +5,17 @@
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-instance-attributes
 #pylint: disable=import-outside-toplevel
+#pylint: disable=bare-except
 """
 TMC_2209 stepper driver module
 """
 
 import time
 import statistics
-from RPi import GPIO
+try:
+    from RPi import GPIO
+except:
+    from Mock import GPIO
 from ._TMC_2209_uart import TMC_UART as tmc_uart
 from ._TMC_2209_logger import TMC_logger, Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase, StopMode

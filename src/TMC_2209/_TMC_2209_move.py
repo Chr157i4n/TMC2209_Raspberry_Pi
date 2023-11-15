@@ -11,7 +11,10 @@ import time
 from enum import Enum
 import math
 import threading
-from RPi import GPIO
+try:
+    from RPi import GPIO
+except:
+    from Mock import GPIO
 from ._TMC_2209_logger import Loglevel
 
 
