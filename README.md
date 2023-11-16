@@ -39,9 +39,9 @@ pip3 install TMC-2209-Raspberry-Pi
 ```
 git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi
 ```
-- install the python module bitstring with  
+- install the required modules
 ```
-pip3 install bitstring
+pip3 install RPi.GPIO enum34 bitstring pyserial
 ```
 - enable the serial port in  
 ```
@@ -68,8 +68,8 @@ The GPIO pins can be specific when initiating the class.
 If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
 
 
-## Tests
-You can run the test files from the main directory with
+## Demo scripts
+You can run the demo scripts files from the main directory with
 ```
 python3 -m demo.demo_script_01_uart_connection
 ```
