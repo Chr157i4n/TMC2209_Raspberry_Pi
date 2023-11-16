@@ -3,7 +3,7 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-test file for testing multiple drivers via one UART connection
+debug file for debuging the UART connection
 """
 
 import time
@@ -22,8 +22,7 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc1 = TMC_2209(21, 16, 20, driver_address=0)
-tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+tmc = TMC_2209(21, 16, 20, skip_uart_init=True)
 
 
 
@@ -34,30 +33,22 @@ tmc2 = TMC_2209(26, 13, 19, driver_address=1)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.set_loglevel(Loglevel.DEBUG)
-tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
+tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
-tmc2.set_loglevel(Loglevel.DEBUG)
-tmc2.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+
+
+
 
 
 
 #-----------------------------------------------------------------------
 # these functions read and print the current settings in the TMC register
 #-----------------------------------------------------------------------
-
-print("---")
-print("IOIN tmc1")
-print("---")
-tmc1.readIOIN()
-
 print("---\n---")
 
+tmc.test_uart()
 
-print("---")
-print("IOIN tmc2")
-print("---")
-tmc2.readIOIN()
 
 print("---\n---")
 
@@ -68,12 +59,8 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # deinitiate the TMC_2209 class
 #-----------------------------------------------------------------------
-tmc1.set_motor_enabled(False)
-tmc2.set_motor_enabled(False)
-tmc1.deinit()
-tmc2.deinit()
-del tmc1
-del tmc2
+tmc.deinit()
+del tmc
 
 print("---")
 print("SCRIPT FINISHED")

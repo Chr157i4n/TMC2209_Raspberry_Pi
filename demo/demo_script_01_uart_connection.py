@@ -3,7 +3,7 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-debug file for debuging the UART connection
+test file for testing the UART connection
 """
 
 import time
@@ -22,7 +22,7 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21, 16, 20, no_uart=True)
+tmc = TMC_2209(21, 16, 20)
 
 
 
@@ -33,10 +33,25 @@ tmc = TMC_2209(21, 16, 20, no_uart=True)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.set_loglevel(Loglevel.DEBUG)
+tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
+
+
+
+#-----------------------------------------------------------------------
+# these functions change settings in the TMC register
+#-----------------------------------------------------------------------
+tmc.set_direction_reg(False)
+tmc.set_current(300)
+tmc.set_interpolation(True)
+tmc.set_spreadcycle(False)
+tmc.set_microstepping_resolution(2)
+tmc.set_internal_rsense(False)
+
+
+print("---\n---")
 
 
 
@@ -45,10 +60,10 @@ tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 #-----------------------------------------------------------------------
 # these functions read and print the current settings in the TMC register
 #-----------------------------------------------------------------------
-print("---\n---")
-
-tmc.test_uart()
-
+tmc.read_ioin()
+tmc.read_chopconf()
+tmc.read_drv_status()
+tmc.read_gconf()
 
 print("---\n---")
 

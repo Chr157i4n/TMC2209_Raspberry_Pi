@@ -3,15 +3,17 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-test file for testing movement of motors with threads
+test file for testing multiple drivers via one UART connection
 """
 
 import time
 from src.TMC_2209.TMC_2209_StepperDriver import *
 
+
 print("---")
 print("SCRIPT START")
 print("---")
+
 
 
 
@@ -21,8 +23,8 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 tmc1 = TMC_2209(21, 16, 20, driver_address=0)
+tmc2 = TMC_2209(26, 13, 19, driver_address=1)
 
-tmc_driverlist = [tmc1]
 
 
 
@@ -32,69 +34,46 @@ tmc_driverlist = [tmc1]
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.set_loglevel(Loglevel.DEBUG)
+tmc1.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
+tmc2.tmc_logger.set_loglevel(Loglevel.DEBUG)
+tmc2.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
 
 #-----------------------------------------------------------------------
-# these functions change settings in the TMC register
+# these functions read and print the current settings in the TMC register
 #-----------------------------------------------------------------------
-for tmc in tmc_driverlist:
-    tmc.set_direction_reg(False)
-    tmc.set_current(300)
-    tmc.set_interpolation(True)
-    tmc.set_spreadcycle(False)
-    tmc.set_microstepping_resolution(2)
-    tmc.set_internal_rsense(False)
-    tmc.set_motor_enabled(True)
 
-    tmc.set_acceleration_fullstep(1000)
-    tmc.set_max_speed_fullstep(250)
-
+print("---")
+print("IOIN tmc1")
+print("---")
+tmc1.read_ioin()
 
 print("---\n---")
 
 
-#-----------------------------------------------------------------------
-# run part
-#-----------------------------------------------------------------------
-
-# move 4000 steps forward
-tmc1.run_to_position_steps_threaded(4000, MovementAbsRel.RELATIVE)
-
-time.sleep(1)
-tmc1.stop()     # stop the movement after 1 second
-
-tmc1.wait_for_movement_finished_threaded()
-
-# move 4000 steps backward
-tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
-
-
-# while the motor is still moving
-while tmc1.get_movement_phase() != MovementPhase.STANDSTILL:
-    # print the current movement phase
-    print(tmc1.get_movement_phase())
-    time.sleep(0.02)
-
-tmc1.wait_for_movement_finished_threaded()
-
-
-
-
+print("---")
+print("IOIN tmc2")
+print("---")
+tmc2.read_ioin()
 
 print("---\n---")
+
+
+
 
 
 #-----------------------------------------------------------------------
 # deinitiate the TMC_2209 class
 #-----------------------------------------------------------------------
 tmc1.set_motor_enabled(False)
+tmc2.set_motor_enabled(False)
 tmc1.deinit()
+tmc2.deinit()
 del tmc1
-
+del tmc2
 
 print("---")
 print("SCRIPT FINISHED")

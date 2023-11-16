@@ -3,6 +3,8 @@
  TMC2209_Raspberry_Pi math library
 """
 
+
+
 def rps_to_vactual(rps, steps_per_rev, fclk = 12000000):
     """
     converts rps -> vactual
@@ -48,7 +50,7 @@ def rps_to_steps(rps, steps_per_rev):
 
 def steps_to_rps(steps, steps_per_rev):
     """
-    converts steps/second -> rps 
+    converts steps/second -> rps
 
         Parameters:
             steps (int): steps per second
@@ -62,7 +64,7 @@ def steps_to_rps(steps, steps_per_rev):
 
 def rps_to_tstep(rps, steps_per_rev, msres):
     """
-    converts rps -> tstep 
+    converts rps -> tstep
 
         Parameters:
             rps (float): revolutions per second
@@ -77,7 +79,7 @@ def rps_to_tstep(rps, steps_per_rev, msres):
 
 def steps_to_tstep(steps, msres):
     """
-    converts steps/second -> tstep 
+    converts steps/second -> tstep
 
         Parameters:
             steps (int): steps per second

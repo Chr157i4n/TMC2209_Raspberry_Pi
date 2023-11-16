@@ -3,7 +3,7 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-test file for testing the UART connection
+test file for testing the STEP, DIR, EN connection
 """
 
 import time
@@ -33,7 +33,7 @@ tmc = TMC_2209(21, 16, 20)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.set_loglevel(Loglevel.DEBUG)
+tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
@@ -58,12 +58,21 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# these functions read and print the current settings in the TMC register
+# this function test whether the connection of the DIR, STEP and EN pin
+# between Raspberry Pi and TMC driver is working
 #-----------------------------------------------------------------------
-tmc.readIOIN()
-tmc.readCHOPCONF()
-tmc.readDRVSTATUS()
-tmc.readGCONF()
+tmc.test_dir_step_en()
+
+print("---\n---")
+
+
+
+
+
+#-----------------------------------------------------------------------
+# deactivate the motor current output
+#-----------------------------------------------------------------------
+tmc.set_motor_enabled(False)
 
 print("---\n---")
 

@@ -3,7 +3,7 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-test file for testing the StallGuard feature
+test file for testing basic movement
 """
 
 import time
@@ -22,7 +22,7 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21, 16, 20)
+tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
 
 
 
@@ -33,7 +33,7 @@ tmc = TMC_2209(21, 16, 20)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.set_loglevel(Loglevel.DEBUG)
+tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
@@ -60,10 +60,10 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # these functions read and print the current settings in the TMC register
 #-----------------------------------------------------------------------
-tmc.readIOIN()
-tmc.readCHOPCONF()
-tmc.readDRVSTATUS()
-tmc.readGCONF()
+tmc.read_ioin()
+tmc.read_chopconf()
+tmc.read_drv_status()
+tmc.read_gconf()
 
 print("---\n---")
 
@@ -72,10 +72,18 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# set the Accerleration and maximal Speed
+# set the Acceleration and maximal Speed
 #-----------------------------------------------------------------------
-tmc.set_acceleration(2000)
-tmc.set_max_speed(500)
+# tmc.set_acceleration(2000)
+# tmc.set_max_speed(500)
+
+#-----------------------------------------------------------------------
+# set the Acceleration and maximal Speed in fullsteps
+#-----------------------------------------------------------------------
+tmc.set_acceleration_fullstep(1000)
+tmc.set_max_speed_fullstep(250)
+
+
 
 
 
@@ -91,53 +99,18 @@ tmc.set_motor_enabled(True)
 
 
 #-----------------------------------------------------------------------
-# runs the motor 800 steps in a thread and
-# prints the stallguard result for each movement phase
+# move the motor 1 revolution
 #-----------------------------------------------------------------------
-tmc.test_stallguard_threshold(800)
+tmc.run_to_position_steps(400)                             #move to position 400
+tmc.run_to_position_steps(0)                               #move to position 0
 
 
+tmc.run_to_position_steps(400, MovementAbsRel.RELATIVE)    #move 400 steps forward
+tmc.run_to_position_steps(-400, MovementAbsRel.RELATIVE)   #move 400 steps backward
 
 
-
-#-----------------------------------------------------------------------
-# set a callback function for the stallguard interrupt based detection
-# 1. param: pin connected to the tmc DIAG output
-# 2. param: is the threshold StallGuard
-# 3. param: is the callback function (threaded)
-# 4. param (optional): min speed threshold (in steptime measured  in  clock  cycles)
-#-----------------------------------------------------------------------
-def my_callback(channel):
-    """StallGuard callback"""
-    del channel
-    print("StallGuard!")
-    tmc.stop()
-
-tmc.set_stallguard_callback(26, 50, my_callback) # after this function call, StallGuard is active
-
-
-#uses STEP/DIR to move the motor
-finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)
-#uses VActual Register to  move the motor
-# finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)
-
-
-if finishedsuccessfully is True:
-    print("Movement finished successfully")
-else:
-    print("Movement was not completed")
-
-
-
-
-
-#-----------------------------------------------------------------------
-# homing
-# 1. param: DIAG pin
-# 2. param: maximum number of revolutions. Can be negative for inverse direction
-# 3. param(optional): StallGuard detection threshold
-#-----------------------------------------------------------------------
-#tmc.do_homing(26, 1, 50)
+tmc.run_to_position_steps(400)                             #move to position 400
+tmc.run_to_position_steps(0)                               #move to position 0
 
 
 

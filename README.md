@@ -39,9 +39,9 @@ pip3 install TMC-2209-Raspberry-Pi
 ```
 git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi
 ```
-- install the python module bitstring with  
+- install the required modules
 ```
-pip3 install bitstring
+pip3 install RPi.GPIO enum34 bitstring pyserial
 ```
 - enable the serial port in  
 ```
@@ -68,17 +68,17 @@ The GPIO pins can be specific when initiating the class.
 If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
 
 
-## Tests
-You can run the test files from the main directory with
+## Demo scripts
+You can run the demo scripts files from the main directory with
 ```
-python3 -m tests.test_script_01_uart_connection
+python3 -m demo.demo_script_01_uart_connection
 ```
 
-#### [test_script_01_uart_connection.py](tests/test_script_01_uart_connection.py)
+#### [demo_script_01_uart_connection.py](demo/demo_script_01_uart_connection.py)
 This only communicates with the TMC driver over UART. It should set some settings in the driver and then outputs the settings.
 When it outputs ```TMC2209: UART Communication Error```, you need to check the UART-connection.
 
-#### [test_script_02_pin_connection.py](tests/test_script_02_pin_connection.py)
+#### [demo_script_02_pin_connection.py](demo/demo_script_02_pin_connection.py)
 This script enables the raspberry GPIO output for the dir, en and step pin and then checks the TMC driver register, 
 whether the driver sees them as HIGH or LOW. Because the enabled pin is activated for a short time, the motor current ouput
 will be also activated in this script for a short time.
@@ -88,23 +88,23 @@ Pin STEP:       OK
 Pin EN:         OK
 if not, check the connection of the pin.
 
-#### [test_script_03_basic_movement.py](tests/test_script_03_basic_movement.py)
+#### [demo_script_03_basic_movement.py](demo/demo_script_03_basic_movement.py)
 This script should move the motor 6 times, one revolution back and forth.
 
-#### [test_script_04_stallguard.py](tests/test_script_04_stallguard.py)
+#### [demo_script_04_stallguard.py](demo/demo_script_04_stallguard.py)
 In this script the stallguard feature of the TMC2209 is beeing setup.
 A funtion will be called, if the driver detects a stall. The function stops the current movement.
 The motor will be moved 10 revolutions. If the movement is finished unhindered, the script outputs ```Movement finished successfully```.
 If you block the motor with pliers or something similar, the the motor will stop and the script outputs ```StallGuard!``` and ```Movement was not completed```
 
-#### [test_script_05_vactual.py](tests/test_script_05_vactual.py)
+#### [demo_script_05_vactual.py](demo/demo_script_05_vactual.py)
 VACTUAL allows moving the motor by UART control. It gives the motor velocity in +-(2^23)-1 [μsteps / t]
 
-#### [test_script_06_multiple_drivers.py](tests/test_script_06_multiple_drivers.py)
+#### [demo_script_06_multiple_drivers.py](demo/demo_script_06_multiple_drivers.py)
 Multiple drivers can be addressed via UART by setting different addresses with the MS1 and MS2 pins.
 Simultaneous movement of multiple motors can be done with threaded movement.
 
-#### [test_script_07_threads.py](tests/test_script_07_threads.py)
+#### [demo_script_07_threads.py](demo/demo_script_07_threads.py)
 In this script, the movement of a stepper with threads is shown. This can be used to do other task while moving a motor, or to move several motors simultaneous.
 
 \

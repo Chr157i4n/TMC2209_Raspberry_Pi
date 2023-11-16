@@ -3,7 +3,7 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-test file for testing the VActual
+test file for testing the StallGuard feature
 """
 
 import time
@@ -20,9 +20,9 @@ print("---")
 
 #-----------------------------------------------------------------------
 # initiate the TMC_2209 class
-# use your pin for pin_en here
+# use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21)
+tmc = TMC_2209(21, 16, 20)
 
 
 
@@ -33,7 +33,7 @@ tmc = TMC_2209(21)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.set_loglevel(Loglevel.DEBUG)
+tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
@@ -60,12 +60,22 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # these functions read and print the current settings in the TMC register
 #-----------------------------------------------------------------------
-tmc.readIOIN()
-tmc.readCHOPCONF()
-tmc.readDRVSTATUS()
-tmc.readGCONF()
+tmc.read_ioin()
+tmc.read_chopconf()
+tmc.read_drv_status()
+tmc.read_gconf()
 
 print("---\n---")
+
+
+
+
+
+#-----------------------------------------------------------------------
+# set the Accerleration and maximal Speed
+#-----------------------------------------------------------------------
+tmc.set_acceleration(2000)
+tmc.set_max_speed(500)
 
 
 
@@ -81,73 +91,52 @@ tmc.set_motor_enabled(True)
 
 
 #-----------------------------------------------------------------------
-# move the motor for 1 second forward, stop for 1 second
-# and then move backwards for 1 second
+# runs the motor 800 steps in a thread and
+# prints the stallguard result for each movement phase
 #-----------------------------------------------------------------------
-#tmc.set_vactual(400)
-#time.sleep(1)
-#tmc.set_vactual(0)
-#time.sleep(1)
-#tmc.set_vactual(-400)
-#time.sleep(1)
-#tmc.set_vactual(0)
+tmc.test_stallguard_threshold(800)
 
 
 
 
 
 #-----------------------------------------------------------------------
-# set_vactual_rps uses revolutions per seconds as parameter
+# set a callback function for the stallguard interrupt based detection
+# 1. param: pin connected to the tmc DIAG output
+# 2. param: is the threshold StallGuard
+# 3. param: is the callback function (threaded)
+# 4. param (optional): min speed threshold (in steptime measured  in  clock  cycles)
 #-----------------------------------------------------------------------
-# tmc.set_vactual_rps(1)
-# time.sleep(1)
-# tmc.set_vactual_rps(0)
-# time.sleep(1)
-# tmc.set_vactual_rps(-1)
-# time.sleep(1)
-# tmc.set_vactual_rps(0)
+def my_callback():
+    """StallGuard callback"""
+    print("StallGuard!")
+    tmc.stop()
+
+tmc.set_stallguard_callback(26, 50, my_callback) # after this function call, StallGuard is active
 
 
+#uses STEP/DIR to move the motor
+finishedsuccessfully = tmc.run_to_position_steps(4000, MovementAbsRel.RELATIVE)
+#uses VActual Register to  move the motor
+# finishedsuccessfully = tmc.set_vactual_rpm(30, revolutions=10)
 
 
-
-#-----------------------------------------------------------------------
-# set_vactual_rps uses revolutions per seconds as parameter
-#-----------------------------------------------------------------------
-#tmc.set_vactual_rpm(60)
-#time.sleep(1)
-#tmc.set_vactual(0)
-#time.sleep(1)
-#tmc.set_vactual_rpm(-60)
-#time.sleep(1)
-#tmc.set_vactual(0)
-
-
-
-
-
-#-----------------------------------------------------------------------
-# set_vactual_rpm and set_vactual_rps accept "revolutions" and "duration"
-# as keyword parameter if duration is set the script will set VActual
-# to that rpm for that duration and stop the motor afterwards if revolutions
-# the script will calculate the duration based on the speed and the revolutions
-# Movement of the Motor will not be very accurate with this way
-#-----------------------------------------------------------------------
-tmc.set_vactual_rpm(30, revolutions=2)
-tmc.set_vactual_rpm(-120, revolutions=2)
-time.sleep(1)
-tmc.set_vactual_rpm(30, duration=4)
-tmc.set_vactual_rpm(-120, duration=1)
+if finishedsuccessfully is True:
+    print("Movement finished successfully")
+else:
+    print("Movement was not completed")
 
 
 
 
 
 #-----------------------------------------------------------------------
-# use acceleration (velocity ramping) with VActual
-# does not work with revolutions as parameter
+# homing
+# 1. param: DIAG pin
+# 2. param: maximum number of revolutions. Can be negative for inverse direction
+# 3. param(optional): StallGuard detection threshold
 #-----------------------------------------------------------------------
-# tmc.set_vactual_rpm(-120, duration=10, acceleration=500)
+#tmc.do_homing(26, 1, 50)
 
 
 

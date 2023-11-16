@@ -3,7 +3,7 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-test file for testing basic movement
+test file for testing the VActual
 """
 
 import time
@@ -20,9 +20,9 @@ print("---")
 
 #-----------------------------------------------------------------------
 # initiate the TMC_2209 class
-# use your pins for pin_en, pin_step, pin_dir here
+# use your pin for pin_en here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
+tmc = TMC_2209(21)
 
 
 
@@ -33,7 +33,7 @@ tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.set_loglevel(Loglevel.DEBUG)
+tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
 tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
 
 
@@ -60,30 +60,12 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # these functions read and print the current settings in the TMC register
 #-----------------------------------------------------------------------
-tmc.readIOIN()
-tmc.readCHOPCONF()
-tmc.readDRVSTATUS()
-tmc.readGCONF()
+tmc.read_ioin()
+tmc.read_chopconf()
+tmc.read_drv_status()
+tmc.read_gconf()
 
 print("---\n---")
-
-
-
-
-
-#-----------------------------------------------------------------------
-# set the Acceleration and maximal Speed
-#-----------------------------------------------------------------------
-# tmc.set_acceleration(2000)
-# tmc.set_max_speed(500)
-
-#-----------------------------------------------------------------------
-# set the Acceleration and maximal Speed in fullsteps
-#-----------------------------------------------------------------------
-tmc.set_acceleration_fullstep(1000)
-tmc.set_max_speed_fullstep(250)
-
-
 
 
 
@@ -99,18 +81,73 @@ tmc.set_motor_enabled(True)
 
 
 #-----------------------------------------------------------------------
-# move the motor 1 revolution
+# move the motor for 1 second forward, stop for 1 second
+# and then move backwards for 1 second
 #-----------------------------------------------------------------------
-tmc.run_to_position_steps(400)                             #move to position 400
-tmc.run_to_position_steps(0)                               #move to position 0
+#tmc.set_vactual_dur(400)
+#time.sleep(1)
+#tmc.set_vactual_dur(0)
+#time.sleep(1)
+#tmc.set_vactual_dur(-400)
+#time.sleep(1)
+#tmc.set_vactual_dur(0)
 
 
-tmc.run_to_position_steps(400, MovementAbsRel.RELATIVE)    #move 400 steps forward
-tmc.run_to_position_steps(-400, MovementAbsRel.RELATIVE)   #move 400 steps backward
 
 
-tmc.run_to_position_steps(400)                             #move to position 400
-tmc.run_to_position_steps(0)                               #move to position 0
+
+#-----------------------------------------------------------------------
+# set_vactual_rps uses revolutions per seconds as parameter
+#-----------------------------------------------------------------------
+# tmc.set_vactual_rps(1)
+# time.sleep(1)
+# tmc.set_vactual_rps(0)
+# time.sleep(1)
+# tmc.set_vactual_rps(-1)
+# time.sleep(1)
+# tmc.set_vactual_rps(0)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# set_vactual_rps uses revolutions per seconds as parameter
+#-----------------------------------------------------------------------
+#tmc.set_vactual_rpm(60)
+#time.sleep(1)
+#tmc.set_vactual(0)
+#time.sleep(1)
+#tmc.set_vactual_rpm(-60)
+#time.sleep(1)
+#tmc.set_vactual(0)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# set_vactual_rpm and set_vactual_rps accept "revolutions" and "duration"
+# as keyword parameter if duration is set the script will set VActual
+# to that rpm for that duration and stop the motor afterwards if revolutions
+# the script will calculate the duration based on the speed and the revolutions
+# Movement of the Motor will not be very accurate with this way
+#-----------------------------------------------------------------------
+tmc.set_vactual_rpm(30, revolutions=2)
+tmc.set_vactual_rpm(-120, revolutions=2)
+time.sleep(1)
+tmc.set_vactual_rpm(30, duration=4)
+tmc.set_vactual_rpm(-120, duration=1)
+
+
+
+
+
+#-----------------------------------------------------------------------
+# use acceleration (velocity ramping) with VActual
+# does not work with revolutions as parameter
+#-----------------------------------------------------------------------
+# tmc.set_vactual_rpm(-120, duration=10, acceleration=500)
 
 
 
