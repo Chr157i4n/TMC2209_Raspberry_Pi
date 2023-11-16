@@ -1,5 +1,12 @@
 # Changelog
 
+## version 0.4
+- split code into different files
+- added logger class
+- moved demo scripts into demo folder
+- added unittest
+- switched all string to f-strings
+
 ## version 0.3.4
 - fixed do_homing()
 - added minspeed to do_homing()
