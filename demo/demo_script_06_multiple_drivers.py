@@ -70,8 +70,6 @@ print("---\n---")
 #-----------------------------------------------------------------------
 tmc1.set_motor_enabled(False)
 tmc2.set_motor_enabled(False)
-tmc1.deinit()
-tmc2.deinit()
 del tmc1
 del tmc2
 

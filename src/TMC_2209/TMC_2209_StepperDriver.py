@@ -116,35 +116,6 @@ class TMC_2209:
             loglevel (enum, optional): loglevel. Defaults to None.
             skip_uart_init (bool, optional): skip UART init. Defaults to False.
         """
-        self.init(pin_en, pin_step, pin_dir, baudrate, serialport, driver_address,
-                  gpio_mode, loglevel, skip_uart_init)
-
-
-
-    def __del__(self):
-        """destructor"""
-        self.deinit()
-        del self.tmc_uart
-        del self.tmc_logger
-
-
-
-    def init(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-        driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
-        """init function
-
-        Args:
-            pin_en (int): Pin number of EN pin
-            pin_step (int, optional): Pin number of STEP pin. Defaults to -1.
-            pin_dir (int, optional): Pin number of DIR pin. Defaults to -1.
-            baudrate (int, optional): baudrate exp: 9600, 115200. Defaults to 115200.
-            serialport (str, optional):  win: 'COM1'; linux: 'dev/serial0'. Defaults to "/dev/serial0".
-            driver_address (int, optional): driver address [0-3]. Defaults to 0.
-
-            gpio_mode (enum, optional): numbering system for the GPIO pins. Defaults to GPIO.BCM.
-            loglevel (enum, optional): level for which to log. Defaults to None.
-            skip_uart_init (bool, optional): skip UART init, if only STEP/DIR is used. Defaults to False.
-        """
         self.tmc_logger = TMC_logger(loglevel, f"TMC2209 {driver_address}")
         self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
 
@@ -181,8 +152,8 @@ class TMC_2209:
 
 
 
-    def deinit(self):
-        """deinit function"""
+    def __del__(self):
+        """destructor"""
         if self._deinit_finished is False:
             self.tmc_logger.log("Deinit", Loglevel.INFO)
 
@@ -203,6 +174,8 @@ class TMC_2209:
             self._deinit_finished= True
         else:
             self.tmc_logger.log("Deinit already finished", Loglevel.INFO)
+        del self.tmc_uart
+        del self.tmc_logger
 
 
 
