@@ -20,8 +20,8 @@ from . import _TMC_2209_reg as tmc_reg
 
 
 def test_dir_step_en(self):
-    """
-    tests the EN, DIR and STEP pin
+    """tests the EN, DIR and STEP pin
+    
     this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
     and checks the IOIN Register of the TMC meanwhile
     """
@@ -83,9 +83,7 @@ def test_dir_step_en(self):
 
 
 def test_step(self):
-    """
-    test method
-    """
+    """test method"""
     self.set_direction_pin(1)
 
     for _ in range(100):
@@ -98,9 +96,7 @@ def test_step(self):
 
 
 def test_uart(self):
-    """
-    test method
-    """
+    """test method"""
     self.tmc_logger.log("---")
     self.tmc_logger.log("TEST UART")
     result = self.tmc_uart.test_uart(tmc_reg.IOIN)
@@ -147,13 +143,13 @@ def test_uart(self):
 
 
 def test_stallguard_threshold(self, steps):
-    """
-    test method for tuning stallguard threshold
+    """test method for tuning stallguard threshold
+    
     run this function with your motor settings and your motor load
     the function will determine the minimum stallguard results for each movement phase
 
-        Parameters:
-            steps (int): amount of steps; can be negative
+    Args:
+        steps (int):
     """
 
     self.tmc_logger.log("---", Loglevel.INFO)

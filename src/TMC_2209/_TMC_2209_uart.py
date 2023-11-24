@@ -14,9 +14,8 @@ from . import _TMC_2209_reg as reg
 
 
 class TMC_UART:
-    """
-    TMC_UART
-
+    """TMC_UART
+    
     this class is used to communicate with the TMC via UART
     it can be used to change the settings of the TMC.
     like the current or the microsteppingmode
@@ -33,8 +32,13 @@ class TMC_UART:
 
 
     def __init__(self, tmc_logger, serialport, baudrate, mtr_id = 0):
-        """
-        constructor
+        """constructor
+
+        Args:
+            tmc_logger (class): TMCLogger class
+            serialport (string): serialport path
+            baudrate (int): baudrate
+            mtr_id (int, optional): driver address [0-3]. Defaults to 0.
         """
         self.tmc_logger = tmc_logger
         if serialport is None:
@@ -69,17 +73,18 @@ class TMC_UART:
 
 
     def __del__(self):
-        """
-        destructor
-        """
+        """""destructor"""""
         if self.ser is not None:
             self.ser.close()
 
 
 
     def compute_crc8_atm(self, datagram, initial_value=0):
-        """
-        this function calculates the crc8 parity bit
+        """this function calculates the crc8 parity bit
+
+        Args:
+            datagram (list): datagram
+            initial_value (int): initial value (Default value = 0)
         """
         crc = initial_value
         # Iterate bytes in data
@@ -97,9 +102,11 @@ class TMC_UART:
 
 
     def read_reg(self, register):
-        """
-        reads the registry on the TMC with a given address.
+        """reads the registry on the TMC with a given address.
         returns the binary value of that register
+
+        Args:
+            register (int): HEX, which register to read
         """
 
         self.ser.reset_output_buffer()
@@ -128,9 +135,12 @@ class TMC_UART:
 
 
     def read_int(self, register, tries=10):
-        """
-        this function tries to read the registry of the TMC 10 times
+        """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
+
+        Args:
+            register (int): HEX, which register to read
+            tries (int): how many tries, before error is raised (Default value = 10)
         """
         while True:
             tries -= 1
@@ -159,11 +169,14 @@ class TMC_UART:
 
 
     def write_reg(self, register, val):
-        """
-        this function can write a value to the register of the tmc
+        """this function can write a value to the register of the tmc
         1. use read_int to get the current setting of the TMC
         2. then modify the settings as wished
         3. write them back to the driver with this function
+
+        Args:
+            register (int): HEX, which register to write
+            val (int): value for that register
         """
 
         self.ser.reset_output_buffer()
@@ -192,10 +205,14 @@ class TMC_UART:
 
 
     def write_reg_check(self, register, val, tries=10):
-        """
-        this function als writes a value to the register of the TMC
+        """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
         the InterfaceTransmissionCounter before and after writing
+
+        Args:
+            register: HEX, which register to write
+            val: value for that register
+            tries: how many tries, before error is raised (Default value = 10)
         """
         ifcnt1 = self.read_int(reg.IFCNT)
 
@@ -219,9 +236,7 @@ class TMC_UART:
 
 
     def flush_serial_buffer(self):
-        """
-        this function clear the communication buffers of the Raspberry Pi
-        """
+        """this function clear the communication buffers of the Raspberry Pi"""
         if self.ser is None:
             return
         self.ser.reset_output_buffer()
@@ -230,25 +245,29 @@ class TMC_UART:
 
 
     def set_bit(self, value, bit):
-        """
-        this sets a specific bit to 1
+        """this sets a specific bit to 1
+
+        Args:
+            value: value on which the bit should be set
+            bit: which bit to set
         """
         return value | (bit)
 
 
 
     def clear_bit(self, value, bit):
-        """
-        this sets a specific bit to 0
+        """this sets a specific bit to 0
+
+        Args:
+            value: value on which the bit should be cleared
+            bit: which bit to clear
         """
         return value & ~(bit)
 
 
 
     def handle_error(self):
-        """
-        error handling
-        """
+        """error handling"""
         if self.error_handler_running:
             return
         self.error_handler_running = True
@@ -273,8 +292,10 @@ class TMC_UART:
 
 
     def test_uart(self, register):
-        """
-        test UART connection
+        """test UART connection
+
+        Args:
+            register (int):  HEX, which register to read
         """
 
         self.ser.reset_output_buffer()

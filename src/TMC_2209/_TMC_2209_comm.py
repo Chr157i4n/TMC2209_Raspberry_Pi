@@ -13,12 +13,10 @@ from . import _TMC_2209_reg as tmc_reg
 
 
 def read_drv_status(self):
-    """
-    read the register Adress "DRV_STATUS" and prints all current setting
+    """read the register Adress "DRV_STATUS" and prints all current setting
 
-        Returns:
-            drvstatus (int): 32bit DRV_STATUS Register
-
+    Returns:
+        int: 32bit DRV_STATUS Register
     """
     self.tmc_logger.log("---")
     self.tmc_logger.log("DRIVER STATUS:")
@@ -72,11 +70,10 @@ def read_drv_status(self):
 
 
 def read_gconf(self):
-    """
-    read the register Adress "GCONF" and prints all current setting
+    """read the register Adress "GCONF" and prints all current setting
 
-        Returns:
-            gconf (int): 10bit GCONF Register
+    Returns:
+        int: 10bit GCONF Register
     """
     self.tmc_logger.log("---")
     self.tmc_logger.log("GENERAL CONFIG")
@@ -121,11 +118,10 @@ def read_gconf(self):
 
 
 def read_gstat(self):
-    """
-    read the register Adress "GSTAT" and prints all current setting
+    """read the register Adress "GSTAT" and prints all current setting
 
-        Returns:
-            gstat (int): 3bit GSTAT Register
+    Returns:
+        int: 3bit GSTAT Register
     """
     self.tmc_logger.log("---")
     self.tmc_logger.log("GSTAT")
@@ -145,9 +141,7 @@ def read_gstat(self):
 
 
 def clear_gstat(self):
-    """
-    read the register Adress "GSTAT" and prints all current setting
-    """
+    """clears the "GSTAT" register"""
     self.tmc_logger.log("clearing GSTAT", Loglevel.INFO)
     gstat = self.tmc_uart.read_int(tmc_reg.GSTAT)
 
@@ -159,11 +153,10 @@ def clear_gstat(self):
 
 
 def read_ioin(self):
-    """
-    read the register Adress "IOIN" and prints all current setting
+    """read the register Adress "IOIN" and prints all current setting
 
-        Returns:
-            ioin (int): 10+8bit IOIN Register
+    Returns:
+        int: 10+8bit IOIN Register
     """
     self.tmc_logger.log("---")
     self.tmc_logger.log("INPUTS")
@@ -195,11 +188,10 @@ def read_ioin(self):
 
 
 def read_chopconf(self):
-    """
-    read the register Adress "CHOPCONF" and prints all current setting
+    """read the register Adress "CHOPCONF" and prints all current setting
 
-        Returns:
-            chopconf (int): 3bit CHOPCONF Register
+    Returns:
+        int: 3bit CHOPCONF Register
     """
     self.tmc_logger.log("---")
     self.tmc_logger.log("CHOPPER CONTROL")
@@ -209,7 +201,7 @@ def read_chopconf(self):
     self.tmc_logger.log(f"native {self.get_microstepping_resolution()} microstep setting")
 
     if chopconf & tmc_reg.intpol:
-        self.tmc_logger.log("interpolation to 256 microsteps")
+        self.tmc_logger.log("interpolation to 256 µsteps")
 
     if chopconf & tmc_reg.vsense:
         self.tmc_logger.log("1: High sensitivity, low sense resistor voltage")
@@ -222,11 +214,10 @@ def read_chopconf(self):
 
 
 def get_direction_reg(self):
-    """
-    returns the motor shaft direction: 0 = CCW; 1 = CW
+    """returns the motor shaft direction: False = CCW; True = CW
 
-        Returns:
-            direction (bool): motor shaft direction: 0 = CCW; 1 = CW
+    Returns:
+        bool: motor shaft direction: False = CCW; True = CW
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     return gconf & tmc_reg.shaft
@@ -234,11 +225,10 @@ def get_direction_reg(self):
 
 
 def set_direction_reg(self, direction):
-    """
-    sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
+    """sets the motor shaft direction to the given value: False = CCW; True = CW
 
-        Parameters:
-            direction (bool): motor shaft direction: 0 = CCW; 1 = CW
+    Args:
+        direction (bool): direction of the motor False = CCW; True = CW
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     if direction:
@@ -252,11 +242,10 @@ def set_direction_reg(self, direction):
 
 
 def get_iscale_analog(self):
-    """
-    return whether Vref (1) or 5V (0) is used for current scale
+    """return whether Vref (True) or 5V (False) is used for current scale
 
-        Returns:
-            en (bool): whether Vref (1) or 5V (0) is used for current scale
+    Returns:
+        en (bool): whether Vref (True) or 5V (False) is used for current scale
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     return gconf & tmc_reg.i_scale_analog
@@ -264,11 +253,10 @@ def get_iscale_analog(self):
 
 
 def set_iscale_analog(self,en):
-    """
-    sets Vref (1) or 5V (0) for current scale
+    """sets Vref (True) or 5V (False) for current scale
 
-        Parameters:
-            en (bool): whether Vref (1) or 5V (0) is used for current scale
+    Args:
+        en (bool): True=Vref, False=5V
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     if en:
@@ -282,13 +270,12 @@ def set_iscale_analog(self,en):
 
 
 def get_vsense(self):
-    """
-    returns which sense resistor voltage is used for current scaling
-    0: Low sensitivity, high sense resistor voltage
-    1: High sensitivity, low sense resistor voltage
+    """returns which sense resistor voltage is used for current scaling
+    False: Low sensitivity, high sense resistor voltage
+    True: High sensitivity, low sense resistor voltage
 
-        Returns:
-            en (bool): whether high sensitivity should is used
+    Returns:
+        bool: whether high sensitivity should is used
     """
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     return chopconf & tmc_reg.vsense
@@ -296,13 +283,12 @@ def get_vsense(self):
 
 
 def set_vsense(self,en):
-    """
-    sets which sense resistor voltage is used for current scaling
-    0: Low sensitivity, high sense resistor voltage
-    1: High sensitivity, low sense resistor voltage
+    """sets which sense resistor voltage is used for current scaling
+    False: Low sensitivity, high sense resistor voltage
+    True: High sensitivity, low sense resistor voltage
 
-        Parameters:
-            en (bool): whether high sensitivity should be used
+    Args:
+        en (bool):
     """
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     if en:
@@ -318,15 +304,14 @@ def set_vsense(self,en):
 
 
 def get_internal_rsense(self):
-    """
-    returns which sense resistor voltage is used for current scaling
-    0: Operation with external sense resistors
-    1: Internal sense resistors. Use current supplied into
+    """returns which sense resistor voltage is used for current scaling
+    False: Operation with external sense resistors
+    True Internal sense resistors. Use current supplied into
     VREF as reference for internal sense resistor. VREF
     pin internally is driven to GND in this mode.
 
-        Returns:
-            en (bool): which sense resistor voltage is used
+    Returns:
+        bool: which sense resistor voltage is used
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     return gconf & tmc_reg.internal_rsense
@@ -334,16 +319,16 @@ def get_internal_rsense(self):
 
 
 def set_internal_rsense(self,en):
-    """
-    sets which sense resistor voltage is used for current scaling
-    0: Operation with external sense resistors
-    1: Internal sense resistors. Use current supplied into
+    """sets which sense resistor voltage is used for current scaling
+    False: Operation with external sense resistors
+    True: Internal sense resistors. Use current supplied into
     VREF as reference for internal sense resistor. VREF
     pin internally is driven to GND in this mode.
 
-        Parameters:
-            en (bool):which sense resistor voltage is used; true will propably destroy your tmc
-    """
+    Args:
+      en (bool): which sense resistor voltage is used; true will propably destroy your tmc
+
+        """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     if en:
         self.tmc_logger.log("activated internal sense resistors.",
@@ -362,15 +347,15 @@ def set_internal_rsense(self,en):
 
 
 def set_irun_ihold(self, ihold, irun, ihold_delay):
-    """
-    sets the current scale (CS) for Running and Holding
+    """sets the current scale (CS) for Running and Holding
     and the delay, when to be switched to Holding current
 
-        Parameters:
-            ihold (int): 0-31
-            irun (int): 0-31
-            ihold_delay (int): 0-15
-    """
+    Args:
+      ihold (int): multiplicator for current while standstill [0-31]
+      irun (int): current while running [0-31]
+      ihold_delay (int): delay after standstill for switching to ihold [0-15]
+
+        """
     ihold_irun = 0
 
     ihold_irun = ihold_irun | ihold << 0
@@ -384,14 +369,13 @@ def set_irun_ihold(self, ihold, irun, ihold_delay):
 
 
 def set_pdn_disable(self,pdn_disable):
-    """
-    disables PDN on the UART pin
-    0: PDN_UART controls standstill current reduction
-    1: PDN_UART input function disabled. Set this bit,
+    """disables PDN on the UART pin
+    False: PDN_UART controls standstill current reduction
+    True: PDN_UART input function disabled. Set this bit,
     when using the UART interface!
 
-        Parameters:
-            pdn_disable (bool): whether pdn should be disabled
+    Args:
+        pdn_disable (bool): whether PDN should be disabled
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     if pdn_disable:
@@ -406,17 +390,15 @@ def set_pdn_disable(self,pdn_disable):
 
 def set_current(self, run_current, hold_current_multiplier = 0.5,
                 hold_current_delay = 10, pdn_disable = True):
-    """
-    sets the current flow for the motor.
+    """sets the current flow for the motor.
 
-        Parameters:
-            run_current (int): current during movement in mA
-            hold_current_multiplier (int): current multiplier during standstill
-            hold_current_delay (int): delay after standstill after which the current drops
-            use_vref (int): most driver have a trimpotentiometer to set the vref. optional
-            Vref (int): if you want to use Vref, you need to set the Vref Voltage
-            pdn_disable (bool): should be disabled if UART is used
-    """
+    Args:
+      run_current (int): current during movement in mA
+      hold_current_multiplier (int):current multiplier during standstill (Default value = 0.5)
+      hold_current_delay (int): delay after standstill after which cur drops (Default value = 10)
+      pdn_disable (bool): should be disabled if UART is used (Default value = True)
+
+        """
     cs_irun = 0
     rsense = 0.11
     vfs = 0
@@ -461,11 +443,10 @@ def set_current(self, run_current, hold_current_multiplier = 0.5,
 
 
 def get_spreadcycle(self):
-    """
-    return whether spreadcycle (1) is active or stealthchop (0)
+    """reads spreadcycle
 
-        Parameters:
-            en_spread (bool): true = spreadcycle; false = stealthchop
+    Returns:
+        bool: True = spreadcycle; False = stealthchop
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     return gconf & tmc_reg.en_spreadcycle
@@ -473,12 +454,12 @@ def get_spreadcycle(self):
 
 
 def set_spreadcycle(self,en_spread):
-    """
-    enables spreadcycle (1) or stealthchop (0)
+    """enables spreadcycle (1) or stealthchop (0)
 
-        Parameters:
-            en_spread (bool): true to enable spreadcycle; false to enable stealthchop
-    """
+    Args:
+      en_spread (bool): true to enable spreadcycle; false to enable stealthchop
+
+        """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
     if en_spread:
         self.tmc_logger.log("activated Spreadcycle", Loglevel.INFO)
@@ -491,11 +472,10 @@ def set_spreadcycle(self,en_spread):
 
 
 def get_interpolation(self):
-    """
-    return whether the tmc inbuilt interpolation is active
+    """return whether the tmc inbuilt interpolation is active
 
-        Returns:
-            en (bool): true if internal µstep interpolation is enabled
+    Returns:
+        en (bool): true if internal µstep interpolation is enabled
     """
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     return bool(chopconf & tmc_reg.intpol)
@@ -503,11 +483,10 @@ def get_interpolation(self):
 
 
 def set_interpolation(self, en):
-    """
-    enables the tmc inbuilt interpolation of the steps to 256 microsteps
+    """enables the tmc inbuilt interpolation of the steps to 256 µsteps
 
-        Parameters:
-            en (bool): true to enable internal µstep interpolation
+    Args:
+        en (bool): true to enable internal µstep interpolation
     """
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
 
@@ -523,12 +502,11 @@ def set_interpolation(self, en):
 
 
 def read_microstepping_resolution(self):
-    """
-    returns the current native microstep resolution (1-256)
+    """returns the current native microstep resolution (1-256)
     this reads the value from the driver register
 
-        Returns:
-            msres (int): µstep resolution
+    Returns:
+        int: µstep resolution
     """
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
 
@@ -545,23 +523,21 @@ def read_microstepping_resolution(self):
 
 
 def get_microstepping_resolution(self):
-    """
-    returns the current native microstep resolution (1-256)
+    """returns the current native microstep resolution (1-256)
     this returns the cached value from this module
 
-        Returns:
-            msres (int): µstep resolution
+    Returns:
+        int: µstep resolution
     """
     return self._msres
 
 
 
 def set_microstepping_resolution(self, msres):
-    """
-    sets the current native microstep resolution (1,2,4,8,16,32,64,128,256)
+    """sets the current native microstep resolution (1,2,4,8,16,32,64,128,256)
 
-        Parameters:
-            msres (int): µstep resolution; has to be a power of 2 or 1 for fullstep
+    Args:
+        msres (int): µstep resolution; has to be a power of 2 or 1 for fullstep
     """
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     #setting all bits to zero
@@ -584,13 +560,12 @@ def set_microstepping_resolution(self, msres):
 
 
 def set_mstep_resolution_reg_select(self, en):
-    """
-    sets the register bit "mstep_reg_select" to 1 or 0 depending to the given value.
+    """sets the register bit "mstep_reg_select" to 1 or 0 depending to the given value.
     this is needed to set the microstep resolution via UART
     this method is called by "set_microstepping_resolution"
 
-        Parameters:
-            en (bool): true to set µstep resolution via UART
+    Args:
+        en (bool): true to set µstep resolution via UART
     """
     gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
 
@@ -605,13 +580,12 @@ def set_mstep_resolution_reg_select(self, en):
 
 
 def get_interface_transmission_counter(self):
-    """
-    reads the interface transmission counter from the tmc register
+    """reads the interface transmission counter from the tmc register
     this value is increased on every succesfull write access
     can be used to verify a write access
 
-        Returns:
-            ifcnt (int): 8bit IFCNT Register
+    Returns:
+        int: 8bit IFCNT Register
     """
     ifcnt = self.tmc_uart.read_int(tmc_reg.IFCNT)
     self.tmc_logger.log(f"Interface Transmission Counter: {ifcnt}", Loglevel.INFO)
@@ -620,11 +594,10 @@ def get_interface_transmission_counter(self):
 
 
 def get_tstep(self):
-    """
-    reads the current tstep from the driver register
+    """reads the current tstep from the driver register
 
-        Returns:
-            tstep (int): TStep time
+    Returns:
+        int: TStep time
     """
     tstep = self.tmc_uart.read_int(tmc_reg.TSTEP)
     return tstep
@@ -632,27 +605,25 @@ def get_tstep(self):
 
 
 def set_vactual(self, vactual):
-    """
-    sets the register bit "VACTUAL" to to a given value
+    """sets the register bit "VACTUAL" to to a given value
     VACTUAL allows moving the motor by UART control.
     It gives the motor velocity in +-(2^23)-1 [μsteps / t]
     0: Normal operation. Driver reacts to STEP input
 
-        Parameters:
-            vactual (int): value for vactual
+    Args:
+        vactual (int): value for VACTUAL
     """
     self.tmc_uart.write_reg_check(tmc_reg.VACTUAL, vactual)
 
 
 
 def get_stallguard_result(self):
-    """
-    return the current stallguard result
+    """return the current stallguard result
     its will be calculated with every fullstep
     higher values means a lower motor load
 
-        Returns:
-            sg_result (int): StallGuard Result
+    Returns:
+        sg_result (int): StallGuard Result
     """
     sg_result = self.tmc_uart.read_int(tmc_reg.SG_RESULT)
     return sg_result
@@ -660,16 +631,14 @@ def get_stallguard_result(self):
 
 
 def set_stallguard_threshold(self, threshold):
-    """
-    sets the register bit "SGTHRS" to to a given value
+    """sets the register bit "SGTHRS" to to a given value
     this is needed for the stallguard interrupt callback
     SG_RESULT becomes compared to the double of this threshold.
     SG_RESULT ≤ SGTHRS*2
 
-        Parameters:
-            threshold (int): value for SGTHRS
+    Args:
+        threshold (int): value for SGTHRS
     """
-
     self.tmc_logger.log(f"sgthrs {bin(threshold)}", Loglevel.INFO)
 
     self.tmc_logger.log("writing sgthrs", Loglevel.INFO)
@@ -678,14 +647,12 @@ def set_stallguard_threshold(self, threshold):
 
 
 def set_coolstep_threshold(self, threshold):
-    """
-    This  is  the  lower  threshold  velocity  for  switching
+    """This  is  the  lower  threshold  velocity  for  switching
     on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
 
-        Parameters:
-            threshold (int): threshold  velocity
+    Args:
+        threshold (int): threshold velocity for coolstep
     """
-
     self.tmc_logger.log(f"tcoolthrs {bin(threshold)}", Loglevel.INFO)
 
     self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO)
@@ -694,12 +661,11 @@ def set_coolstep_threshold(self, threshold):
 
 
 def get_microstep_counter(self):
-    """
-    returns the current Microstep counter.
+    """returns the current Microstep counter.
     Indicates actual position in the microstep table for CUR_A
 
-        Returns:
-            mscnt (int): current Microstep counter
+    Returns:
+        int: current Microstep counter
     """
     mscnt = self.tmc_uart.read_int(tmc_reg.MSCNT)
     return mscnt
@@ -707,15 +673,14 @@ def get_microstep_counter(self):
 
 
 def get_microstep_counter_in_steps(self, offset=0):
-    """
-    returns the current Microstep counter.
+    """returns the current Microstep counter.
     Indicates actual position in the microstep table for CUR_A
 
-        Parameters:
-            offset (int): offset added to the current step counter
+    Args:
+        offset (int): offset in steps (Default value = 0)
 
-        Returns:
-            step (int): current Microstep counter convertet to steps
+    Returns:
+        step (int): current Microstep counter convertet to steps
     """
     step = (self.get_microstep_counter()-64)*(self._msres*4)/1024
     step = (4*self._msres)-step-1

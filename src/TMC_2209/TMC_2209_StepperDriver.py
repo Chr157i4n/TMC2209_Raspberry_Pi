@@ -6,8 +6,11 @@
 #pylint: disable=too-many-instance-attributes
 #pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
-"""
-TMC_2209 stepper driver module
+"""TMC_2209 stepper driver module
+
+this module has two different functions:
+1. change setting in the TMC-driver via UART
+2. move the motor via STEP/DIR pins
 """
 
 import time
@@ -25,9 +28,8 @@ from . import _TMC_2209_math as tmc_math
 
 
 class TMC_2209:
-    """
-    TMC_2209
-
+    """TMC_2209
+    
     this class has two different functions:
     1. change setting in the TMC-driver via UART
     2. move the motor via STEP/DIR pins
@@ -68,7 +70,6 @@ class TMC_2209:
 
     _stop = StopMode.NO
     _starttime = 0
-    _sg_delay = 0
     _sg_callback = None
 
     _msres = -1
@@ -102,8 +103,18 @@ class TMC_2209:
 
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
                  driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
-        """
-        constructor
+        """constructor
+
+        Args:
+            pin_en (int): EN pin number
+            pin_step (int, optional): STEP pin number. Defaults to -1.
+            pin_dir (int, optional): DIR pin number. Defaults to -1.
+            baudrate (int, optional): baudrate. Defaults to 115200.
+            serialport (str, optional): serialport path. Defaults to "/dev/serial0".
+            driver_address (int, optional): driver adress [0-3]. Defaults to 0.
+            gpio_mode (enum, optional): gpio mode. Defaults to GPIO.BCM.
+            loglevel (enum, optional): loglevel. Defaults to None.
+            skip_uart_init (bool, optional): skip UART init. Defaults to False.
         """
         self.init(pin_en, pin_step, pin_dir, baudrate, serialport, driver_address,
                   gpio_mode, loglevel, skip_uart_init)
@@ -111,9 +122,7 @@ class TMC_2209:
 
 
     def __del__(self):
-        """
-        destructor
-        """
+        """destructor"""
         self.deinit()
         del self.tmc_uart
         del self.tmc_logger
@@ -121,20 +130,20 @@ class TMC_2209:
 
 
     def init(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-    driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
-        """
-        init function
+        driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
+        """init function
 
-            Parameters:
-                pin_en (int): Pin number of EN pin
-                pin_step (int): Pin number of STEP pin
-                pin_dir (int): Pin number of DIR pin
-                baudrate (int): baudrate exp: 9600, 115200
-                serialport (string): win: 'COM1'; linux: 'dev/serial0'
-                driver_address (int): 0 - 3
-                no_uart=False (bool): skip UART init, if only STEP/DIR is used
-                gpio_mode (enum): numbering system for the GPIO pins
-                loglevel (enum): level for which to log
+        Args:
+            pin_en (int): Pin number of EN pin
+            pin_step (int, optional): Pin number of STEP pin. Defaults to -1.
+            pin_dir (int, optional): Pin number of DIR pin. Defaults to -1.
+            baudrate (int, optional): baudrate exp: 9600, 115200. Defaults to 115200.
+            serialport (str, optional):  win: 'COM1'; linux: 'dev/serial0'. Defaults to "/dev/serial0".
+            driver_address (int, optional): driver address [0-3]. Defaults to 0.
+
+            gpio_mode (enum, optional): numbering system for the GPIO pins. Defaults to GPIO.BCM.
+            loglevel (enum, optional): level for which to log. Defaults to None.
+            skip_uart_init (bool, optional): skip UART init, if only STEP/DIR is used. Defaults to False.
         """
         self.tmc_logger = TMC_logger(loglevel, f"TMC2209 {driver_address}")
         self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
@@ -173,9 +182,7 @@ class TMC_2209:
 
 
     def deinit(self):
-        """
-        deinit function
-        """
+        """deinit function"""
         if self._deinit_finished is False:
             self.tmc_logger.log("Deinit", Loglevel.INFO)
 
@@ -200,19 +207,16 @@ class TMC_2209:
 
 
     def set_deinitialize_true(self):
-        """
-        set deinitialize to true
-        """
+        """set deinitialize to true"""
         self._deinit_finished = True
 
 
 
     def set_motor_enabled(self, en):
-        """
-        enables or disables the motor current output
+        """enables or disables the motor current output
 
-            Parameters:
-                en (bool): whether the motor current output should be enabled
+        Args:
+            en (bool): whether the motor current output should be enabled
         """
         GPIO.output(self._pin_en, not en)
         self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
@@ -220,18 +224,18 @@ class TMC_2209:
 
 
     def do_homing(self, diag_pin, revolutions = 10, threshold = None, speed_rpm = None):
-        """
-        homes the motor in the given direction using stallguard.
+        """homes the motor in the given direction using stallguard.
         this method is using vactual to move the motor and an interrupt on the DIAG pin
 
-            Parameters
-                diag_pin (int): DIAG pin number
-                revolutions (int): max number of revolutions. Can be negative for inverse direction
-                threshold (int): optional; StallGuard detection threshold
-                speed_rpm (float): optional; speed in revolutions per minute
+        Args:
+            diag_pin (int): DIAG pin number
+            revolutions (int): max number of revolutions. Can be negative for inverse direction
+                (Default value = 10)
+            threshold (int): StallGuard detection threshold (Default value = None)
+            speed_rpm (float):speed in revolutions per minute (Default value = None)
 
-            Returns:
-                not homing_failed (bool): true when homing was successful
+        Returns:
+            not homing_failed (bool): true when homing was successful
         """
         if threshold is not None:
             self._sg_threshold = threshold
@@ -264,14 +268,13 @@ class TMC_2209:
 
 
     def do_homing2(self, revolutions, threshold=None):
-        """
-        homes the motor in the given direction using stallguard
+        """homes the motor in the given direction using stallguard
         old function, uses STEP/DIR to move the motor and pulls the StallGuard result
         from the interface
 
-            Parameters
-                revolutions (int): max number of revolutions. Can be negative for inverse direction
-                threshold (int): optional; StallGuard detection threshold
+        Args:
+            revolutions (int): max number of revolutions. Can be negative for inverse direction
+            threshold (int, optional): StallGuard detection threshold (Default value = None)
         """
         sg_results = []
 
@@ -328,20 +331,17 @@ class TMC_2209:
 
 
     def reverse_direction_pin(self):
-        """
-        reverses the motor shaft direction
-        """
+        """reverses the motor shaft direction"""
         self._direction = not self._direction
         GPIO.output(self._pin_dir, self._direction)
 
 
 
     def set_direction_pin(self, direction):
-        """
-        sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
+        """sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
 
-            Parameters:
-                direction (bool): motor shaft direction: 0 = CCW; 1 = CW
+        Args:
+            direction (bool): motor shaft direction: False = CCW; True = CW
         """
         self._direction = direction
         GPIO.output(self._pin_dir, direction)
@@ -349,12 +349,11 @@ class TMC_2209:
 
 
     def read_steps_per_rev(self):
-        """
-        returns how many steps are needed for one revolution.
+        """returns how many steps are needed for one revolution.
         this reads the value from the tmc driver.
 
-            Returns:
-                steps_per_rev (int): Steps per revolution
+        Returns:
+            int: Steps per revolution
         """
         self._steps_per_rev = self._fullsteps_per_rev*self.read_microstepping_resolution()
         return self._steps_per_rev
@@ -362,12 +361,11 @@ class TMC_2209:
 
 
     def get_steps_per_rev(self):
-        """
-        returns how many steps are needed for one revolution.
+        """returns how many steps are needed for one revolution.
         this gets the cached value from the library.
 
-            Returns:
-                steps_per_rev (int): Steps per revolution
+        Returns:
+            int: Steps per revolution
         """
         return self._steps_per_rev
 
@@ -375,21 +373,21 @@ class TMC_2209:
 
     def set_vactual_dur(self, vactual, duration=0, acceleration=0,
                              show_stallguard_result=False, show_tstep=False):
-        """
-        sets the register bit "VACTUAL" to to a given value
+        """sets the register bit "VACTUAL" to to a given value
         VACTUAL allows moving the motor by UART control.
         It gives the motor velocity in +-(2^23)-1 [μsteps / t]
         0: Normal operation. Driver reacts to STEP input
 
-            Parameters:
-                vactual (int): value for vactual
-                duration (int): after this vactual will be set to 0
-                acceleration (int): use this for a velocity ramp
-                show_stallguard_result (bool): prints StallGuard Result during movement
-                show_tstep (bool): prints TStep during movement
+        Args:
+            vactual (int): value for VACTUAL
+            duration (int): after this vactual will be set to 0 (Default value = 0)
+            acceleration (int): use this for a velocity ramp (Default value = 0)
+            show_stallguard_result (bool): prints StallGuard Result during movement
+                (Default value = False)
+            show_tstep (bool): prints TStep during movement (Default value = False)
 
-            Returns:
-                stop (enum): how the movement was finished
+        Returns:
+            stop (enum): how the movement was finished
         """
         self._stop = StopMode.NO
         current_vactual = 0
@@ -443,20 +441,19 @@ class TMC_2209:
 
 
     def set_vactual_rps(self, rps, duration=0, revolutions=0, acceleration=0):
-        """
-        converts the rps parameter to a vactual value which represents
+        """converts the rps parameter to a vactual value which represents
         rotation speed in revolutions per second
         With internal oscillator:
         VACTUAL[2209] = v[Hz] / 0.715Hz
 
-            Parameters:
-                rps (int): value for vactual in rps
-                duration (int): after this vactual will be set to 0
-                revolutions (int): after this vactual will be set to 0
-                acceleration (int): use this for a velocity ramp
+        Args:
+            rps (int): value for vactual in rps
+            duration (int): after this vactual will be set to 0 (Default value = 0)
+            revolutions (int): after this vactual will be set to 0 (Default value = 0)
+            acceleration (int): use this for a velocity ramp (Default value = 0)
 
-            Returns:
-                stop (enum): how the movement was finished
+        Returns:
+            stop (enum): how the movement was finished
         """
         vactual = tmc_math.rps_to_vactual(rps, self._steps_per_rev)
         if revolutions!=0:
@@ -468,35 +465,33 @@ class TMC_2209:
 
 
     def set_vactual_rpm(self, rpm, duration=0, revolutions=0, acceleration=0):
-        """
-        converts the rps parameter to a vactual value which represents
+        """converts the rps parameter to a vactual value which represents
         rotation speed in revolutions per minute
 
-            Parameters:
-                rpm (int): value for vactual in rpm
-                duration (int): after this vactual will be set to 0
-                revolutions (int): after this vactual will be set to 0
-                acceleration (int): use this for a velocity ramp
+        Args:
+            rpm (int): value for vactual in rpm
+            duration (int): after this vactual will be set to 0 (Default value = 0)
+            revolutions (int): after this vactual will be set to 0 (Default value = 0)
+            acceleration (int): use this for a velocity ramp (Default value = 0)
 
-            Returns:
-                stop (enum): how the movement was finished
+        Returns:
+            stop (enum): how the movement was finished
         """
         return self.set_vactual_rps(rpm/60, duration, revolutions, acceleration)
 
 
 
     def set_stallguard_callback(self, pin_stallguard, threshold, callback,
-                                min_speed = 100, ignore_delay = 0):
-        """
-        set a function to call back, when the driver detects a stall
+                                min_speed = 100):
+        """set a function to call back, when the driver detects a stall
         via stallguard
         high value on the diag pin can also mean a driver error
 
-            Parameters:
-                pin_stallguard (int): pin needs to be connected to DIAG
-                threshold (int): value for SGTHRS
-                callback (function): will be called on StallGuard trigger
-                min_speed (int): min speed [steps/s] for StallGuard
+        Args:
+            pin_stallguard (int): pin needs to be connected to DIAG
+            threshold (int): value for SGTHRS
+            callback (func): will be called on StallGuard trigger
+            min_speed (int): min speed [steps/s] for StallGuard (Default value = 100)
         """
         self.tmc_logger.log(f"setup stallguard callback on GPIO {pin_stallguard}",
                             Loglevel.INFO)
@@ -506,7 +501,6 @@ class TMC_2209:
         self.set_stallguard_threshold(threshold)
         self.set_coolstep_threshold(tmc_math.steps_to_tstep(
             min_speed, self.get_microstepping_resolution()))
-        self._sg_delay = ignore_delay
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
 
@@ -518,18 +512,15 @@ class TMC_2209:
 
 
     def stallguard_callback(self, gpio_pin):
-        """
-        the callback function for StallGuard.
+        """the callback function for StallGuard.
         only checks whether the duration of the current movement is longer than
         _sg_delay and then calls the actual callback
 
-            Parameters:
-                gpio_pin (int): pin number of the interrupt pin
+        Args:
+            gpio_pin (int): pin number of the interrupt pin
         """
         del gpio_pin
         if self._sg_callback is None:
             self.tmc_logger.log("StallGuard callback is None", Loglevel.DEBUG)
-            return
-        if time.time()<=self._starttime+self._sg_delay and self._sg_delay != 0:
             return
         self._sg_callback()

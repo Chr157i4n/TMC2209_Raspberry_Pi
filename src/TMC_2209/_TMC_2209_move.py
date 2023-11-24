@@ -48,45 +48,41 @@ class StopMode(Enum):
 
 
 def set_movement_abs_rel(self, movement_abs_rel):
-    """
-    set whether the movment should be relative or absolute by default.
-    See the Enum MovementAbsoluteRelative
+    """set whether the movment should be relative or absolute by default.
+    See the Enum MovementAbsoluteRelative          
 
-        Paramters:
-            movement_abs_rel (enum): whether the movment should be relative or absolute
+    Args:
+        movement_abs_rel (enum): whether the movment should be relative or absolute
     """
     self._movement_abs_rel = movement_abs_rel
 
 
 
 def get_current_position(self):
-    """
-    returns the current motor position in microsteps
+    """returns the current motor position in µsteps
 
-        Returns:
-            current_pos (bool): current motor position
+    Returns:
+        bool: current motor position
     """
     return self._current_pos
 
 
 
 def set_current_position(self, new_pos):
-    """
-    overwrites the current motor position in microsteps
+    """overwrites the current motor position in µsteps
 
-        Parameters:
-            new_pos (bool): new position
+    Args:
+        new_pos (bool): new position of the motor in µsteps
     """
     self._current_pos = new_pos
 
 
 
 def set_max_speed(self, speed):
-    """
-    sets the maximum motor speed in µsteps per second
+    """sets the maximum motor speed in µsteps per second
 
-        Parameters:
-            speed (int): maximum speed in microsteps/sec
+    Args:
+        speed (int): speed in µsteps per second
     """
     if speed < 0.0:
         speed = -speed
@@ -101,33 +97,30 @@ def set_max_speed(self, speed):
 
 
 def set_max_speed_fullstep(self, speed):
-    """
-    sets the maximum motor speed in fullsteps per second
+    """sets the maximum motor speed in fullsteps per second
 
-        Parameters:
-            speed (int): maximum speed in fullsteps/sec
+    Args:
+        speed (int): maximum speed in fullsteps/sec
     """
     self.set_max_speed(speed*self.get_microstepping_resolution())
 
 
 
 def get_max_speed(self):
-    """
-    returns the maximum motor speed in steps per second
+    """returns the maximum motor speed in steps per second
 
-        Returns:
-            max_speed (int): current maximum speed in steps/sec
+    Returns:
+        int: current maximum speed in steps/sec
     """
     return self._max_speed
 
 
 
 def set_acceleration(self, acceleration):
-    """
-    sets the motor acceleration/decceleration in µsteps per sec per sec
+    """sets the motor acceleration/decceleration in µsteps per sec per sec
 
-        Parameters:
-            acceleration (int): acceleration/decceleration in µsteps per sec per sec
+    Args:
+        acceleration (int): acceleration/decceleration in µsteps per sec per sec
     """
     if acceleration == 0.0:
         return
@@ -143,63 +136,60 @@ def set_acceleration(self, acceleration):
 
 
 def set_acceleration_fullstep(self, acceleration):
-    """
-    sets the motor acceleration/decceleration in fullsteps per sec per sec
+    """sets the motor acceleration/decceleration in fullsteps per sec per sec
 
-        Parameters:
-            acceleration (int): acceleration/decceleration in fullsteps per sec per sec
+    Args:
+        acceleration (int): acceleration/decceleration in fullsteps per sec per sec
     """
     self.set_acceleration(acceleration*self.get_microstepping_resolution())
 
 
 
 def get_acceleration(self):
-    """
-    returns the motor acceleration/decceleration in steps per sec per sec
+    """returns the motor acceleration/decceleration in steps per sec per sec
 
-        Returns:
-            acceleration (int): acceleration/decceleration in µsteps per sec per sec
+    Returns:
+        int: acceleration/decceleration in µsteps per sec per sec
     """
     return self._acceleration
 
 
 
 def stop(self, stop_mode = StopMode.HARDSTOP):
-    """
-    stop the current movement
+    """stop the current movement
 
-        Parameters:
-            stop_mode (enum): whether the movement should be stopped immediatly or softly
+    Args:
+        stop_mode (enum): whether the movement should be stopped immediatly or softly
+            (Default value = StopMode.HARDSTOP)
     """
     self._stop = stop_mode
 
 
 
 def get_movement_phase(self):
-    """
-    return the current Movement Phase
+    """return the current Movement Phase
 
-        Returns:
-            movement_phase (enum): current Movement Phase
+    Returns:
+        movement_phase (enum): current Movement Phase
     """
     return self._movement_phase
 
 
 
 def run_to_position_steps(self, steps, movement_abs_rel = None):
-    """
-    runs the motor to the given position.
+    """runs the motor to the given position.
     with acceleration and deceleration
     blocks the code until finished or stopped from a different thread!
     returns true when the movement if finshed normally and false,
     when the movement was stopped
 
-        Parameters:
-            steps (int): amount of steps; can be negative
-            movement_abs_rel (enum): whether the movement should be absolut or relative
+    Args:
+        steps (int): amount of steps; can be negative
+        movement_abs_rel (enum): whether the movement should be absolut or relative
+            (Default value = None)
 
-        Returns:
-            stop (enum): how the movement was finished
+    Returns:
+        stop (enum): how the movement was finished
     """
     if movement_abs_rel is None:
         movement_abs_rel = self._movement_abs_rel
@@ -223,38 +213,37 @@ def run_to_position_steps(self, steps, movement_abs_rel = None):
 
 
 
-def run_to_position_revolutions(self, revolutions, movement_absolute_relative = None):
-    """
-    runs the motor to the given position.
+def run_to_position_revolutions(self, revolutions, movement_abs_rel = None):
+    """runs the motor to the given position.
     with acceleration and deceleration
     blocks the code until finished!
 
-        Parameters:
-            revolutions (int): amount of revs; can be negative
-            movement_abs_rel (enum): whether the movement should be absolut or relative
+    Args:
+        revolutions (int): amount of revs; can be negative
+        movement_abs_rel (enum): whether the movement should be absolut or relative
 
-        Returns:
-            stop (enum): how the movement was finished
+    Returns:
+        stop (enum): how the movement was finished
     """
     return self.run_to_position_steps(round(revolutions * self._steps_per_rev),
-                                        movement_absolute_relative)
+                                        movement_abs_rel)
 
 
 
 def run_to_position_steps_threaded(self, steps, movement_abs_rel = None):
-    """
-    runs the motor to the given position.
+    """runs the motor to the given position.
     with acceleration and deceleration
     does not block the code
     returns true when the movement if finshed normally and false,
     when the movement was stopped
 
-        Parameters:
-            steps (int): amount of steps; can be negative
-            movement_abs_rel (enum): whether the movement should be absolut or relative
+    Args:
+        steps (int): amount of steps; can be negative
+        movement_abs_rel (enum): whether the movement should be absolut or relative
+            (Default value = None)
 
-        Returns:
-            stop (enum): how the movement was finished
+    Returns:
+        stop (enum): how the movement was finished
     """
     self._movement_thread = threading.Thread(target=self.run_to_position_steps,
                                                 args=(steps, movement_abs_rel))
@@ -262,33 +251,32 @@ def run_to_position_steps_threaded(self, steps, movement_abs_rel = None):
 
 
 
-def run_to_position_revolutions_threaded(self, revolutions, movement_absolute_relative = None):
-    """
-    runs the motor to the given position.
+def run_to_position_revolutions_threaded(self, revolutions, movement_abs_rel = None):
+    """runs the motor to the given position.
     with acceleration and deceleration
     does not block the code
 
-        Parameters:
-            revolutions (int): amount of revs; can be negative
-            movement_abs_rel (enum): whether the movement should be absolut or relative
+    Args:
+        revolutions (int): amount of revs; can be negative
+        movement_abs_rel (enum): whether the movement should be absolut or relative
+            (Default value = None)
 
-        Returns:
-            stop (enum): how the movement was finished
+    Returns:
+        stop (enum): how the movement was finished
     """
     return self.run_to_position_steps_threaded(round(revolutions * self._steps_per_rev),
-                                                movement_absolute_relative)
+                                                movement_abs_rel)
 
 
 
 def wait_for_movement_finished_threaded(self):
-    """
-    wait for the motor to finish the movement,
+    """wait for the motor to finish the movement,
     if startet threaded
     returns true when the movement if finshed normally and false,
     when the movement was stopped
 
-        Returns:
-            stop (enum): how the movement was finished
+    Returns:
+        enum: how the movement was finished
     """
     self._movement_thread.join()
     return self._stop
@@ -296,8 +284,8 @@ def wait_for_movement_finished_threaded(self):
 
 
 def run(self):
-    """
-    calculates a new speed if a speed was made
+    """calculates a new speed if a speed was made
+    
     returns true if the target position is reached
     should not be called from outside!
     """
@@ -308,19 +296,16 @@ def run(self):
 
 
 def distance_to_go(self):
-    """
-    returns the remaining distance the motor should run
-    """
+    """returns the remaining distance the motor should run"""
     return self._target_pos - self._current_pos
 
 
 
 def compute_new_speed(self):
-    """
-    returns the calculated current speed depending on the acceleration
+    """returns the calculated current speed depending on the acceleration
+    
     this code is based on:
     "Generate stepper-motor speed profiles in real time" by David Austin
-
     https://www.embedded.com/generate-stepper-motor-speed-profiles-in-real-time/
     https://web.archive.org/web/20140705143928/http://fab.cba.mit.edu/classes/MIT/961.09/projects/i0/Stepper_Motor_Speed_Profile.pdf
     """
@@ -391,9 +376,7 @@ def compute_new_speed(self):
 
 
 def run_speed(self):
-    """
-    this methods does the actual steps with the current speed
-    """
+    """this methods does the actual steps with the current speed"""
     # Dont do anything unless we actually have a step interval
     if not self._step_interval:
         return False
@@ -415,8 +398,8 @@ def run_speed(self):
 
 
 def make_a_step(self):
-    """
-    method that makes on step
+    """method that makes on step
+    
     for the TMC2209 there needs to be a signal duration of minimum 100 ns
     """
     GPIO.output(self._pin_step, GPIO.HIGH)
