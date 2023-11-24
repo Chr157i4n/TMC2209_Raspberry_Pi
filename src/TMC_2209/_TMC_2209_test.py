@@ -21,7 +21,7 @@ from . import _TMC_2209_reg as tmc_reg
 
 def test_dir_step_en(self):
     """tests the EN, DIR and STEP pin
-    
+
     this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
     and checks the IOIN Register of the TMC meanwhile
     """
@@ -144,7 +144,7 @@ def test_uart(self):
 
 def test_stallguard_threshold(self, steps):
     """test method for tuning stallguard threshold
-    
+
     run this function with your motor settings and your motor load
     the function will determine the minimum stallguard results for each movement phase
 

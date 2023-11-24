@@ -15,7 +15,7 @@ from . import _TMC_2209_reg as reg
 
 class TMC_UART:
     """TMC_UART
-    
+
     this class is used to communicate with the TMC via UART
     it can be used to change the settings of the TMC.
     like the current or the microsteppingmode

@@ -49,7 +49,7 @@ class StopMode(Enum):
 
 def set_movement_abs_rel(self, movement_abs_rel):
     """set whether the movment should be relative or absolute by default.
-    See the Enum MovementAbsoluteRelative          
+    See the Enum MovementAbsoluteRelative
 
     Args:
         movement_abs_rel (enum): whether the movment should be relative or absolute
@@ -285,7 +285,7 @@ def wait_for_movement_finished_threaded(self):
 
 def run(self):
     """calculates a new speed if a speed was made
-    
+
     returns true if the target position is reached
     should not be called from outside!
     """
@@ -303,7 +303,7 @@ def distance_to_go(self):
 
 def compute_new_speed(self):
     """returns the calculated current speed depending on the acceleration
-    
+
     this code is based on:
     "Generate stepper-motor speed profiles in real time" by David Austin
     https://www.embedded.com/generate-stepper-motor-speed-profiles-in-real-time/
@@ -399,7 +399,7 @@ def run_speed(self):
 
 def make_a_step(self):
     """method that makes on step
-    
+
     for the TMC2209 there needs to be a signal duration of minimum 100 ns
     """
     GPIO.output(self._pin_step, GPIO.HIGH)

@@ -29,7 +29,7 @@ from . import _TMC_2209_math as tmc_math
 
 class TMC_2209:
     """TMC_2209
-    
+
     this class has two different functions:
     1. change setting in the TMC-driver via UART
     2. move the motor via STEP/DIR pins

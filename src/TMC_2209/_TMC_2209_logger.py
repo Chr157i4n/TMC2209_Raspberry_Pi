@@ -20,7 +20,7 @@ class Loglevel(Enum):
 
 class TMC_logger:
     """TMC_2209_comm
-    
+
     this class has the function:
     move the motor via STEP/DIR pins
     """
