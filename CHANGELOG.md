@@ -1,5 +1,11 @@
 # Changelog
 
+## version 0.4.1
+- removed dependency enum34
+- removed dependency bitstring
+- changed min python version to 3.6
+- changed docstring format to google
+
 ## version 0.4
 - split code into different files
 - added logger class
