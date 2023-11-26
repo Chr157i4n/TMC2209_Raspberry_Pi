@@ -7,7 +7,6 @@ TMC_UART stepper driver uart module
 
 import time
 import struct
-from bitstring import BitArray
 import serial
 
 from . import _TMC_2209_reg as reg
@@ -316,8 +315,8 @@ class TMC_UART:
         rtn = self.ser.read(12)
         self.tmc_logger.log(f"received {len(rtn)} bytes; {len(rtn)*8} bits")
         self.tmc_logger.log(f"hex: {rtn.hex()}")
-        c = BitArray(hex=rtn.hex())
-        self.tmc_logger.log(f"bin: {c.bin}")
+        rtn_bin = format(int(rtn.hex(),16), f"0>{len(rtn)*8}b")
+        self.tmc_logger.log(f"bin: {rtn_bin}")
 
         time.sleep(self.communication_pause)
 

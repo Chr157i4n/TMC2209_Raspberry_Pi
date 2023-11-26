@@ -41,7 +41,7 @@ git clone https://github.com/Chr157i4n/TMC2209_Raspberry_Pi
 ```
 - install the required modules
 ```
-pip3 install RPi.GPIO bitstring pyserial
+pip3 install RPi.GPIO pyserial
 ```
 - enable the serial port in  
 ```
