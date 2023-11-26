@@ -19,8 +19,7 @@ class Loglevel(Enum):
 
 
 class TMC_logger:
-    """
-    TMC_2209_comm
+    """TMC_2209_comm
 
     this class has the function:
     move the motor via STEP/DIR pins
@@ -31,12 +30,11 @@ class TMC_logger:
 
 
     def __init__(self, loglevel = Loglevel.INFO, logprefix = "TMC2209"):
-        """
-        constructor
+        """constructor
 
-            Parameters:
-                logprefix (string): new logprefix
-                loglevel (enum): level for which to log
+        Args:
+            logprefix (string): new logprefix
+            loglevel (enum): level for which to log
         """
         if loglevel is not None:
             self._loglevel = loglevel
@@ -48,34 +46,31 @@ class TMC_logger:
 
 
     def set_logprefix(self, logprefix):
-        """
-        set the logprefix.
+        """set the logprefix.
 
-            Parameters:
-                logprefix (string): new logprefix
+        Args:
+            logprefix (string): new logprefix
         """
         self._logprefix = logprefix
 
 
 
     def set_loglevel(self, loglevel):
-        """
-        set the loglevel. See the Enum Loglevel
+        """set the loglevel. See the Enum Loglevel
 
-            Parameters:
-                loglevel (enum): level for which to log
+        Args:
+            loglevel (enum): level for which to log
         """
         self._loglevel = loglevel
 
 
 
     def log(self, message, loglevel=Loglevel.NONE):
-        """
-        logs a message
+        """logs a message
 
-            Parameters:
-                message (string): message to log
-                loglevel (enum): level for which to log
+        Args:
+            message (string): message to log
+            loglevel (enum): loglevel of this message (Default value = Loglevel.NONE)
         """
         if self._loglevel.value >= loglevel.value:
             print(self._logprefix+": " +message)

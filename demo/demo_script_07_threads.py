@@ -92,7 +92,6 @@ print("---\n---")
 # deinitiate the TMC_2209 class
 #-----------------------------------------------------------------------
 tmc1.set_motor_enabled(False)
-tmc1.deinit()
 del tmc1
 
 

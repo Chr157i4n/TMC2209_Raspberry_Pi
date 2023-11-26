@@ -21,7 +21,6 @@ jobs:
         pip install RPi.GPIO
         pip install Mock.GPIO
         pip install mock
-        pip install bitstring
         pip install pyserial
     - name: Analysing the code with pylint
       run: |
