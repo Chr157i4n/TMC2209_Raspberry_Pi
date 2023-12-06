@@ -1,0 +1,15 @@
+name: MarkdownLint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: DavidAnson/markdownlint-cli2-action@v14
+      with:
+        globs: |
+          README.md
+          CHANGELOG.md
+          docs/*.md
