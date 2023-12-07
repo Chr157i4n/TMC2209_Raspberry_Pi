@@ -3,6 +3,7 @@
 [![PyPI python version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/python/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 [![PyPI version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/v/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 [![PyPI downloads TMC-2209-Raspberry-Pi](https://img.shields.io/pypi/dm/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
+[![GitHub issues](https://img.shields.io/github/issues/Chr157i4n/TMC2209_Raspberry_Pi.svg)](https://GitHub.com/Chr157i4n/TMC2209_Raspberry_Pi/issues/)
 
 \
 \
