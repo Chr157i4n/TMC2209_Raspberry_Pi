@@ -23,10 +23,9 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == "NVIDIA_JETSON":
-    print('''
+    raise NotImplementedError('''
 Not implemented. Needs refinement.\nNvidia Jetson has nuances with the parameter pull_up_down for pin_stallguard:
 https://github.com/NVIDIA/jetson-gpio/issues/5''')
-    raise NotImplementedError
 
 if BOARD == "RASPBERRY_PI":
     tmc = TMC_2209(21, 16, 20)

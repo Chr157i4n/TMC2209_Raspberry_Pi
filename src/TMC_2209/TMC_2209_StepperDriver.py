@@ -15,13 +15,11 @@ this module has two different functions:
 
 import time
 import statistics
-
+from ._TMC_2209_GPIO_board import GPIO, BOARD
 from ._TMC_2209_uart import TMC_UART as tmc_uart
 from ._TMC_2209_logger import TMC_logger, Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase, StopMode
 from . import _TMC_2209_math as tmc_math
-
-from ._TMC_2209_GPIO_board import GPIO, BOARD
 
 
 
