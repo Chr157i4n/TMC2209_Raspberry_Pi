@@ -3,7 +3,7 @@ Many boards have RaspberryPI-compatible PinOut,
 but require to import special GPIO module instead RPI.GPIO
 
 This module determines the type of board
-and import the corresponding GPIO module/
+and import the corresponding GPIO module
 
 Can be extended to support BeagleBone or other boards
 """
