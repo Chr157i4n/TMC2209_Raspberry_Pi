@@ -19,7 +19,7 @@ with open('/proc/device-tree/model', encoding="utf-8") as f:
             BOARD = "RASPBERRY_PI"
         except ModuleNotFoundError as err:
             dependencies_logger.log(
-                (f"ImportError: {err}\n"
+                (f"ModuleNotFoundError: {err}\n"
                 "Board is Raspberry PI but module RPi.GPIO isn`t installed.\n"
                 "Follow the installation instructions in the link below to resolve the issue:\n"
                 "https://sourceforge.net/p/raspberry-gpio-python/wiki/install/\n"
@@ -50,7 +50,7 @@ with open('/proc/device-tree/model', encoding="utf-8") as f:
             raise
         except ImportError as err:
             dependencies_logger.log(
-                (f"ModuleNotFoundError: {err}\n"
+                (f"ImportError: {err}\n"
                 "Board is Nvidia Jetson but module jetson-gpio isn`t installed.\n"
                 "Follow the installation instructions in the link below to resolve the issue:\n"
                 "https://github.com/NVIDIA/jetson-gpio\n"
