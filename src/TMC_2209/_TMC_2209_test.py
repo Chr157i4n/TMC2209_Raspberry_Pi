@@ -138,7 +138,7 @@ def test_uart(self):
         self.tmc_logger.log("""the Raspberry Pi did not received the bits it has send.
                     the first 4 bits are different""", Loglevel.INFO)
         status = False
-        
+
     self.tmc_logger.log("---")
     if status:
         self.tmc_logger.log("UART connection: OK")
