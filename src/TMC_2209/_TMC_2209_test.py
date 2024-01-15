@@ -101,8 +101,19 @@ def test_uart(self):
     snd = result[0]
     rtn = result[1]
 
+    status = True
+
     self.tmc_logger.log(f"length snd: {len(snd)}", Loglevel.DEBUG)
     self.tmc_logger.log(f"length rtn: {len(rtn)}", Loglevel.DEBUG)
+
+
+    self.tmc_logger.log("complete messages:", Loglevel.DEBUG)
+    self.tmc_logger.log(str(snd.hex()), Loglevel.DEBUG)
+    self.tmc_logger.log(str(rtn.hex()), Loglevel.DEBUG)
+
+    self.tmc_logger.log("just the first 4 bits:", Loglevel.DEBUG)
+    self.tmc_logger.log(str(snd[0:4].hex()), Loglevel.DEBUG)
+    self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG)
 
     if len(rtn)==12:
         self.tmc_logger.log("""the Raspberry Pi received the sended
@@ -110,12 +121,15 @@ def test_uart(self):
     elif len(rtn)==4:
         self.tmc_logger.log("the Raspberry Pi received only the sended bits",
                             Loglevel.INFO)
+        status = False
     elif len(rtn)==0:
         self.tmc_logger.log("the Raspberry Pi did not receive anything",
                             Loglevel.INFO)
+        status = False
     else:
         self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bits: {len(rtn)}",
                             Loglevel.INFO)
+        status = False
 
     if snd[0:4] == rtn[0:4]:
         self.tmc_logger.log("""the Raspberry Pi received exactly the bits it has send.
@@ -123,16 +137,13 @@ def test_uart(self):
     else:
         self.tmc_logger.log("""the Raspberry Pi did not received the bits it has send.
                     the first 4 bits are different""", Loglevel.INFO)
-
-
-    self.tmc_logger.log("complete", Loglevel.DEBUG)
-    self.tmc_logger.log(str(snd.hex()), Loglevel.DEBUG)
-    self.tmc_logger.log(str(rtn.hex()), Loglevel.DEBUG)
-
-    self.tmc_logger.log("just the first 4 bits", Loglevel.DEBUG)
-    self.tmc_logger.log(str(snd[0:4].hex()), Loglevel.DEBUG)
-    self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG)
-
+        status = False
+        
+    self.tmc_logger.log("---")
+    if status:
+        self.tmc_logger.log("UART connection: OK")
+    else:
+        self.tmc_logger.log("UART connection: not OK")
 
     self.tmc_logger.log("---")
     return True
