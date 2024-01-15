@@ -1,3 +1,5 @@
+#pylint: disable=unused-import
+#pylint: disable=ungrouped-imports
 """
 Many boards have RaspberryPI-compatible PinOut,
 but require to import special GPIO module instead RPI.GPIO
@@ -8,8 +10,8 @@ and import the corresponding GPIO module
 Can be extended to support BeagleBone or other boards
 """
 
-from ._TMC_2209_logger import TMC_logger, Loglevel
 from os.path import exists
+from ._TMC_2209_logger import TMC_logger, Loglevel
 
 BOARD = "UNKNOWN"
 dependencies_logger = TMC_logger(Loglevel.DEBUG, "DEPENDENCIES")
