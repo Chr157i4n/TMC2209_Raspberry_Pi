@@ -20,7 +20,13 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc1 = TMC_2209(21, 16, 20, driver_address=0)
+if BOARD == "RASPBERRY_PI":
+    tmc1 = TMC_2209(21, 16, 20)
+elif BOARD == "NVIDIA_JETSON":
+    tmc1 = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1")
+else:
+    # just in case
+    tmc1 = TMC_2209(21, 16, 20)
 
 tmc_driverlist = [tmc1]
 

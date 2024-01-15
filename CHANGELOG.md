@@ -1,5 +1,11 @@
 # Changelog
 
+## version 0.4.2
+
+- added support for Nvidia Jetson
+- added seperate file for GPIO board imports
+- changed min python version to 3.7
+
 ## version 0.4.1
 
 - removed dependency enum34

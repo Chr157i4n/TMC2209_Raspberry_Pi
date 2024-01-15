@@ -22,7 +22,14 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
+if BOARD == "RASPBERRY_PI":
+    tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
+elif BOARD == "NVIDIA_JETSON":
+    tmc = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", loglevel=Loglevel.DEBUG)
+else:
+    # just in case
+    tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
+
 
 
 

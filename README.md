@@ -3,6 +3,7 @@
 [![PyPI python version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/python/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 [![PyPI version TMC-2209-Raspberry-Pi](https://badgen.net/pypi/v/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
 [![PyPI downloads TMC-2209-Raspberry-Pi](https://img.shields.io/pypi/dm/TMC-2209-Raspberry-Pi)](https://pypi.org/project/TMC-2209-Raspberry-Pi)
+[![GitHub issues](https://img.shields.io/github/issues/Chr157i4n/TMC2209_Raspberry_Pi.svg)](https://GitHub.com/Chr157i4n/TMC2209_Raspberry_Pi/issues/)
 
 \
 \
@@ -61,10 +62,10 @@ Pin TMC2209 | connect to | Function
 -- | -- | --
 TX or PDN_UART with 1kOhm | TX of Raspberry Pi | send data to TMC via UART
 RX or PDN_UART directly | RX of Raspberry Pi | receive data from TMC via UART
+VDD | 3,3V of Raspberry Pi | optional, for more stable logic voltage
+GND | GND of Raspberry Pi | GND for VDD and Signals
 VM | 12V or 24V of power supply | power for the motor
 GND | GND of power supply | power for the motor
-VDD | 3,3V of Raspberry Pi | optional, for more stable logic voltage
-GND2 | GND of Raspberry Pi | GND for VDD and Signals
 EN | GPIO21 of Raspberry Pi | enable the motor output
 STEP | GPIO16 of Raspberry Pi | moves the motor one step per pulse
 DIR | GPIO20 of Raspberry Pi | set the direction of the motor
