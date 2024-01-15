@@ -11,6 +11,7 @@ Can be extended to support BeagleBone or other boards
 from ._TMC_2209_logger import TMC_logger, Loglevel
 from os.path import exists
 
+BOARD = "UNKNOWN"
 dependencies_logger = TMC_logger(Loglevel.DEBUG, "DEPENDENCIES")
 
 if not exists('/proc/device-tree/model'):
