@@ -9,7 +9,7 @@ test for TMC_2209_uart.py
 """
 
 import unittest
-import mock
+from unittest import  mock
 from src.TMC_2209._TMC_2209_logger import *
 from src.TMC_2209._TMC_2209_uart import *
 
