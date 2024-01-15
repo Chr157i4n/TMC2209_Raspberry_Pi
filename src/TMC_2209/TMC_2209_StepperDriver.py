@@ -122,16 +122,16 @@ class TMC_2209:
         GPIO.setwarnings(False)
         GPIO.setmode(gpio_mode)
 
-        self.tmc_logger.log("EN Pin: {pin_en}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"EN Pin: {pin_en}", Loglevel.DEBUG)
         self._pin_en = pin_en
         GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
 
-        self.tmc_logger.log("STEP Pin: {pin_step}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"STEP Pin: {pin_step}", Loglevel.DEBUG)
         if pin_step != -1:
             self._pin_step = pin_step
             GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
 
-        self.tmc_logger.log("DIR Pin: {pin_dir}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"DIR Pin: {pin_dir}", Loglevel.DEBUG)
         if pin_dir != -1:
             self._pin_dir = pin_dir
             GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
