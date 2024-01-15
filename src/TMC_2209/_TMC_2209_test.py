@@ -9,10 +9,7 @@ TMC_2209 stepper driver communication module
 """
 
 import time
-try:
-    from RPi import GPIO
-except:
-    from Mock import GPIO
+from ._TMC_2209_GPIO_board import GPIO
 from ._TMC_2209_logger import Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase
 from . import _TMC_2209_reg as tmc_reg

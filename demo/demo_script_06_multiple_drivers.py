@@ -22,8 +22,20 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-tmc1 = TMC_2209(21, 16, 20, driver_address=0)
-tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+# Multiple driver not tested
+if BOARD == "RASPBERRY_PI":
+    tmc1 = TMC_2209(21, 16, 20, driver_address=0)
+    tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+elif BOARD == "NVIDIA_JETSON":
+    # tmc1 = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", driver_address=0)
+    raise Exception("Not tested for Nvidia Jetson, use with caution")
+else:
+    # just in case
+    tmc1 = TMC_2209(21, 16, 20, driver_address=0)
+    tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+
+
+
 
 
 

@@ -15,10 +15,7 @@ this module has two different functions:
 
 import time
 import statistics
-try:
-    from RPi import GPIO
-except:
-    from Mock import GPIO
+from ._TMC_2209_GPIO_board import GPIO, BOARD
 from ._TMC_2209_uart import TMC_UART as tmc_uart
 from ._TMC_2209_logger import TMC_logger, Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase, StopMode
@@ -59,6 +56,7 @@ class TMC_2209:
         test_dir_step_en, test_step, test_uart, test_stallguard_threshold
     )
 
+    BOARD = BOARD
     tmc_uart = None
     tmc_logger = None
     _pin_step = -1

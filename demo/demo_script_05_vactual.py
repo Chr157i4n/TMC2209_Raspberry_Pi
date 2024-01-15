@@ -22,8 +22,13 @@ print("---")
 # initiate the TMC_2209 class
 # use your pin for pin_en here
 #-----------------------------------------------------------------------
-tmc = TMC_2209(21)
-
+if BOARD == "RASPBERRY_PI":
+    tmc = TMC_2209(21, 16, 20)
+elif BOARD == "NVIDIA_JETSON":
+    tmc = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1")
+else:
+    # just in case
+    tmc = TMC_2209(21, 16, 20)
 
 
 
