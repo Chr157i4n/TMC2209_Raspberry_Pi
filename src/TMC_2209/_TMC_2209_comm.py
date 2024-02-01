@@ -517,6 +517,7 @@ def read_microstepping_resolution(self):
     msresdezimal = 8 - msresdezimal
 
     self._msres = int(math.pow(2, msresdezimal))
+    self._steps_per_rev = self._fullsteps_per_rev * self._msres
 
     return self._msres
 
@@ -552,6 +553,7 @@ def set_microstepping_resolution(self, msres):
     self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf)
 
     self._msres = msres
+    self._steps_per_rev = self._fullsteps_per_rev * self._msres
 
     self.set_mstep_resolution_reg_select(True)
 
