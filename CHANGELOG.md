@@ -1,5 +1,9 @@
 # Changelog
 
+## version 0.4.3
+
+- small bugfix
+
 ## version 0.4.2
 
 - added support for Nvidia Jetson
