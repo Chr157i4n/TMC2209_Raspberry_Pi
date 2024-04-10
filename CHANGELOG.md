@@ -1,5 +1,9 @@
 # Changelog
 
+## version 0.4.4
+
+- change logger to use logging module
+
 ## version 0.4.3
 
 - small bugfix
