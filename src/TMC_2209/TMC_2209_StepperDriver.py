@@ -162,7 +162,7 @@ class TMC_2209:
 
             self.set_motor_enabled(False)
 
-            self.tmc_logger.log("GPIO cleanup")
+            self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
             if self._pin_step != -1:
                 GPIO.cleanup(self._pin_step)
             if self._pin_dir != -1:

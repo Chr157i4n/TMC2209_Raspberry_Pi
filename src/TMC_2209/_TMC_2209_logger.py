@@ -11,9 +11,10 @@ from enum import Enum
 class Loglevel(Enum):
     """loglevel"""
     ALL = 1             # all messages will be logged
-    MOVEMENT = 5        # error, info, debug and movement messages will be logged
-    DEBUG = 10          # error, info and debug messages will be logged
-    INFO = 20           # error and info messages will be logged
+    MOVEMENT = 5        # error, warning, info, debug and movement messages will be logged
+    DEBUG = 10          # error, warning, info and debug messages will be logged
+    INFO = 20           # error, warning and info messages will be logged
+    WARNING = 30        # error and warning messages will be logged
     ERROR = 40          # only error messages will be logged
     NONE = -1           # no messages will be logged
 

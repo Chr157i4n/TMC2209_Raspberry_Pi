@@ -10,6 +10,7 @@ import struct
 import serial
 
 from . import _TMC_2209_reg as reg
+from ._TMC_2209_logger import Loglevel
 
 
 class TMC_UART:
@@ -117,7 +118,7 @@ class TMC_UART:
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):
-            self.tmc_logger.log("Err in write")
+            self.tmc_logger.log("Err in write", Loglevel.ERROR)
             return False
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
@@ -149,16 +150,16 @@ class TMC_UART:
 
             if(len(rtn)<12 or not_zero_count == 0):
                 self.tmc_logger.log(f"""UART Communication Error:
-                                    {len(rtn_data)} data bytes | {len(rtn)} total bytes""")
+                                    {len(rtn_data)} data bytes | {len(rtn)} total bytes""", Loglevel.ERROR)
             elif rtn[11] != self.compute_crc8_atm(rtn[4:11]):
-                self.tmc_logger.log("UART Communication Error: CRC MISMATCH")
+                self.tmc_logger.log("UART Communication Error: CRC MISMATCH", Loglevel.ERROR)
             else:
                 break
 
             if tries<=0:
-                self.tmc_logger.log("after 10 tries not valid answer")
-                self.tmc_logger.log(f"snd:\t{bytes(self.r_frame)}")
-                self.tmc_logger.log(f"rtn:\t{rtn}")
+                self.tmc_logger.log("after 10 tries not valid answer", Loglevel.ERROR)
+                self.tmc_logger.log(f"snd:\t{bytes(self.r_frame)}", Loglevel.DEBUG)
+                self.tmc_logger.log(f"rtn:\t{rtn}", Loglevel.DEBUG)
                 self.handle_error()
                 return -1
 
@@ -194,7 +195,7 @@ class TMC_UART:
 
         rtn = self.ser.write(self.w_frame)
         if rtn != len(self.w_frame):
-            self.tmc_logger.log("Err in write")
+            self.tmc_logger.log("Err in write", Loglevel.ERROR)
             return False
 
         time.sleep(self.communication_pause)
@@ -223,12 +224,12 @@ class TMC_UART:
             tries -= 1
             ifcnt2 = self.read_int(reg.IFCNT)
             if ifcnt1 >= ifcnt2:
-                self.tmc_logger.log("writing not successful!")
-                self.tmc_logger.log("ifcnt:",ifcnt1,ifcnt2)
+                self.tmc_logger.log("writing not successful!", Loglevel.ERROR)
+                self.tmc_logger.log("ifcnt:",ifcnt1,ifcnt2, Loglevel.DEBUG)
             else:
                 return True
             if tries<=0:
-                self.tmc_logger.log("after 10 tries no valid write access")
+                self.tmc_logger.log("after 10 tries no valid write access", Loglevel.ERROR)
                 self.handle_error()
                 return -1
 
@@ -271,21 +272,21 @@ class TMC_UART:
             return
         self.error_handler_running = True
         gstat = self.read_int(reg.GSTAT)
-        self.tmc_logger.log("GSTAT Error check:")
+        self.tmc_logger.log("GSTAT Error check:", Loglevel.DEBUG)
         if gstat == -1:
-            self.tmc_logger.log("No answer from Driver")
+            self.tmc_logger.log("No answer from Driver", Loglevel.DEBUG)
         elif gstat == 0:
-            self.tmc_logger.log("Everything looks fine in GSTAT")
+            self.tmc_logger.log("Everything looks fine in GSTAT", Loglevel.DEBUG)
         else:
             if gstat & reg.reset:
-                self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT")
+                self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT", Loglevel.DEBUG)
             if gstat & reg.drv_err:
                 self.tmc_logger.log("""The driver has been shut down due to overtemperature or short
-                      circuit detection since the last read access""")
+                      circuit detection since the last read access""", Loglevel.DEBUG)
             if gstat & reg.uv_cp:
                 self.tmc_logger.log("""Undervoltage on the charge pump.
-                      The driver is disabled in this case""")
-        self.tmc_logger.log("EXITING!")
+                      The driver is disabled in this case""", Loglevel.DEBUG)
+        self.tmc_logger.log("EXITING!", Loglevel.INFO)
         raise SystemExit
 
 
@@ -306,17 +307,17 @@ class TMC_UART:
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):
-            self.tmc_logger.log("Err in write")
+            self.tmc_logger.log("Err in write", Loglevel.ERROR)
             return False
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
         time.sleep(self.communication_pause)
 
         rtn = self.ser.read(12)
-        self.tmc_logger.log(f"received {len(rtn)} bytes; {len(rtn)*8} bits")
-        self.tmc_logger.log(f"hex: {rtn.hex()}")
+        self.tmc_logger.log(f"received {len(rtn)} bytes; {len(rtn)*8} bits", Loglevel.DEBUG)
+        self.tmc_logger.log(f"hex: {rtn.hex()}", Loglevel.DEBUG)
         rtn_bin = format(int(rtn.hex(),16), f"0>{len(rtn)*8}b")
-        self.tmc_logger.log(f"bin: {rtn_bin}")
+        self.tmc_logger.log(f"bin: {rtn_bin}", Loglevel.DEBUG)
 
         time.sleep(self.communication_pause)
 
