@@ -81,7 +81,8 @@ def read_gconf(self):
     self.tmc_logger.log(bin(gconf), Loglevel.INFO)
 
     if gconf & tmc_reg.i_scale_analog:
-        self.tmc_logger.log("Driver is using voltage supplied to VREF as current reference", Loglevel.INFO)
+        self.tmc_logger.log("Driver is using voltage supplied to VREF as current reference",
+                            Loglevel.INFO)
     else:
         self.tmc_logger.log("Driver is using internal reference derived from 5VOUT", Loglevel.INFO)
     if gconf & tmc_reg.internal_rsense:
@@ -104,7 +105,8 @@ def read_gconf(self):
     else:
         self.tmc_logger.log("INDEX shows the first microstep position of sequencer", Loglevel.INFO)
     if gconf & tmc_reg.index_step:
-        self.tmc_logger.log("INDEX output shows step pulses from internal pulse generator", Loglevel.INFO)
+        self.tmc_logger.log("INDEX output shows step pulses from internal pulse generator",
+                            Loglevel.INFO)
     else:
         self.tmc_logger.log("INDEX output as selected by index_otpw", Loglevel.INFO)
     if gconf & tmc_reg.mstep_reg_select:
@@ -128,7 +130,8 @@ def read_gstat(self):
     gstat = self.tmc_uart.read_int(tmc_reg.GSTAT)
     self.tmc_logger.log(bin(gstat), Loglevel.INFO)
     if gstat & tmc_reg.reset:
-        self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT", Loglevel.WARNING)
+        self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT",
+                            Loglevel.WARNING)
     if gstat & tmc_reg.drv_err:
         self.tmc_logger.log("""The driver has been shut down due to overtemperature or
                     short circuit detection since the last read access""", Loglevel.ERROR)
@@ -198,7 +201,8 @@ def read_chopconf(self):
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     self.tmc_logger.log(bin(chopconf), Loglevel.INFO)
 
-    self.tmc_logger.log(f"native {self.get_microstepping_resolution()} microstep setting", Loglevel.INFO)
+    self.tmc_logger.log(f"native {self.get_microstepping_resolution()} microstep setting",
+                        Loglevel.INFO)
 
     if chopconf & tmc_reg.intpol:
         self.tmc_logger.log("interpolation to 256 µsteps", Loglevel.INFO)

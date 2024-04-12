@@ -150,7 +150,8 @@ class TMC_UART:
 
             if(len(rtn)<12 or not_zero_count == 0):
                 self.tmc_logger.log(f"""UART Communication Error:
-                                    {len(rtn_data)} data bytes | {len(rtn)} total bytes""", Loglevel.ERROR)
+                                    {len(rtn_data)} data bytes |
+                                    {len(rtn)} total bytes""", Loglevel.ERROR)
             elif rtn[11] != self.compute_crc8_atm(rtn[4:11]):
                 self.tmc_logger.log("UART Communication Error: CRC MISMATCH", Loglevel.ERROR)
             else:
@@ -279,7 +280,8 @@ class TMC_UART:
             self.tmc_logger.log("Everything looks fine in GSTAT", Loglevel.DEBUG)
         else:
             if gstat & reg.reset:
-                self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT", Loglevel.DEBUG)
+                self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT",
+                                    Loglevel.DEBUG)
             if gstat & reg.drv_err:
                 self.tmc_logger.log("""The driver has been shut down due to overtemperature or short
                       circuit detection since the last read access""", Loglevel.DEBUG)

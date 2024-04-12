@@ -100,8 +100,8 @@ class TMC_2209:
 
 
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-                 driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, logprefix=None, log_handlers=None,
-                 skip_uart_init=False):
+                 driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, logprefix=None,
+                 log_handlers=None, skip_uart_init=False):
         """constructor
 
         Args:
@@ -114,7 +114,8 @@ class TMC_2209:
             gpio_mode (enum, optional): gpio mode. Defaults to GPIO.BCM.
             loglevel (enum, optional): loglevel. Defaults to None.
             logprefix (str, optional): log prefix. Defaults to None (standard TMC prefix).
-            log_handlers (list, optional): list of logging handlers. Defaults to None (log to console).
+            log_handlers (list, optional): list of logging handlers.
+                Defaults to None (log to console).
             skip_uart_init (bool, optional): skip UART init. Defaults to False.
         """
         if logprefix is None:

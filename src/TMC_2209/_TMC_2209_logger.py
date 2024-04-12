@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+#pylint: disable=protected-access
 """
 TMC_2209 stepper driver logger module
 """
@@ -27,7 +28,8 @@ class TMC_logger:
     log messages from the TMC_2209 lib
     """
 
-    def __init__(self, loglevel: Loglevel = Loglevel.INFO, logprefix: str = "TMC2209", handlers=None):
+    def __init__(self, loglevel: Loglevel = Loglevel.INFO, logprefix: str = "TMC2209",
+                 handlers=None):
         """constructor
 
         Args:
@@ -40,6 +42,7 @@ class TMC_logger:
 
         # Add our custom log levels to the logger
         for level in [Loglevel.ALL, Loglevel.MOVEMENT, Loglevel.NONE]:
+            print(level)
             self._add_logging_level(level.name, level.value)
 
         self.logger = logging.getLogger(logprefix)
@@ -73,7 +76,8 @@ class TMC_logger:
             loglevel (enum): level for which to log
         """
         if loglevel is None:
-            loglevel = Loglevel.INFO        # This is safer than setting it to Loglevel.NONE (no messages will be logged)
+            # This is safer than setting it to Loglevel.NONE (no messages will be logged)
+            loglevel = Loglevel.INFO
         self.loglevel = loglevel
         self.logger.setLevel(loglevel.value)
 
@@ -82,7 +86,8 @@ class TMC_logger:
 
         Args:
             handler (logging.Handler): handler to add
-            formatter (logging.Formatter): formatter for the handler, or None to use the existing formatter (default: None)
+            formatter (logging.Formatter): formatter for the handler,
+                or None to use the existing formatter (default: None)
         """
         if formatter is None:
             formatter = self.formatter
@@ -107,7 +112,8 @@ class TMC_logger:
 
         Args:
             formatter (logging.Formatter): new formatter
-            handlers (list): list of logging handlers to set the new formatting for, or None to set it for all the handlers
+            handlers (list): list of logging handlers to set the new formatting for,
+                or None to set it for all the handlers
                 (default: None)
         """
         self.formatter = formatter
@@ -121,15 +127,16 @@ class TMC_logger:
         if not method_name:
             method_name = level_name.lower()
 
-        '''if hasattr(logging, level_name):
-            raise AttributeError(f"{level_name} already defined in logging module")
-        if hasattr(logging, method_name):
-            raise AttributeError(f"{method_name} already defined in logging module")
-        if hasattr(logging.getLoggerClass(), method_name):
-            raise AttributeError(f"{method_name} already defined in logger class")'''
+        # if hasattr(logging, level_name):
+        #     raise AttributeError(f"{level_name} already defined in logging module")
+        # if hasattr(logging, method_name):
+        #     raise AttributeError(f"{method_name} already defined in logging module")
+        # if hasattr(logging.getLoggerClass(), method_name):
+        #     raise AttributeError(f"{method_name} already defined in logger class")
 
         def logForLevel(self, message, *args, **kwargs):
             if self.isEnabledFor(level_num):
+                print("test")
                 self._log(level_num, message, args, **kwargs)
 
         def logToRoot(message, *args, **kwargs):
@@ -139,6 +146,7 @@ class TMC_logger:
         setattr(logging, level_name, level_num)
         setattr(logging.getLoggerClass(), method_name, logForLevel)
         setattr(logging, method_name, logToRoot)
+
 
     def log(self, message, loglevel: Loglevel = Loglevel.INFO):
         """logs a message
