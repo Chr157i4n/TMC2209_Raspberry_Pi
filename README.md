@@ -12,7 +12,7 @@ This is a library to drive a stepper motor with a TMC2209 stepper driver and a R
 This code is still experimental, so use it on your own risk.
 
 This library is programmed in pure Python. The performance of Python is not good enough to drive the motor with high speed.
-So if you move the motor with high speed and this library the motor will lose steps.
+So if you move the motor with high speed using this library the motor will lose steps.
 
 My TMC2209 is a [Bigtreetech TMC 2209 V1.2](https://github.com/bigtreetech/BIGTREETECH-TMC2209-V1.2)
 
@@ -23,7 +23,7 @@ You can read more about this in the datasheet from Trinamic.
 Because the TMC2209 uses one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends.
 Well, the Pi receives 4 bytes from itself and 8 bytes from the driver. So the Pi receives a total of 12 bytes and only the last 8 are the reply, of which only 4 are data bytes.
 
-the Documentation of the TMC2209 can be found here:  
+The Documentation of the TMC2209 can be found here:  
 [TMC2209 - Datsheet](https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf)
 
 The code is also available on [PyPI](https://pypi.org/project/TMC-2209-Raspberry-Pi).
