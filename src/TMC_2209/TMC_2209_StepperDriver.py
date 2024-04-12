@@ -100,7 +100,8 @@ class TMC_2209:
 
 
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-                 driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, skip_uart_init=False):
+                 driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, logprefix=None,
+                 log_handlers=None, skip_uart_init=False):
         """constructor
 
         Args:
@@ -112,9 +113,14 @@ class TMC_2209:
             driver_address (int, optional): driver adress [0-3]. Defaults to 0.
             gpio_mode (enum, optional): gpio mode. Defaults to GPIO.BCM.
             loglevel (enum, optional): loglevel. Defaults to None.
+            logprefix (str, optional): log prefix. Defaults to None (standard TMC prefix).
+            log_handlers (list, optional): list of logging handlers.
+                Defaults to None (log to console).
             skip_uart_init (bool, optional): skip UART init. Defaults to False.
         """
-        self.tmc_logger = TMC_logger(loglevel, f"TMC2209 {driver_address}")
+        if logprefix is None:
+            logprefix = f"TMC2209 {driver_address}"
+        self.tmc_logger = TMC_logger(loglevel, logprefix, log_handlers)
         self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
 
 
@@ -157,7 +163,7 @@ class TMC_2209:
 
             self.set_motor_enabled(False)
 
-            self.tmc_logger.log("GPIO cleanup")
+            self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
             if self._pin_step != -1:
                 GPIO.cleanup(self._pin_step)
             if self._pin_dir != -1:
