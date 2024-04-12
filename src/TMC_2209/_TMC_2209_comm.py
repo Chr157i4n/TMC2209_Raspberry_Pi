@@ -18,53 +18,53 @@ def read_drv_status(self):
     Returns:
         int: 32bit DRV_STATUS Register
     """
-    self.tmc_logger.log("---")
-    self.tmc_logger.log("DRIVER STATUS:")
+    self.tmc_logger.log("---", Loglevel.INFO)
+    self.tmc_logger.log("DRIVER STATUS:", Loglevel.INFO)
     drvstatus =self.tmc_uart.read_int(tmc_reg.DRVSTATUS)
     self.tmc_logger.log(bin(drvstatus), Loglevel.INFO)
     if drvstatus & tmc_reg.stst:
-        self.tmc_logger.log("Info: motor is standing still")
+        self.tmc_logger.log("Motor is standing still", Loglevel.INFO)
     else:
-        self.tmc_logger.log("Info: motor is running")
+        self.tmc_logger.log("Motor is running", Loglevel.INFO)
 
     if drvstatus & tmc_reg.stealth:
-        self.tmc_logger.log("Info: motor is running on StealthChop")
+        self.tmc_logger.log("Motor is running on StealthChop", Loglevel.INFO)
     else:
-        self.tmc_logger.log("Info: motor is running on SpreadCycle")
+        self.tmc_logger.log("Motor is running on SpreadCycle", Loglevel.INFO)
 
     cs_actual = drvstatus & tmc_reg.cs_actual
     cs_actual = cs_actual >> 16
-    self.tmc_logger.log(f"CS actual: {cs_actual}")
+    self.tmc_logger.log(f"CS actual: {cs_actual}", Loglevel.INFO)
 
     if drvstatus & tmc_reg.olb:
-        self.tmc_logger.log("Warning: Open load detected on phase B")
+        self.tmc_logger.log("Open load detected on phase B", Loglevel.WARNING)
 
     if drvstatus & tmc_reg.ola:
-        self.tmc_logger.log("Warning: Open load detected on phase A")
+        self.tmc_logger.log("Open load detected on phase A", Loglevel.WARNING)
 
     if drvstatus & tmc_reg.s2vsb:
-        self.tmc_logger.log("""Error: Short on low-side MOSFET detected on phase B.
-                    The driver becomes disabled""")
+        self.tmc_logger.log("""Short on low-side MOSFET detected on phase B.
+                    The driver becomes disabled""", Loglevel.ERROR)
 
     if drvstatus & tmc_reg.s2vsa:
-        self.tmc_logger.log("""Error: Short on low-side MOSFET detected on phase A.
-                    The driver becomes disabled""")
+        self.tmc_logger.log("""Short on low-side MOSFET detected on phase A.
+                    The driver becomes disabled""", Loglevel.ERROR)
 
     if drvstatus & tmc_reg.s2gb:
-        self.tmc_logger.log("""Error: Short to GND detected on phase B.
-                            The driver becomes disabled.""")
+        self.tmc_logger.log("""Short to GND detected on phase B.
+                            The driver becomes disabled.""", Loglevel.ERROR)
 
     if drvstatus & tmc_reg.s2ga:
-        self.tmc_logger.log("""Error: Short to GND detected on phase A.
-                            The driver becomes disabled.""")
+        self.tmc_logger.log("""Short to GND detected on phase A.
+                            The driver becomes disabled.""", Loglevel.ERROR)
 
     if drvstatus & tmc_reg.ot:
-        self.tmc_logger.log("Error: Driver Overheating!")
+        self.tmc_logger.log("Driver Overheating!", Loglevel.ERROR)
 
     if drvstatus & tmc_reg.otpw:
-        self.tmc_logger.log("Warning: Driver Overheating Prewarning!")
+        self.tmc_logger.log("Driver Overheating Prewarning!", Loglevel.WARNING)
 
-    self.tmc_logger.log("---")
+    self.tmc_logger.log("---", Loglevel.INFO)
     return drvstatus
 
 
@@ -81,38 +81,40 @@ def read_gconf(self):
     self.tmc_logger.log(bin(gconf), Loglevel.INFO)
 
     if gconf & tmc_reg.i_scale_analog:
-        self.tmc_logger.log("Driver is using voltage supplied to VREF as current reference")
+        self.tmc_logger.log("Driver is using voltage supplied to VREF as current reference",
+                            Loglevel.INFO)
     else:
-        self.tmc_logger.log("Driver is using internal reference derived from 5VOUT")
+        self.tmc_logger.log("Driver is using internal reference derived from 5VOUT", Loglevel.INFO)
     if gconf & tmc_reg.internal_rsense:
         self.tmc_logger.log("""Internal sense resistors.
-                            Use current supplied into VREF as reference.""")
-        self.tmc_logger.log("VREF pin internally is driven to GND in this mode.")
-        self.tmc_logger.log("This will most likely destroy your driver!!!")
+                            Use current supplied into VREF as reference.""", Loglevel.WARNING)
+        self.tmc_logger.log("VREF pin internally is driven to GND in this mode.", Loglevel.WARNING)
+        self.tmc_logger.log("This will most likely destroy your driver!!!", Loglevel.WARNING)
         raise SystemExit
-    self.tmc_logger.log("Operation with external sense resistors")
+    self.tmc_logger.log("Operation with external sense resistors", Loglevel.INFO)
     if gconf & tmc_reg.en_spreadcycle:
-        self.tmc_logger.log("SpreadCycle mode enabled")
+        self.tmc_logger.log("SpreadCycle mode enabled", Loglevel.INFO)
     else:
-        self.tmc_logger.log("StealthChop PWM mode enabled")
+        self.tmc_logger.log("StealthChop PWM mode enabled", Loglevel.INFO)
     if gconf & tmc_reg.shaft:
-        self.tmc_logger.log("Inverse motor direction")
+        self.tmc_logger.log("Inverse motor direction", Loglevel.INFO)
     else:
-        self.tmc_logger.log("normal motor direction")
+        self.tmc_logger.log("Normal motor direction", Loglevel.INFO)
     if gconf & tmc_reg.index_otpw:
-        self.tmc_logger.log("INDEX pin outputs overtemperature prewarning flag")
+        self.tmc_logger.log("INDEX pin outputs overtemperature prewarning flag", Loglevel.INFO)
     else:
-        self.tmc_logger.log("INDEX shows the first microstep position of sequencer")
+        self.tmc_logger.log("INDEX shows the first microstep position of sequencer", Loglevel.INFO)
     if gconf & tmc_reg.index_step:
-        self.tmc_logger.log("INDEX output shows step pulses from internal pulse generator")
+        self.tmc_logger.log("INDEX output shows step pulses from internal pulse generator",
+                            Loglevel.INFO)
     else:
-        self.tmc_logger.log("INDEX output as selected by index_otpw")
+        self.tmc_logger.log("INDEX output as selected by index_otpw", Loglevel.INFO)
     if gconf & tmc_reg.mstep_reg_select:
-        self.tmc_logger.log("Microstep resolution selected by MSTEP register")
+        self.tmc_logger.log("Microstep resolution selected by MSTEP register", Loglevel.INFO)
     else:
-        self.tmc_logger.log("Microstep resolution selected by pins MS1, MS2")
+        self.tmc_logger.log("Microstep resolution selected by pins MS1, MS2", Loglevel.INFO)
 
-    self.tmc_logger.log("---")
+    self.tmc_logger.log("---", Loglevel.INFO)
     return gconf
 
 
@@ -123,19 +125,20 @@ def read_gstat(self):
     Returns:
         int: 3bit GSTAT Register
     """
-    self.tmc_logger.log("---")
-    self.tmc_logger.log("GSTAT")
+    self.tmc_logger.log("---", Loglevel.INFO)
+    self.tmc_logger.log("GSTAT", Loglevel.INFO)
     gstat = self.tmc_uart.read_int(tmc_reg.GSTAT)
     self.tmc_logger.log(bin(gstat), Loglevel.INFO)
     if gstat & tmc_reg.reset:
-        self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT")
+        self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT",
+                            Loglevel.WARNING)
     if gstat & tmc_reg.drv_err:
         self.tmc_logger.log("""The driver has been shut down due to overtemperature or
-                    short circuit detection since the last read access""")
+                    short circuit detection since the last read access""", Loglevel.ERROR)
     if gstat & tmc_reg.uv_cp:
         self.tmc_logger.log("""Undervoltage on the charge pump.
-                            The driver is disabled in this case""")
-    self.tmc_logger.log("---")
+                            The driver is disabled in this case""", Loglevel.ERROR)
+    self.tmc_logger.log("---", Loglevel.INFO)
     return gstat
 
 
@@ -158,31 +161,31 @@ def read_ioin(self):
     Returns:
         int: 10+8bit IOIN Register
     """
-    self.tmc_logger.log("---")
-    self.tmc_logger.log("INPUTS")
+    self.tmc_logger.log("---", Loglevel.INFO)
+    self.tmc_logger.log("INPUTS", Loglevel.INFO)
     ioin = self.tmc_uart.read_int(tmc_reg.IOIN)
     self.tmc_logger.log(bin(ioin), Loglevel.INFO)
     if ioin & tmc_reg.io_spread:
-        self.tmc_logger.log("spread is high")
+        self.tmc_logger.log("spread is high", Loglevel.INFO)
     else:
-        self.tmc_logger.log("spread is low")
+        self.tmc_logger.log("spread is low", Loglevel.INFO)
 
     if ioin & tmc_reg.io_dir:
-        self.tmc_logger.log("dir is high")
+        self.tmc_logger.log("dir is high", Loglevel.INFO)
     else:
-        self.tmc_logger.log("dir is low")
+        self.tmc_logger.log("dir is low", Loglevel.INFO)
 
     if ioin & tmc_reg.io_step:
-        self.tmc_logger.log("step is high")
+        self.tmc_logger.log("step is high", Loglevel.INFO)
     else:
-        self.tmc_logger.log("step is low")
+        self.tmc_logger.log("step is low", Loglevel.INFO)
 
     if ioin & tmc_reg.io_enn:
-        self.tmc_logger.log("en is high")
+        self.tmc_logger.log("en is high", Loglevel.INFO)
     else:
-        self.tmc_logger.log("en is low")
+        self.tmc_logger.log("en is low", Loglevel.INFO)
 
-    self.tmc_logger.log("---")
+    self.tmc_logger.log("---", Loglevel.INFO)
     return ioin
 
 
@@ -193,22 +196,23 @@ def read_chopconf(self):
     Returns:
         int: 3bit CHOPCONF Register
     """
-    self.tmc_logger.log("---")
-    self.tmc_logger.log("CHOPPER CONTROL")
+    self.tmc_logger.log("---", Loglevel.INFO)
+    self.tmc_logger.log("CHOPPER CONTROL", Loglevel.INFO)
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     self.tmc_logger.log(bin(chopconf), Loglevel.INFO)
 
-    self.tmc_logger.log(f"native {self.get_microstepping_resolution()} microstep setting")
+    self.tmc_logger.log(f"native {self.get_microstepping_resolution()} microstep setting",
+                        Loglevel.INFO)
 
     if chopconf & tmc_reg.intpol:
-        self.tmc_logger.log("interpolation to 256 µsteps")
+        self.tmc_logger.log("interpolation to 256 µsteps", Loglevel.INFO)
 
     if chopconf & tmc_reg.vsense:
-        self.tmc_logger.log("1: High sensitivity, low sense resistor voltage")
+        self.tmc_logger.log("1: High sensitivity, low sense resistor voltage", Loglevel.INFO)
     else:
-        self.tmc_logger.log("0: Low sensitivity, high sense resistor voltage")
+        self.tmc_logger.log("0: Low sensitivity, high sense resistor voltage", Loglevel.INFO)
 
-    self.tmc_logger.log("---")
+    self.tmc_logger.log("---", Loglevel.INFO)
     return chopconf
 
 

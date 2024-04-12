@@ -116,34 +116,34 @@ def test_uart(self):
     self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG)
 
     if len(rtn)==12:
-        self.tmc_logger.log("""the Raspberry Pi received the sended
-                            bits and the answer from the TMC""",Loglevel.INFO)
+        self.tmc_logger.log("""the Raspberry Pi received the sent
+                            bits and the answer from the TMC""", Loglevel.DEBUG)
     elif len(rtn)==4:
-        self.tmc_logger.log("the Raspberry Pi received only the sended bits",
-                            Loglevel.INFO)
+        self.tmc_logger.log("the Raspberry Pi received only the sent bits",
+                            Loglevel.ERROR)
         status = False
     elif len(rtn)==0:
         self.tmc_logger.log("the Raspberry Pi did not receive anything",
-                            Loglevel.INFO)
+                            Loglevel.ERROR)
         status = False
     else:
         self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bits: {len(rtn)}",
-                            Loglevel.INFO)
+                            Loglevel.ERROR)
         status = False
 
     if snd[0:4] == rtn[0:4]:
         self.tmc_logger.log("""the Raspberry Pi received exactly the bits it has send.
-                    the first 4 bits are the same""", Loglevel.INFO)
+                    the first 4 bits are the same""", Loglevel.DEBUG)
     else:
         self.tmc_logger.log("""the Raspberry Pi did not received the bits it has send.
-                    the first 4 bits are different""", Loglevel.INFO)
+                    the first 4 bits are different""", Loglevel.DEBUG)
         status = False
 
     self.tmc_logger.log("---")
     if status:
-        self.tmc_logger.log("UART connection: OK")
+        self.tmc_logger.log("UART connection: OK", Loglevel.INFO)
     else:
-        self.tmc_logger.log("UART connection: not OK")
+        self.tmc_logger.log("UART connection: not OK", Loglevel.ERROR)
 
     self.tmc_logger.log("---")
     return True
