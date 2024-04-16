@@ -43,7 +43,6 @@ class TMC_logger:
 
         # Add our custom log levels to the logger
         for level in [Loglevel.ALL, Loglevel.MOVEMENT, Loglevel.NONE]:
-            print(level)
             self._add_logging_level(level.name, level.value)
 
         self.logger = logging.getLogger(logprefix)
@@ -139,7 +138,6 @@ class TMC_logger:
 
         def logForLevel(self, message, *args, **kwargs):
             if self.isEnabledFor(level_num):
-                print("test")
                 self._log(level_num, message, args, **kwargs)
 
         def logToRoot(message, *args, **kwargs):
