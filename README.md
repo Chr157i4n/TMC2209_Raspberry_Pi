@@ -124,6 +124,10 @@ Simultaneous movement of multiple motors can be done with threaded movement.
 
 In this script, the movement of a stepper with threads is shown. This can be used to do other task while moving a motor, or to move several motors simultaneous.
 
+### [demo_script_08_log_to_file.py](demo/demo_script_08_log_to_file.py)
+
+This script shows how you can alter the formatting of the TMC2209 log messages and redirect the log output to a file called `tmc2209_log_file.log` that will be created in the current directory.
+
 \
 \
 For me these baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000.
