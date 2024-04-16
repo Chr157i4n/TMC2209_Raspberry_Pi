@@ -482,7 +482,8 @@ class TMC_2209:
         self._pin_stallguard = pin_stallguard
 
         GPIO.setup(self._pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
+        # first remove existing events
+        GPIO.remove_event_detect(self._pin_stallguard)
         GPIO.add_event_detect(self._pin_stallguard, GPIO.RISING, callback=self.stallguard_callback,
                               bouncetime=300)
 
