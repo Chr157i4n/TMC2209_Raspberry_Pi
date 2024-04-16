@@ -49,12 +49,13 @@ else:
 #-----------------------------------------------------------------------
 # Log custom messages
 #-----------------------------------------------------------------------
+tmc.tmc_logger.log("========================", Loglevel.ALL)
 tmc.tmc_logger.log("Hello World!", Loglevel.DEBUG)
 tmc.tmc_logger.log("Wow, you can even log your own messages!", Loglevel.ERROR)
 tmc.tmc_logger.log("If you like this library, please give us a star on GitHub!", Loglevel.INFO)
 tmc.tmc_logger.log("The cake is a lie", Loglevel.WARNING)
 tmc.tmc_logger.log("I like to move it, move it", Loglevel.MOVEMENT)
-
+tmc.tmc_logger.log("========================", Loglevel.ALL)
 
 
 
