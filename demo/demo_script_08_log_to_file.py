@@ -6,8 +6,10 @@
 test file for testing writing the log messages to a file
 """
 
-from src.TMC_2209.TMC_2209_StepperDriver import *
 import logging
+from src.TMC_2209.TMC_2209_StepperDriver import *
+
+
 
 print("---")
 print("SCRIPT START")
@@ -19,7 +21,8 @@ print("---")
 #-----------------------------------------------------------------------
 loglevel = Loglevel.ALL
 logging_handler = logging.FileHandler("tmc2209_log_file.log")
-logformatter = logging.Formatter('%(name)s %(asctime)s - %(levelname)s - %(message)s', '%Y%m%d %H:%M:%S')
+logformatter = logging.Formatter('%(name)s %(asctime)s - %(levelname)s - %(message)s',
+                                 '%Y%m%d %H:%M:%S')
 
 
 
@@ -69,4 +72,3 @@ del tmc
 print("---")
 print("SCRIPT FINISHED")
 print("---")
-
