@@ -12,7 +12,7 @@ This is a library to drive a stepper motor with a TMC2209 stepper driver and a R
 This code is still experimental, so use it on your own risk.
 
 This library is programmed in pure Python. The performance of Python is not good enough to drive the motor with high speed.
-So if you move the motor with high speed and this library the motor will lose steps.
+So if you move the motor with high speed using this library the motor will lose steps.
 
 My TMC2209 is a [Bigtreetech TMC 2209 V1.2](https://github.com/bigtreetech/BIGTREETECH-TMC2209-V1.2)
 
@@ -23,7 +23,7 @@ You can read more about this in the datasheet from Trinamic.
 Because the TMC2209 uses one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends.
 Well, the Pi receives 4 bytes from itself and 8 bytes from the driver. So the Pi receives a total of 12 bytes and only the last 8 are the reply, of which only 4 are data bytes.
 
-the Documentation of the TMC2209 can be found here:  
+The Documentation of the TMC2209 can be found here:  
 [TMC2209 - Datsheet](https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf)
 
 The code is also available on [PyPI](https://pypi.org/project/TMC-2209-Raspberry-Pi).
@@ -124,6 +124,10 @@ Simultaneous movement of multiple motors can be done with threaded movement.
 
 In this script, the movement of a stepper with threads is shown. This can be used to do other task while moving a motor, or to move several motors simultaneous.
 
+### [demo_script_08_log_to_file.py](demo/demo_script_08_log_to_file.py)
+
+This script shows how you can alter the formatting of the TMC2209 log messages and redirect the log output to a file called `tmc2209_log_file.log` that will be created in the current directory.
+
 \
 \
 For me these baudrates worked fine: 19200, 38400, 57600, 115200, 230400, 460800, 576000.
@@ -166,7 +170,7 @@ I reserve the right not to answer E-Mails.
 Problem | Solution
 -- | --
 FileNotFoundError: [Errno 2] No such file or directory: '/dev/serial0' | depending on your Raspberry Pi version, you need to enable the Serial Port <br /> run `sudo raspi-config` in your terminal. <br /> there go to '3 Interface Options' -> 'P3 Serial Port' <br /> Would you like a login shell to be accessible over serial? No <br /> Would you like the serial port hardware to be enabled? Yes <br /> Finish and then reboot
-PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need to give the permission to acces the Serial Port to your current user <br /> You may need to add your user (pi) to the dialout group with `sudo usermod -a -G dialout pi`
+PermissionError: [Errno 13] <br /> Permission denied: '/dev/serial0' | you need to give the permission to acces the Serial Port to your current user <br /> You may need to add your user (pi) to the dialout group with `sudo usermod -a -G dialout pi` and then relog. <br /> If that does not work, make sure that your user has read/write permissions on the dev file `/dev/serial0` by calling `sudo chmod 660 /dev/serial0`.
 "TMC2209: UART Communication Error" | You can use the 'debug_script_01_uart_connection' script to get a better reading on the received bytes and troubleshoot your problem
 "TMC2209: UART Communication Error: 0 data bytes \| 4 total bytes" | only 4 total bytes received indicates, that the Raspberry Pi receives its own data, but nothing from the TMC driver. This happens if RX and TX are connected properly, but the TMC driver has no power
 "TMC2209: UART Communication Error: 0 data bytes \| 0 total bytes" | 0 total bytes received indicates, a problem with your wiring or your Raspberry Pi. This happens if TX is not connected

@@ -29,27 +29,29 @@ class TMC_logger:
     """
 
     def __init__(self, loglevel: Loglevel = Loglevel.INFO, logprefix: str = "TMC2209",
-                 handlers=None):
+                 handlers: list = None, formatter: logging.Formatter = None):
         """constructor
 
         Args:
-            logprefix (string): new logprefix
+            logprefix (string): new logprefix (name of the logger) (default: "TMC2209")
             loglevel (enum): level for which to log
             handlers (list): list of logging handlers, see logging.handlers (default: None)
+            formatter (logging.Formatter): formatter for the log messages (default: None)
         """
         if logprefix is None:
             logprefix = "TMC2209"
 
         # Add our custom log levels to the logger
         for level in [Loglevel.ALL, Loglevel.MOVEMENT, Loglevel.NONE]:
-            print(level)
             self._add_logging_level(level.name, level.value)
 
         self.logger = logging.getLogger(logprefix)
 
         self.loglevel = loglevel
         self.set_loglevel(loglevel)
-        self.formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        if formatter is None:
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.formatter = formatter
 
         if handlers is None:
             # Default handler: StreamHandler (logs to console)
@@ -136,7 +138,6 @@ class TMC_logger:
 
         def logForLevel(self, message, *args, **kwargs):
             if self.isEnabledFor(level_num):
-                print("test")
                 self._log(level_num, message, args, **kwargs)
 
         def logToRoot(message, *args, **kwargs):
