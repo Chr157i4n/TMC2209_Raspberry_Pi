@@ -1,5 +1,10 @@
 # Changelog
 
+## version 0.4.5
+
+- enhancement of logging module
+- small bugfix
+
 ## version 0.4.4
 
 - change logger to use logging module
