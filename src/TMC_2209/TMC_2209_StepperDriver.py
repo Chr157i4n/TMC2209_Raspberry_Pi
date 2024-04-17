@@ -15,6 +15,7 @@ this module has two different functions:
 
 import time
 import statistics
+import logging
 from ._TMC_2209_GPIO_board import GPIO, BOARD
 from ._TMC_2209_uart import TMC_UART as tmc_uart
 from ._TMC_2209_logger import TMC_logger, Loglevel
@@ -101,7 +102,8 @@ class TMC_2209:
 
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
                  driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, logprefix=None,
-                 log_handlers=None, skip_uart_init=False):
+                 log_handlers: list = None, log_formatter : logging.Formatter = None,
+                 skip_uart_init: bool = False):
         """constructor
 
         Args:
@@ -113,14 +115,18 @@ class TMC_2209:
             driver_address (int, optional): driver adress [0-3]. Defaults to 0.
             gpio_mode (enum, optional): gpio mode. Defaults to GPIO.BCM.
             loglevel (enum, optional): loglevel. Defaults to None.
-            logprefix (str, optional): log prefix. Defaults to None (standard TMC prefix).
+            logprefix (str, optional): log prefix (name of the logger).
+                Defaults to None (standard TMC prefix).
             log_handlers (list, optional): list of logging handlers.
                 Defaults to None (log to console).
+            log_formatter (logging.Formatter, optional): formatter for the log messages.
+                Defaults to None (messages are logged in the format
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s').
             skip_uart_init (bool, optional): skip UART init. Defaults to False.
         """
         if logprefix is None:
             logprefix = f"TMC2209 {driver_address}"
-        self.tmc_logger = TMC_logger(loglevel, logprefix, log_handlers)
+        self.tmc_logger = TMC_logger(loglevel, logprefix, log_handlers, log_formatter)
         self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
 
 
