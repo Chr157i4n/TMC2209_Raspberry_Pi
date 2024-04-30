@@ -112,7 +112,7 @@ class TMC_2209:
             pin_dir (int, optional): DIR pin number. Defaults to -1.
             baudrate (int, optional): baudrate. Defaults to 115200.
             serialport (str, optional): serialport path. Defaults to "/dev/serial0".
-            driver_address (int, optional): driver adress [0-3]. Defaults to 0.
+            driver_address (int, optional): driver address [0-3]. Defaults to 0.
             gpio_mode (enum, optional): gpio mode. Defaults to GPIO.BCM.
             loglevel (enum, optional): loglevel. Defaults to None.
             logprefix (str, optional): log prefix (name of the logger).
