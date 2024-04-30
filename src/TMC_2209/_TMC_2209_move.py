@@ -45,11 +45,11 @@ class StopMode(Enum):
 
 
 def set_movement_abs_rel(self, movement_abs_rel):
-    """set whether the movment should be relative or absolute by default.
+    """set whether the movement should be relative or absolute by default.
     See the Enum MovementAbsoluteRelative
 
     Args:
-        movement_abs_rel (enum): whether the movment should be relative or absolute
+        movement_abs_rel (enum): whether the movement should be relative or absolute
     """
     self._movement_abs_rel = movement_abs_rel
 
@@ -59,7 +59,7 @@ def get_current_position(self):
     """returns the current motor position in µsteps
 
     Returns:
-        bool: current motor position
+        int: current motor position
     """
     return self._current_pos
 
@@ -69,7 +69,7 @@ def set_current_position(self, new_pos):
     """overwrites the current motor position in µsteps
 
     Args:
-        new_pos (bool): new position of the motor in µsteps
+        new_pos (int): new position of the motor in µsteps
     """
     self._current_pos = new_pos
 
@@ -114,10 +114,10 @@ def get_max_speed(self):
 
 
 def set_acceleration(self, acceleration):
-    """sets the motor acceleration/decceleration in µsteps per sec per sec
+    """sets the motor acceleration/deceleration in µsteps per sec per sec
 
     Args:
-        acceleration (int): acceleration/decceleration in µsteps per sec per sec
+        acceleration (int): acceleration/deceleration in µsteps per sec per sec
     """
     if acceleration == 0.0:
         return
@@ -133,20 +133,20 @@ def set_acceleration(self, acceleration):
 
 
 def set_acceleration_fullstep(self, acceleration):
-    """sets the motor acceleration/decceleration in fullsteps per sec per sec
+    """sets the motor acceleration/deceleration in fullsteps per sec per sec
 
     Args:
-        acceleration (int): acceleration/decceleration in fullsteps per sec per sec
+        acceleration (int): acceleration/deceleration in fullsteps per sec per sec
     """
     self.set_acceleration(acceleration*self.get_microstepping_resolution())
 
 
 
 def get_acceleration(self):
-    """returns the motor acceleration/decceleration in steps per sec per sec
+    """returns the motor acceleration/deceleration in steps per sec per sec
 
     Returns:
-        int: acceleration/decceleration in µsteps per sec per sec
+        int: acceleration/deceleration in µsteps per sec per sec
     """
     return self._acceleration
 
@@ -156,7 +156,7 @@ def stop(self, stop_mode = StopMode.HARDSTOP):
     """stop the current movement
 
     Args:
-        stop_mode (enum): whether the movement should be stopped immediatly or softly
+        stop_mode (enum): whether the movement should be stopped immediately or softly
             (Default value = StopMode.HARDSTOP)
     """
     self._stop = stop_mode
@@ -177,7 +177,7 @@ def run_to_position_steps(self, steps, movement_abs_rel = None):
     """runs the motor to the given position.
     with acceleration and deceleration
     blocks the code until finished or stopped from a different thread!
-    returns true when the movement if finshed normally and false,
+    returns true when the movement if finished normally and false,
     when the movement was stopped
 
     Args:
@@ -231,7 +231,7 @@ def run_to_position_steps_threaded(self, steps, movement_abs_rel = None):
     """runs the motor to the given position.
     with acceleration and deceleration
     does not block the code
-    returns true when the movement if finshed normally and false,
+    returns true when the movement if finished normally and false,
     when the movement was stopped
 
     Args:
@@ -268,8 +268,8 @@ def run_to_position_revolutions_threaded(self, revolutions, movement_abs_rel = N
 
 def wait_for_movement_finished_threaded(self):
     """wait for the motor to finish the movement,
-    if startet threaded
-    returns true when the movement if finshed normally and false,
+    if started threaded
+    returns true when the movement if finished normally and false,
     when the movement was stopped
 
     Returns:
@@ -306,7 +306,7 @@ def compute_new_speed(self):
     https://www.embedded.com/generate-stepper-motor-speed-profiles-in-real-time/
     https://web.archive.org/web/20140705143928/http://fab.cba.mit.edu/classes/MIT/961.09/projects/i0/Stepper_Motor_Speed_Profile.pdf
     """
-    distance_to = self.distance_to_go() # +ve is clockwise from curent location
+    distance_to = self.distance_to_go() # +ve is clockwise from current location
     steps_to_stop = (self._speed * self._speed) / (2.0 * self._acceleration) # Equation 16
     if ((distance_to == 0 and steps_to_stop <= 2) or
     (self._stop == StopMode.SOFTSTOP and steps_to_stop <= 1)):
@@ -330,7 +330,7 @@ def compute_new_speed(self):
         elif self._n < 0:
             # Currently decelerating, need to accel again?
             if (steps_to_stop < distance_to) and self._direction == Direction.CW:
-                self._n = -self._n # Start accceleration
+                self._n = -self._n # Start acceleration
                 self._movement_phase = MovementPhase.ACCELERATING
     elif distance_to < 0:
         # We are clockwise from the target
@@ -344,7 +344,7 @@ def compute_new_speed(self):
         elif self._n < 0:
             # Currently decelerating, need to accel again?
             if (steps_to_stop < -distance_to) and self._direction == Direction.CCW:
-                self._n = -self._n # Start accceleration
+                self._n = -self._n # Start acceleration
                 self._movement_phase = MovementPhase.ACCELERATING
     # Need to accelerate or decelerate
     if self._n == 0:
@@ -374,7 +374,7 @@ def compute_new_speed(self):
 
 def run_speed(self):
     """this methods does the actual steps with the current speed"""
-    # Dont do anything unless we actually have a step interval
+    # Don't do anything unless we actually have a step interval
     if not self._step_interval:
         return False
 
