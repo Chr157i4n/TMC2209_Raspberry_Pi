@@ -7,7 +7,10 @@ test file for testing movement of motors with threads
 """
 
 import time
-from src.TMC_2209.TMC_2209_StepperDriver import *
+try:
+    from src.TMC_2209.TMC_2209_StepperDriver import *
+except ModuleNotFoundError:
+    from TMC_2209.TMC_2209_StepperDriver import *
 
 print("---")
 print("SCRIPT START")
