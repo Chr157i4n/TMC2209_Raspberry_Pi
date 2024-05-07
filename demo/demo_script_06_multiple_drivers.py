@@ -8,7 +8,10 @@ test file for testing multiple drivers via one UART connection
 """
 
 import time
-from src.TMC_2209.TMC_2209_StepperDriver import *
+try:
+    from src.TMC_2209.TMC_2209_StepperDriver import *
+except ModuleNotFoundError:
+    from TMC_2209.TMC_2209_StepperDriver import *
 
 
 print("---")

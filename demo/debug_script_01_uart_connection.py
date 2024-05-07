@@ -7,7 +7,10 @@ debug file for debuging the UART connection
 """
 
 import time
-from src.TMC_2209.TMC_2209_StepperDriver import *
+try:
+    from src.TMC_2209.TMC_2209_StepperDriver import *
+except ModuleNotFoundError:
+    from TMC_2209.TMC_2209_StepperDriver import *
 
 
 print("---")
