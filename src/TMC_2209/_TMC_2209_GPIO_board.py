@@ -2,6 +2,7 @@
 #pylint: disable=ungrouped-imports
 #pylint: disable=unknown-option-value
 #pylint: disable=possibly-used-before-assignment
+#pylint: disable=used-before-assignment
 """
 Many boards have RaspberryPI-compatible PinOut,
 but require to import special GPIO module instead RPI.GPIO
