@@ -53,23 +53,23 @@ else:
         model = f.readline().lower()
         if "raspberry pi 5" in model:
             try:
-                from RPi import GPIO # TODO use gpiozero or a different lib for Pi5
+                from gpiozero import LED, Button
                 BOARD = Board.RASPBERRY_PI5
             except ModuleNotFoundError as err:
                 dependencies_logger.log(
-                    (f"ModuleNotFoundError: {err}\n" # TODO change text
-                    "Board is Raspberry PI 5 but module RPi.GPIO isn`t installed.\n"
+                    (f"ModuleNotFoundError: {err}\n"
+                    "Board is Raspberry PI 5 but module gpiozero isn`t installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install/\n"
+                    "https://gpiozero.readthedocs.io/en/stable/installing.html\n"
                     "Exiting..."),
                 Loglevel.ERROR)
                 raise
             except ImportError as err:
                 dependencies_logger.log(
-                    (f"ImportError: {err}\n" # TODO change text
-                    "Board is Raspberry PI 5 but module RPi.GPIO isn`t installed.\n"
+                    (f"ImportError: {err}\n"
+                    "Board is Raspberry PI 5 but module gpiozero isn`t installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install/\n"
+                    "https://gpiozero.readthedocs.io/en/stable/installing.html\n"
                     "Exiting..."),
                 Loglevel.ERROR)
                 raise
@@ -82,7 +82,7 @@ else:
                     (f"ModuleNotFoundError: {err}\n"
                     "Board is Raspberry PI but module RPi.GPIO isn`t installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install/\n"
+                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install\n"
                     "Exiting..."),
                 Loglevel.ERROR)
                 raise
@@ -91,7 +91,7 @@ else:
                     (f"ImportError: {err}\n"
                     "Board is Raspberry PI but module RPi.GPIO isn`t installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install/\n"
+                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install\n"
                     "Exiting..."),
                 Loglevel.ERROR)
                 raise
@@ -133,33 +133,47 @@ else:
 class TMC_gpio:
     """TMC_gpio class"""
 
+    _gpiozero_leds = [None] * 40
+    _gpiozero_buttons = [None] * 40
+
     @staticmethod
-    def init(gpio_mode=GPIO.BCM):
+    def init(gpio_mode=None):
         """init"""
-        GPIO.setwarnings(False)
-        if gpio_mode is None:
-            gpio_mode = GPIO.BCM
-        GPIO.setmode(gpio_mode)
+        if BOARD == Board.RASPBERRY_PI5:
+            pass
+        else:
+            GPIO.setwarnings(False)
+            if gpio_mode is None:
+                gpio_mode = GPIO.BCM
+            GPIO.setmode(gpio_mode)
 
     @staticmethod
     def deinit():
         """deinit"""
+        if BOARD == Board.RASPBERRY_PI5:
+            pass
+        else:
+            pass
 
     @staticmethod
     def gpio_setup(pin, mode, initial = Gpio.LOW, pull_up_down = GpioPUD.PUD_OFF):
         """setup gpio pin"""
-        print("TEST")
-        initial = int(initial)
-        pull_up_down = int(pull_up_down)
-        mode = int(mode)
+        if BOARD == Board.RASPBERRY_PI5:
+            TMC_gpio._gpiozero_leds[pin] = LED(pin)
+        else:
+            initial = int(initial)
+            pull_up_down = int(pull_up_down)
+            mode = int(mode)
 
-        GPIO.setup(pin, mode, initial=initial, pull_up_down=pull_up_down)
+            GPIO.setup(pin, mode, initial=initial, pull_up_down=pull_up_down)
 
     @staticmethod
     def gpio_cleanup(pin):
         """cleanup gpio pin"""
-        print("TEST")
-        GPIO.cleanup(pin)
+        if BOARD == Board.RASPBERRY_PI5:
+            pass
+        else:
+            GPIO.cleanup(pin)
 
     @staticmethod
     def gpio_input(pin):
@@ -170,15 +184,24 @@ class TMC_gpio:
     @staticmethod
     def gpio_output(pin, value):
         """set output value of gpio pin"""
-        GPIO.output(pin, value)
+        if BOARD == Board.RASPBERRY_PI5:
+            TMC_gpio._gpiozero_leds[pin].value = value
+        else:
+            GPIO.output(pin, value)
 
     @staticmethod
     def gpio_remove_event_detect(pin):
         """remove event dectect"""
-        GPIO.remove_event_detect(pin)
+        if BOARD == Board.RASPBERRY_PI5:
+            pass
+        else:
+            GPIO.remove_event_detect(pin)
 
     @staticmethod
     def gpio_add_event_detect(pin, callback):
         """add event detect"""
-        GPIO.add_event_detect(pin, GPIO.RISING, callback=callback,
-                              bouncetime=300)
+        if BOARD == Board.RASPBERRY_PI5:
+            pass
+        else:
+            GPIO.add_event_detect(pin, GPIO.RISING, callback=callback,
+                                bouncetime=300)
