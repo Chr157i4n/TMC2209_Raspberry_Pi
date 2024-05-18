@@ -9,8 +9,10 @@ test file for testing the StallGuard feature
 import time
 try:
     from src.TMC_2209.TMC_2209_StepperDriver import *
+    from src.TMC_2209._TMC_2209_GPIO_board import Board
 except ModuleNotFoundError:
     from TMC_2209.TMC_2209_StepperDriver import *
+    from TMC_2209._TMC_2209_GPIO_board import Board
 
 
 print("---")
@@ -30,7 +32,7 @@ if BOARD == "NVIDIA_JETSON":
 Not implemented. Needs refinement.\nNvidia Jetson has nuances with the parameter pull_up_down for pin_stallguard:
 https://github.com/NVIDIA/jetson-gpio/issues/5''')
 
-if BOARD == "RASPBERRY_PI":
+if BOARD == Board.RASPBERRY_PI:
     tmc = TMC_2209(21, 16, 20)
 else:
     # just in case

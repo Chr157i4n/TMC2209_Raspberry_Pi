@@ -12,7 +12,7 @@ import time
 from enum import Enum
 import math
 import threading
-from ._TMC_2209_GPIO_board import GPIO
+from ._TMC_2209_GPIO_board import TMC_gpio, Gpio
 from ._TMC_2209_logger import Loglevel
 
 
@@ -350,7 +350,7 @@ def compute_new_speed(self):
     if self._n == 0:
         # First step from stopped
         self._cn = self._c0
-        GPIO.output(self._pin_step, GPIO.LOW)
+        TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
         if distance_to > 0:
             self.set_direction_pin(1)
             self.tmc_logger.log("going CW", Loglevel.MOVEMENT)
@@ -399,9 +399,9 @@ def make_a_step(self):
 
     for the TMC2209 there needs to be a signal duration of minimum 100 ns
     """
-    GPIO.output(self._pin_step, GPIO.HIGH)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
     time.sleep(1/1000/1000)
-    GPIO.output(self._pin_step, GPIO.LOW)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
     time.sleep(1/1000/1000)
 
     self.tmc_logger.log("one step", Loglevel.MOVEMENT)

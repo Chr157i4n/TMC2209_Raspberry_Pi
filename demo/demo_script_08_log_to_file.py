@@ -9,8 +9,10 @@ test file for testing writing the log messages to a file
 import logging
 try:
     from src.TMC_2209.TMC_2209_StepperDriver import *
+    from src.TMC_2209._TMC_2209_GPIO_board import Board
 except ModuleNotFoundError:
     from TMC_2209.TMC_2209_StepperDriver import *
+    from TMC_2209._TMC_2209_GPIO_board import Board
 
 
 
@@ -36,10 +38,10 @@ logformatter = logging.Formatter('%(name)s %(asctime)s - %(levelname)s - %(messa
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-if BOARD == "RASPBERRY_PI":
+if BOARD == Board.RASPBERRY_PI:
     tmc = TMC_2209(21, 16, 20, skip_uart_init=True,
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
-elif BOARD == "NVIDIA_JETSON":
+if BOARD == Board.NVIDIA_JETSON:
     tmc = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", skip_uart_init=True,
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 else:

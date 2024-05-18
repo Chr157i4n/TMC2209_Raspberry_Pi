@@ -16,7 +16,7 @@ this module has two different functions:
 import time
 import statistics
 import logging
-from ._TMC_2209_GPIO_board import GPIO, BOARD
+from ._TMC_2209_GPIO_board import TMC_gpio, Gpio, GpioMode, GpioPUD, BOARD
 from ._TMC_2209_uart import TMC_UART as tmc_uart
 from ._TMC_2209_logger import TMC_logger, Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase, StopMode
@@ -101,7 +101,7 @@ class TMC_2209:
 
 
     def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-                 driver_address=0, gpio_mode=GPIO.BCM, loglevel=None, logprefix=None,
+                 driver_address=0, gpio_mode=None, loglevel=None, logprefix=None,
                  log_handlers: list = None, log_formatter : logging.Formatter = None,
                  skip_uart_init: bool = False):
         """constructor
@@ -113,7 +113,7 @@ class TMC_2209:
             baudrate (int, optional): baudrate. Defaults to 115200.
             serialport (str, optional): serialport path. Defaults to "/dev/serial0".
             driver_address (int, optional): driver address [0-3]. Defaults to 0.
-            gpio_mode (enum, optional): gpio mode. Defaults to GPIO.BCM.
+            gpio_mode (enum, optional): gpio mode. Defaults to None.
             loglevel (enum, optional): loglevel. Defaults to None.
             logprefix (str, optional): log prefix (name of the logger).
                 Defaults to None (standard TMC prefix).
@@ -131,22 +131,21 @@ class TMC_2209:
 
 
         self.tmc_logger.log("Init", Loglevel.INFO)
-        GPIO.setwarnings(False)
-        GPIO.setmode(gpio_mode)
+        TMC_gpio.init(gpio_mode)
 
         self.tmc_logger.log(f"EN Pin: {pin_en}", Loglevel.DEBUG)
         self._pin_en = pin_en
-        GPIO.setup(self._pin_en, GPIO.OUT, initial=GPIO.HIGH)
+        TMC_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
 
         self.tmc_logger.log(f"STEP Pin: {pin_step}", Loglevel.DEBUG)
         if pin_step != -1:
             self._pin_step = pin_step
-            GPIO.setup(self._pin_step, GPIO.OUT, initial=GPIO.LOW)
+            TMC_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
 
         self.tmc_logger.log(f"DIR Pin: {pin_dir}", Loglevel.DEBUG)
         if pin_dir != -1:
             self._pin_dir = pin_dir
-            GPIO.setup(self._pin_dir, GPIO.OUT, initial=self._direction)
+            TMC_gpio.gpio_setup(self._pin_dir, GpioMode.OUT, initial=self._direction)
 
         self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
 
@@ -171,14 +170,14 @@ class TMC_2209:
 
             self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
             if self._pin_step != -1:
-                GPIO.cleanup(self._pin_step)
+                TMC_gpio.gpio_cleanup(self._pin_step)
             if self._pin_dir != -1:
-                GPIO.cleanup(self._pin_dir)
+                TMC_gpio.gpio_cleanup(self._pin_dir)
             if self._pin_en != -1:
-                GPIO.cleanup(self._pin_en)
+                TMC_gpio.gpio_cleanup(self._pin_en)
             if self._pin_stallguard != -1:
-                GPIO.remove_event_detect(self._pin_stallguard)
-                GPIO.cleanup(self._pin_stallguard)
+                TMC_gpio.gpio_remove_event_detect(self._pin_stallguard)
+                TMC_gpio.gpio_cleanup(self._pin_stallguard)
 
             self.tmc_logger.log("Deinit finished", Loglevel.INFO)
             self._deinit_finished= True
@@ -201,7 +200,7 @@ class TMC_2209:
         Args:
             en (bool): whether the motor current output should be enabled
         """
-        GPIO.output(self._pin_en, not en)
+        TMC_gpio.gpio_output(self._pin_en, not en)
         self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
 
 
@@ -316,7 +315,7 @@ class TMC_2209:
     def reverse_direction_pin(self):
         """reverses the motor shaft direction"""
         self._direction = not self._direction
-        GPIO.output(self._pin_dir, self._direction)
+        TMC_gpio.gpio_output(self._pin_dir, self._direction)
 
 
 
@@ -327,7 +326,7 @@ class TMC_2209:
             direction (bool): motor shaft direction: False = CCW; True = CW
         """
         self._direction = direction
-        GPIO.output(self._pin_dir, direction)
+        TMC_gpio.gpio_output(self._pin_dir, direction)
 
 
 
@@ -487,11 +486,10 @@ class TMC_2209:
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
 
-        GPIO.setup(self._pin_stallguard, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        TMC_gpio.gpio_setup(self._pin_stallguard, GpioMode.IN, pull_up_down=GpioPUD.PUD_DOWN)
         # first remove existing events
-        GPIO.remove_event_detect(self._pin_stallguard)
-        GPIO.add_event_detect(self._pin_stallguard, GPIO.RISING, callback=self.stallguard_callback,
-                              bouncetime=300)
+        TMC_gpio.gpio_remove_event_detect(self._pin_stallguard)
+        TMC_gpio.gpio_add_event_detect(self._pin_stallguard, self.stallguard_callback)
 
 
 

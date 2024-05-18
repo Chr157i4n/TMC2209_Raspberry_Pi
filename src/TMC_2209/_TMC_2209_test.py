@@ -9,7 +9,7 @@ TMC_2209 stepper driver communication module
 """
 
 import time
-from ._TMC_2209_GPIO_board import GPIO
+from ._TMC_2209_GPIO_board import TMC_gpio, Gpio
 from ._TMC_2209_logger import Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase
 from . import _TMC_2209_reg as tmc_reg
@@ -24,9 +24,9 @@ def test_dir_step_en(self):
     """
     pin_dir_ok = pin_step_ok = pin_en_ok = True
 
-    GPIO.output(self._pin_step, GPIO.HIGH)
-    GPIO.output(self._pin_dir, GPIO.HIGH)
-    GPIO.output(self._pin_en, GPIO.HIGH)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
     time.sleep(0.1)
     ioin = self.read_ioin()
     if not ioin & tmc_reg.io_dir:
@@ -36,9 +36,9 @@ def test_dir_step_en(self):
     if not ioin & tmc_reg.io_enn:
         pin_en_ok = False
 
-    GPIO.output(self._pin_step, GPIO.LOW)
-    GPIO.output(self._pin_dir, GPIO.LOW)
-    GPIO.output(self._pin_en, GPIO.LOW)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
+    TMC_gpio.gpio_output(self._pin_dir, Gpio.LOW)
+    TMC_gpio.gpio_output(self._pin_en, Gpio.LOW)
     time.sleep(0.1)
     ioin = self.read_ioin()
     if ioin & tmc_reg.io_dir:
@@ -48,9 +48,9 @@ def test_dir_step_en(self):
     if ioin & tmc_reg.io_enn:
         pin_en_ok = False
 
-    GPIO.output(self._pin_step, GPIO.HIGH)
-    GPIO.output(self._pin_dir, GPIO.HIGH)
-    GPIO.output(self._pin_en, GPIO.HIGH)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
     time.sleep(0.1)
     ioin = self.read_ioin()
     if not ioin & tmc_reg.io_dir:
@@ -85,9 +85,9 @@ def test_step(self):
 
     for _ in range(100):
         self._current_pos += 1
-        GPIO.output(self._pin_step, GPIO.HIGH)
+        TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
         time.sleep(0.001)
-        GPIO.output(self._pin_step, GPIO.LOW)
+        TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
         time.sleep(0.01)
 
 

@@ -9,8 +9,10 @@ test file for testing the UART connection
 import time
 try:
     from src.TMC_2209.TMC_2209_StepperDriver import *
+    from src.TMC_2209._TMC_2209_GPIO_board import Board
 except ModuleNotFoundError:
     from TMC_2209.TMC_2209_StepperDriver import *
+    from TMC_2209._TMC_2209_GPIO_board import Board
 
 
 print("---")
@@ -25,9 +27,9 @@ print("---")
 # initiate the TMC_2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-if BOARD == "RASPBERRY_PI":
+if BOARD == Board.RASPBERRY_PI:
     tmc = TMC_2209(21, 16, 20)
-elif BOARD == "NVIDIA_JETSON":
+if BOARD == Board.NVIDIA_JETSON:
     tmc = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1")
 else:
     # just in case
