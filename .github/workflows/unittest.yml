@@ -17,6 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install gpiozero
         pip install RPi.GPIO
         pip install Mock.GPIO
         pip install pyserial
