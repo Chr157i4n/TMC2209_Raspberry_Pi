@@ -27,7 +27,7 @@ print("---")
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
     tmc1 = TMC_2209(21, 16, 20)
-if BOARD == Board.NVIDIA_JETSON:
+elif BOARD == Board.NVIDIA_JETSON:
     tmc1 = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1")
 else:
     # just in case

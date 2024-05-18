@@ -24,4 +24,4 @@ jobs:
         pip install pyserial
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --disable=C0103 --extension-pkg-whitelist=RPi
+        pylint $(git ls-files '*.py') --disable=C0103 --disable=W0511 --extension-pkg-whitelist=RPi

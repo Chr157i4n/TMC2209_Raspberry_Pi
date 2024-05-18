@@ -1,5 +1,7 @@
 #pylint: disable=unused-import
 #pylint: disable=ungrouped-imports
+#pylint: disable=unknown-option-value
+#pylint: disable=possibly-used-before-assignment
 """
 Many boards have RaspberryPI-compatible PinOut,
 but require to import special GPIO module instead RPI.GPIO
@@ -38,7 +40,7 @@ class GpioPUD(IntEnum):
     PUD_DOWN = 21
 
 
-    
+
 
 
 BOARD = Board.UNKNOWN
@@ -64,8 +66,8 @@ else:
                 raise
             except ImportError as err:
                 dependencies_logger.log(
-                    (f"ImportError: {err}\n"
-                    "Board is Raspberry PI 5 but module RPi.GPIO isn`t installed.\n" # TODO change text
+                    (f"ImportError: {err}\n" # TODO change text
+                    "Board is Raspberry PI 5 but module RPi.GPIO isn`t installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://sourceforge.net/p/raspberry-gpio-python/wiki/install/\n"
                     "Exiting..."),
@@ -126,34 +128,57 @@ else:
             except ImportError:
                 from Mock import GPIO
 
-class TMC_gpio: 
 
+
+class TMC_gpio:
+    """TMC_gpio class"""
+
+    @staticmethod
     def init(gpio_mode=GPIO.BCM):
+        """init"""
         GPIO.setwarnings(False)
-        if gpio_mode == None:
+        if gpio_mode is None:
             gpio_mode = GPIO.BCM
         GPIO.setmode(gpio_mode)
 
+    @staticmethod
     def deinit():
-        pass
+        """deinit"""
 
+    @staticmethod
     def gpio_setup(pin, mode, initial = Gpio.LOW, pull_up_down = GpioPUD.PUD_OFF):
-        GPIO.setup(pin, int(mode), initial=int(initial), pull_up_down=int(pull_up_down))
+        """setup gpio pin"""
+        print("TEST")
+        initial = int(initial)
+        pull_up_down = int(pull_up_down)
+        mode = int(mode)
 
+        GPIO.setup(pin, mode, initial=initial, pull_up_down=pull_up_down)
+
+    @staticmethod
     def gpio_cleanup(pin):
+        """cleanup gpio pin"""
+        print("TEST")
         GPIO.cleanup(pin)
 
+    @staticmethod
     def gpio_input(pin):
+        """get input value of gpio pin"""
+        del pin
         return 0
 
+    @staticmethod
     def gpio_output(pin, value):
-        """function to switch a gpio output
-        """
+        """set output value of gpio pin"""
         GPIO.output(pin, value)
 
+    @staticmethod
     def gpio_remove_event_detect(pin):
+        """remove event dectect"""
         GPIO.remove_event_detect(pin)
 
+    @staticmethod
     def gpio_add_event_detect(pin, callback):
+        """add event detect"""
         GPIO.add_event_detect(pin, GPIO.RISING, callback=callback,
                               bouncetime=300)

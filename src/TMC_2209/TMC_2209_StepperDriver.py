@@ -374,6 +374,7 @@ class TMC_2209:
         self._stop = StopMode.NO
         current_vactual = 0
         sleeptime = 0.05
+        time_to_stop = 0
         if vactual<0:
             acceleration = -acceleration
 
