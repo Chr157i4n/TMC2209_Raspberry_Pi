@@ -41,6 +41,9 @@ logformatter = logging.Formatter('%(name)s %(asctime)s - %(levelname)s - %(messa
 if BOARD == Board.RASPBERRY_PI:
     tmc = TMC_2209(21, 16, 20, skip_uart_init=True,
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
+elif BOARD == Board.RASPBERRY_PI5:
+    tmc = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0", skip_uart_init=True,
+                   loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 elif BOARD == Board.NVIDIA_JETSON:
     tmc = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", skip_uart_init=True,
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)

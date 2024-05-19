@@ -34,6 +34,8 @@ https://github.com/NVIDIA/jetson-gpio/issues/5''')
 
 if BOARD == Board.RASPBERRY_PI:
     tmc = TMC_2209(21, 16, 20)
+elif BOARD == Board.RASPBERRY_PI5:
+    tmc = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0")
 else:
     # just in case
     tmc = TMC_2209(21, 16, 20)

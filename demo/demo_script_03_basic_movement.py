@@ -29,6 +29,8 @@ print("---")
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
     tmc = TMC_2209(21, 16, 20, loglevel=Loglevel.DEBUG)
+elif BOARD == Board.RASPBERRY_PI5:
+    tmc = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0", loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
     tmc = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", loglevel=Loglevel.DEBUG)
 else:
