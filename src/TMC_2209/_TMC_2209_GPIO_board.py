@@ -54,7 +54,7 @@ else:
         model = f.readline().lower()
         if "raspberry pi 5" in model:
             try:
-                from gpiozero import LED, Button
+                from gpiozero import DigitalOutputDevice
                 BOARD = Board.RASPBERRY_PI5
             except ModuleNotFoundError as err:
                 dependencies_logger.log(
@@ -134,8 +134,7 @@ else:
 class TMC_gpio:
     """TMC_gpio class"""
 
-    _gpiozero_leds = [None] * 40
-    _gpiozero_buttons = [None] * 40
+    _gpiozero_dos = [None] * 40
 
     @staticmethod
     def init(gpio_mode=None):
@@ -160,7 +159,7 @@ class TMC_gpio:
     def gpio_setup(pin, mode, initial = Gpio.LOW, pull_up_down = GpioPUD.PUD_OFF):
         """setup gpio pin"""
         if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpiozero_leds[pin] = LED(pin)
+            TMC_gpio._gpiozero_dos[pin] = DigitalOutputDevice(pin)
         else:
             initial = int(initial)
             pull_up_down = int(pull_up_down)
@@ -186,7 +185,7 @@ class TMC_gpio:
     def gpio_output(pin, value):
         """set output value of gpio pin"""
         if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpiozero_leds[pin].value = value
+            TMC_gpio._gpiozero_dos[pin].value = value
         else:
             GPIO.output(pin, value)
 
