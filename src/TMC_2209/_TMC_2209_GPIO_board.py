@@ -237,7 +237,7 @@ class TMC_gpio:
         else:
             GPIO.add_event_detect(pin, GPIO.RISING, callback=callback,
                                 bouncetime=300)
-            
+
     @staticmethod
     def gpio_remove_event_detect(pin):
         """remove event dectect"""

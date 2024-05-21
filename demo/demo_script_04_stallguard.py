@@ -32,7 +32,7 @@ if BOARD == Board.NVIDIA_JETSON:
         Not implemented. Needs refinement.\n
         Nvidia Jetson has nuances with the parameter pull_up_down for pin_stallguard:
         https://github.com/NVIDIA/jetson-gpio/issues/5''')
-elif BOARD == Board.RASPBERRY_PI:
+if BOARD == Board.RASPBERRY_PI:
     tmc = TMC_2209(21, 16, 20)
 elif BOARD == Board.RASPBERRY_PI5:
     tmc = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0")
