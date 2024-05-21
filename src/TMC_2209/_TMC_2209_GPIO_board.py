@@ -55,7 +55,7 @@ else:
         model = f.readline().lower()
         if "raspberry pi 5" in model:
             try:
-                from gpiozero import DigitalOutputDevice
+                from gpiozero import DigitalOutputDevice, DigitalInputDevice
                 BOARD = Board.RASPBERRY_PI5
             except ModuleNotFoundError as err:
                 dependencies_logger.log(
@@ -183,8 +183,12 @@ class TMC_gpio:
     @staticmethod
     def gpio_setup(pin, mode, initial = Gpio.LOW, pull_up_down = GpioPUD.PUD_OFF):
         """setup gpio pin"""
+        #print(f"{BOARD}, {pin}, {mode}")
         if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpios[pin] = DigitalOutputDevice(pin)
+            if mode == GpioMode.OUT:
+                TMC_gpio._gpios[pin] = DigitalOutputDevice(pin)
+            else:
+                TMC_gpio._gpios[pin] = DigitalInputDevice(pin)
         elif BOARD == Board.LUCKFOX_PICO:
             mode = 'out' if (mode == GpioMode.OUT) else 'in'
             TMC_gpio._gpios[pin] = GPIO(pin, mode)
@@ -192,7 +196,6 @@ class TMC_gpio:
             initial = int(initial)
             pull_up_down = int(pull_up_down)
             mode = int(mode)
-
             GPIO.setup(pin, mode, initial=initial, pull_up_down=pull_up_down)
 
     @staticmethod
@@ -222,22 +225,23 @@ class TMC_gpio:
             GPIO.output(pin, value)
 
     @staticmethod
-    def gpio_remove_event_detect(pin):
-        """remove event dectect"""
-        if BOARD == Board.RASPBERRY_PI5:
-            pass # TODO: implement for stallguard
-        elif BOARD == Board.LUCKFOX_PICO:
-            pass # TODO: implement for stallguard
-        else:
-            GPIO.remove_event_detect(pin)
-
-    @staticmethod
     def gpio_add_event_detect(pin, callback):
         """add event detect"""
         if BOARD == Board.RASPBERRY_PI5:
-            pass # TODO: implement for stallguard
+            TMC_gpio._gpios[pin].when_activated = callback
         elif BOARD == Board.LUCKFOX_PICO:
             pass # TODO: implement for stallguard
         else:
             GPIO.add_event_detect(pin, GPIO.RISING, callback=callback,
                                 bouncetime=300)
+            
+    @staticmethod
+    def gpio_remove_event_detect(pin):
+        """remove event dectect"""
+        if BOARD == Board.RASPBERRY_PI5:
+            if TMC_gpio._gpios[pin].when_activated is not None:
+                TMC_gpio._gpios[pin].when_activated = None
+        elif BOARD == Board.LUCKFOX_PICO:
+            pass # TODO: implement for stallguard
+        else:
+            GPIO.remove_event_detect(pin)
