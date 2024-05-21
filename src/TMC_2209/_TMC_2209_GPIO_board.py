@@ -23,6 +23,7 @@ class Board(Enum):
     RASPBERRY_PI = 1 # all except Pi 5
     RASPBERRY_PI5 = 2
     NVIDIA_JETSON = 3
+    LUCKFOX_PICO = 4
 
 class Gpio(IntEnum):
     """GPIO value"""
@@ -118,6 +119,28 @@ else:
                     "Exiting..."),
                 Loglevel.ERROR)
                 raise
+        elif "luckfox pico" in model:
+            try:
+                from periphery import GPIO
+                BOARD = Board.LUCKFOX_PICO
+            except ModuleNotFoundError as err:
+                dependencies_logger.log(
+                    (f"ModuleNotFoundError: {err}\n"
+                    "Board is Luckfox Pico but module periphery isn`t installed.\n"
+                    "Follow the installation instructions in the link below to resolve the issue:\n"
+                    "https://github.com/vsergeev/python-periphery\n"
+                    "Exiting..."),
+                Loglevel.ERROR)
+                raise
+            except ImportError as err:
+                dependencies_logger.log(
+                    (f"ImportError: {err}\n"
+                    "Board is Luckfox Pico but module periphery isn`t installed.\n"
+                    "Follow the installation instructions in the link below to resolve the issue:\n"
+                    "https://github.com/vsergeev/python-periphery\n"
+                    "Exiting..."),
+                Loglevel.ERROR)
+                raise
         else:
             # just in case
             dependencies_logger.log(
@@ -134,12 +157,14 @@ else:
 class TMC_gpio:
     """TMC_gpio class"""
 
-    _gpiozero_dos = [None] * 40
+    _gpios = [None] * 40
 
     @staticmethod
     def init(gpio_mode=None):
         """init"""
         if BOARD == Board.RASPBERRY_PI5:
+            pass
+        elif BOARD == Board.LUCKFOX_PICO:
             pass
         else:
             GPIO.setwarnings(False)
@@ -159,7 +184,10 @@ class TMC_gpio:
     def gpio_setup(pin, mode, initial = Gpio.LOW, pull_up_down = GpioPUD.PUD_OFF):
         """setup gpio pin"""
         if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpiozero_dos[pin] = DigitalOutputDevice(pin)
+            TMC_gpio._gpios[pin] = DigitalOutputDevice(pin)
+        elif BOARD == Board.LUCKFOX_PICO:
+            mode = 'out' if (mode == GpioMode.OUT) else 'in'
+            TMC_gpio._gpios[pin] = GPIO(pin, mode)
         else:
             initial = int(initial)
             pull_up_down = int(pull_up_down)
@@ -171,7 +199,9 @@ class TMC_gpio:
     def gpio_cleanup(pin):
         """cleanup gpio pin"""
         if BOARD == Board.RASPBERRY_PI5:
-            pass
+            TMC_gpio._gpios[pin].close()
+        elif BOARD == Board.LUCKFOX_PICO:
+            TMC_gpio._gpios[pin].close()
         else:
             GPIO.cleanup(pin)
 
@@ -179,13 +209,15 @@ class TMC_gpio:
     def gpio_input(pin):
         """get input value of gpio pin"""
         del pin
-        return 0
+        return 0 # TODO: implement
 
     @staticmethod
     def gpio_output(pin, value):
         """set output value of gpio pin"""
         if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpiozero_dos[pin].value = value
+            TMC_gpio._gpios[pin].value = value
+        elif BOARD == Board.LUCKFOX_PICO:
+            TMC_gpio._gpios[pin].write(bool(value))
         else:
             GPIO.output(pin, value)
 
@@ -193,7 +225,9 @@ class TMC_gpio:
     def gpio_remove_event_detect(pin):
         """remove event dectect"""
         if BOARD == Board.RASPBERRY_PI5:
-            pass
+            pass # TODO: implement for stallguard
+        elif BOARD == Board.LUCKFOX_PICO:
+            pass # TODO: implement for stallguard
         else:
             GPIO.remove_event_detect(pin)
 
@@ -201,7 +235,9 @@ class TMC_gpio:
     def gpio_add_event_detect(pin, callback):
         """add event detect"""
         if BOARD == Board.RASPBERRY_PI5:
-            pass
+            pass # TODO: implement for stallguard
+        elif BOARD == Board.LUCKFOX_PICO:
+            pass # TODO: implement for stallguard
         else:
             GPIO.add_event_detect(pin, GPIO.RISING, callback=callback,
                                 bouncetime=300)
