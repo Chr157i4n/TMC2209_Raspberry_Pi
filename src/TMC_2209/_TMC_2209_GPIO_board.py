@@ -196,7 +196,10 @@ class TMC_gpio:
             initial = int(initial)
             pull_up_down = int(pull_up_down)
             mode = int(mode)
-            GPIO.setup(pin, mode, initial=initial, pull_up_down=pull_up_down)
+            if mode == GpioMode.OUT:
+                GPIO.setup(pin, mode, initial=initial)
+            else:
+                GPIO.setup(pin, mode, pull_up_down=pull_up_down)
 
     @staticmethod
     def gpio_cleanup(pin):
