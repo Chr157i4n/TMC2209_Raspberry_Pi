@@ -17,6 +17,15 @@ from os.path import exists
 from enum import Enum, IntEnum
 from ._TMC_2209_logger import TMC_logger, Loglevel
 
+# ------------------------------
+# LIB           | BOARD
+# ------------------------------
+# RPi.GPIO      | Pi4, Pi3 etc.
+# Jetson.GPIO   | Nvidia Jetson
+# gpiozero      | Pi5
+# pheriphery    | Luckfox Pico
+# ------------------------------
+
 class Board(Enum):
     """board"""
     UNKNOWN = 0
@@ -161,7 +170,7 @@ class TMC_gpio:
 
     @staticmethod
     def init(gpio_mode=None):
-        """init"""
+        """init gpio library"""
         if BOARD == Board.RASPBERRY_PI5:
             pass
         elif BOARD == Board.LUCKFOX_PICO:
@@ -174,7 +183,7 @@ class TMC_gpio:
 
     @staticmethod
     def deinit():
-        """deinit"""
+        """deinit gpio library"""
         if BOARD == Board.RASPBERRY_PI5:
             pass
         else:
@@ -196,7 +205,7 @@ class TMC_gpio:
             initial = int(initial)
             pull_up_down = int(pull_up_down)
             mode = int(mode)
-            if mode == GpioMode.OUT:
+            if mode == GpioMode.OUT: # TODO: better way to pass different params
                 GPIO.setup(pin, mode, initial=initial)
             else:
                 GPIO.setup(pin, mode, pull_up_down=pull_up_down)
