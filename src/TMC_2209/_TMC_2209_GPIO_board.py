@@ -166,7 +166,7 @@ else:
 class TMC_gpio:
     """TMC_gpio class"""
 
-    _gpios = [None] * 40
+    _gpios = [None] * 200
 
     @staticmethod
     def init(gpio_mode=None):
