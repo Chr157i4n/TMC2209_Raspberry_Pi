@@ -69,7 +69,7 @@ else:
             except ModuleNotFoundError as err:
                 dependencies_logger.log(
                     (f"ModuleNotFoundError: {err}\n"
-                    "Board is Raspberry PI 5 but module gpiozero isn`t installed.\n"
+                    "Board is Raspberry PI 5 but module gpiozero isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://gpiozero.readthedocs.io/en/stable/installing.html\n"
                     "Exiting..."),
@@ -78,7 +78,7 @@ else:
             except ImportError as err:
                 dependencies_logger.log(
                     (f"ImportError: {err}\n"
-                    "Board is Raspberry PI 5 but module gpiozero isn`t installed.\n"
+                    "Board is Raspberry PI 5 but module gpiozero isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://gpiozero.readthedocs.io/en/stable/installing.html\n"
                     "Exiting..."),
@@ -91,7 +91,7 @@ else:
             except ModuleNotFoundError as err:
                 dependencies_logger.log(
                     (f"ModuleNotFoundError: {err}\n"
-                    "Board is Raspberry PI but module RPi.GPIO isn`t installed.\n"
+                    "Board is Raspberry PI but module RPi.GPIO isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://sourceforge.net/p/raspberry-gpio-python/wiki/install\n"
                     "Exiting..."),
@@ -100,7 +100,7 @@ else:
             except ImportError as err:
                 dependencies_logger.log(
                     (f"ImportError: {err}\n"
-                    "Board is Raspberry PI but module RPi.GPIO isn`t installed.\n"
+                    "Board is Raspberry PI but module RPi.GPIO isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://sourceforge.net/p/raspberry-gpio-python/wiki/install\n"
                     "Exiting..."),
@@ -113,7 +113,7 @@ else:
             except ModuleNotFoundError as err:
                 dependencies_logger.log(
                     (f"ModuleNotFoundError: {err}\n"
-                    "Board is Nvidia Jetson but module jetson-gpio isn`t installed.\n"
+                    "Board is Nvidia Jetson but module jetson-gpio isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://github.com/NVIDIA/jetson-gpio\n"
                     "Exiting..."),
@@ -122,7 +122,7 @@ else:
             except ImportError as err:
                 dependencies_logger.log(
                     (f"ImportError: {err}\n"
-                    "Board is Nvidia Jetson but module jetson-gpio isn`t installed.\n"
+                    "Board is Nvidia Jetson but module jetson-gpio isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://github.com/NVIDIA/jetson-gpio\n"
                     "Exiting..."),
@@ -135,7 +135,7 @@ else:
             except ModuleNotFoundError as err:
                 dependencies_logger.log(
                     (f"ModuleNotFoundError: {err}\n"
-                    "Board is Luckfox Pico but module periphery isn`t installed.\n"
+                    "Board is Luckfox Pico but module periphery isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://github.com/vsergeev/python-periphery\n"
                     "Exiting..."),
@@ -144,7 +144,7 @@ else:
             except ImportError as err:
                 dependencies_logger.log(
                     (f"ImportError: {err}\n"
-                    "Board is Luckfox Pico but module periphery isn`t installed.\n"
+                    "Board is Luckfox Pico but module periphery isn't installed.\n"
                     "Follow the installation instructions in the link below to resolve the issue:\n"
                     "https://github.com/vsergeev/python-periphery\n"
                     "Exiting..."),
