@@ -56,6 +56,24 @@ pip3 install TMC-2209-Raspberry-Pi
     sudo raspi-config
     ```
 
+### Board Support
+
+The following table shows the supported boards and which libraries for GPIO access is beeing used for that board.
+
+Library | Installation Parameter | Boards
+-- | -- | --
+RPi.GPIO | RASPBERRY_PI | Pi4, Pi3 etc.
+gpiozero | RASPBERRY_PI5 | Pi5
+Jetson.GPIO | NVIDIA_JETSON | Nvidia Jetson
+pheriphery | LUCKFOX_PICO | Luckfox Pico
+
+Those libraries are needed for this library to work. You can either install the correct library yourself.
+You can also install the needed GPIO library by specifing the Installation Parameter while installing this library:
+
+```shell
+pip3 install TMC-2209-Raspberry-Pi[RASPBERRY_PI]
+```
+
 ## Wiring
 
 Pin TMC2209 | connect to | Function

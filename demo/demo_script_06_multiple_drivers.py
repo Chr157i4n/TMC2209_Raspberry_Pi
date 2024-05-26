@@ -3,6 +3,7 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 #pylint: disable=broad-exception-raised
+#pylint: disable=no-else-raise
 """
 test file for testing multiple drivers via one UART connection
 """
@@ -10,8 +11,10 @@ test file for testing multiple drivers via one UART connection
 import time
 try:
     from src.TMC_2209.TMC_2209_StepperDriver import *
+    from src.TMC_2209._TMC_2209_GPIO_board import Board
 except ModuleNotFoundError:
     from TMC_2209.TMC_2209_StepperDriver import *
+    from TMC_2209._TMC_2209_GPIO_board import Board
 
 
 print("---")
@@ -27,10 +30,13 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 # Multiple driver not tested
-if BOARD == "RASPBERRY_PI":
+if BOARD == Board.RASPBERRY_PI:
     tmc1 = TMC_2209(21, 16, 20, driver_address=0)
     tmc2 = TMC_2209(26, 13, 19, driver_address=1)
-elif BOARD == "NVIDIA_JETSON":
+elif BOARD == Board.RASPBERRY_PI5:
+    tmc1 = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0", driver_address=0)
+    tmc2 = TMC_2209(26, 13, 19, serialport="/dev/ttyAMA0", driver_address=1)
+elif BOARD == Board.NVIDIA_JETSON:
     # tmc1 = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", driver_address=0)
     raise Exception("Not tested for Nvidia Jetson, use with caution")
 else:
