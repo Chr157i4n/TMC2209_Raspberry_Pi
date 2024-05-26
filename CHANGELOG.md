@@ -1,5 +1,11 @@
 # Changelog
 
+## version 0.5
+
+- decoupled gpio access from gpio library
+- added support for Raspberry Pi5 (gpiozero)
+- added support for Luckfox Pico (python-periphery)
+
 ## version 0.4.5
 
 - enhancement of logging module
