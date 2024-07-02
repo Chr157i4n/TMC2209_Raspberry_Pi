@@ -505,6 +505,31 @@ def set_interpolation(self, en):
 
 
 
+def set_toff(self, toff):
+    """Sets TOFF register to value
+
+    Args:
+        toff (uint8_t): value of toff (must be a four-bit value)
+    """
+    # Ensure toff is a four-bit value by zeroing out the top bits
+    toff = toff & 0x0F
+
+    # Read the current value of the CHOPCONF register
+    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+
+    # Zero out the lower four bits of the CHOPCONF register
+    chopconf = chopconf & 0xFFFFFFF0
+
+    # Set the lower four bits of CHOPCONF to the toff value
+    chopconf = chopconf | toff
+
+    # Write the new value back to the CHOPCONF register
+    self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf)
+
+    # Log the action
+    self.tmc_logger.log(f"writing toff setting: {str(toff)}", Loglevel.INFO)
+
+
 def read_microstepping_resolution(self):
     """returns the current native microstep resolution (1-256)
     this reads the value from the driver register
