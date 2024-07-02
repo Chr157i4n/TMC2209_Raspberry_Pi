@@ -41,7 +41,7 @@ class TMC_2209:
         read_microstepping_resolution, get_microstepping_resolution, set_microstepping_resolution,
         set_mstep_resolution_reg_select, get_interface_transmission_counter, get_tstep, set_vactual,
         get_stallguard_result, set_stallguard_threshold, set_coolstep_threshold,
-        get_microstep_counter, get_microstep_counter_in_steps
+        get_microstep_counter, get_microstep_counter_in_steps, set_toff
     )
 
     from ._TMC_2209_move import (
