@@ -350,6 +350,20 @@ class TMC_2209:
 
 
 
+    def set_direction_pin_or_reg(self, direction):
+        """sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
+        will use the reg, if pin==-1, otherwise use the pin
+
+        Args:
+            direction (bool): motor shaft direction: False = CCW; True = CW
+        """
+        if self._pin_dir != -1:
+            self.set_direction_pin(direction)
+        else:
+            self.set_direction_reg(not direction) #no clue, why this has to be inverted
+
+
+
     def read_steps_per_rev(self):
         """returns how many steps are needed for one revolution.
         this reads the value from the tmc driver.

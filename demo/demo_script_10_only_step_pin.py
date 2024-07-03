@@ -117,17 +117,12 @@ tmc.set_toff(3)
 # move the motor 1 revolution
 #-----------------------------------------------------------------------
 tmc.run_to_position_steps(400)                             #move to position 400
-tmc.set_direction_reg(True)
 tmc.run_to_position_steps(0)                               #move to position 0
 
-tmc.set_direction_reg(False)
 tmc.run_to_position_steps(400, MovementAbsRel.RELATIVE)    #move 400 steps forward
-tmc.set_direction_reg(True)
 tmc.run_to_position_steps(-400, MovementAbsRel.RELATIVE)   #move 400 steps backward
 
-tmc.set_direction_reg(False)
 tmc.run_to_position_steps(400)                             #move to position 400
-tmc.set_direction_reg(True)
 tmc.run_to_position_steps(0)                               #move to position 0
 
 
