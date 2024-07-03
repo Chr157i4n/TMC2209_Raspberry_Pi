@@ -31,7 +31,11 @@ class TMC_UART:
 
 
 
-    def __init__(self, tmc_logger, serialport, baudrate, mtr_id = 0):
+    def __init__(self,
+                 tmc_logger,
+                 serialport,
+                 baudrate, mtr_id = 0
+                 ):
         """constructor
 
         Args:

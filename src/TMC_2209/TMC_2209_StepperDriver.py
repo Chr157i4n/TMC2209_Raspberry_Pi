@@ -100,10 +100,20 @@ class TMC_2209:
 
 
 
-    def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-                 driver_address=0, gpio_mode=None, loglevel=None, logprefix=None,
-                 log_handlers: list = None, log_formatter : logging.Formatter = None,
-                 skip_uart_init: bool = False):
+    def __init__(self,
+                 pin_en=-1,
+                 pin_step=-1,
+                 pin_dir=-1,
+                 baudrate=115200,
+                 serialport="/dev/serial0",
+                 driver_address=0,
+                 gpio_mode=None,
+                 loglevel=None,
+                 logprefix=None,
+                 log_handlers: list = None,
+                 log_formatter : logging.Formatter = None,
+                 skip_uart_init: bool = False
+                 ):
         """constructor
 
         Args:

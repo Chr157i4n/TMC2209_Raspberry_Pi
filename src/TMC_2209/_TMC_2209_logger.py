@@ -28,8 +28,11 @@ class TMC_logger:
     log messages from the TMC_2209 lib
     """
 
-    def __init__(self, loglevel: Loglevel = Loglevel.INFO, logprefix: str = "TMC2209",
-                 handlers: list = None, formatter: logging.Formatter = None):
+    def __init__(self,
+                 loglevel: Loglevel = Loglevel.INFO,
+                 logprefix: str = "TMC2209",
+                 handlers: list = None,
+                 formatter: logging.Formatter = None):
         """constructor
 
         Args:
