@@ -41,7 +41,7 @@ uv_cp               = 1<<2
 
 #CHOPCONF
 toff0               = 1<<0
-toff1               = 1<<1               
+toff1               = 1<<1
 toff2               = 1<<2
 toff3               = 1<<3
 vsense              = 1<<17
