@@ -352,10 +352,10 @@ def compute_new_speed(self):
         self._cn = self._c0
         TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
         if distance_to > 0:
-            self.set_direction_pin(1)
+            self.set_direction_pin_or_reg(1)
             self.tmc_logger.log("going CW", Loglevel.MOVEMENT)
         else:
-            self.set_direction_pin(0)
+            self.set_direction_pin_or_reg(0)
             self.tmc_logger.log("going CCW", Loglevel.MOVEMENT)
         self._movement_phase = MovementPhase.ACCELERATING
     else:

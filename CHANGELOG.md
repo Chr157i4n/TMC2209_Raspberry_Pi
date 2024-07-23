@@ -1,5 +1,11 @@
 # Changelog
 
+## version 0.5.1
+
+- added toff setting
+- added support for controlling direction during movement over UART
+- added demo script for motor movement using only the STEP pin
+
 ## version 0.5
 
 - decoupled gpio access from gpio library

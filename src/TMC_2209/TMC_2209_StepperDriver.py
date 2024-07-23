@@ -41,7 +41,7 @@ class TMC_2209:
         read_microstepping_resolution, get_microstepping_resolution, set_microstepping_resolution,
         set_mstep_resolution_reg_select, get_interface_transmission_counter, get_tstep, set_vactual,
         get_stallguard_result, set_stallguard_threshold, set_coolstep_threshold,
-        get_microstep_counter, get_microstep_counter_in_steps, set_toff
+        get_microstep_counter, get_microstep_counter_in_steps, get_toff, set_toff
     )
 
     from ._TMC_2209_move import (
@@ -100,10 +100,20 @@ class TMC_2209:
 
 
 
-    def __init__(self, pin_en, pin_step=-1, pin_dir=-1, baudrate=115200, serialport="/dev/serial0",
-                 driver_address=0, gpio_mode=None, loglevel=None, logprefix=None,
-                 log_handlers: list = None, log_formatter : logging.Formatter = None,
-                 skip_uart_init: bool = False):
+    def __init__(self,
+                 pin_en=-1,
+                 pin_step=-1,
+                 pin_dir=-1,
+                 baudrate=115200,
+                 serialport="/dev/serial0",
+                 driver_address=0,
+                 gpio_mode=None,
+                 loglevel=None,
+                 logprefix=None,
+                 log_handlers: list = None,
+                 log_formatter : logging.Formatter = None,
+                 skip_uart_init: bool = False
+                 ):
         """constructor
 
         Args:
@@ -134,8 +144,9 @@ class TMC_2209:
         TMC_gpio.init(gpio_mode)
 
         self.tmc_logger.log(f"EN Pin: {pin_en}", Loglevel.DEBUG)
-        self._pin_en = pin_en
-        TMC_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
+        if pin_en != -1:
+            self._pin_en = pin_en
+            TMC_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
 
         self.tmc_logger.log(f"STEP Pin: {pin_step}", Loglevel.DEBUG)
         if pin_step != -1:
@@ -200,8 +211,11 @@ class TMC_2209:
         Args:
             en (bool): whether the motor current output should be enabled
         """
-        TMC_gpio.gpio_output(self._pin_en, not en)
-        self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
+        if self._pin_en != -1:
+            TMC_gpio.gpio_output(self._pin_en, not en)
+            self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
+        else:
+            self.tmc_logger.log(f"Motor pin is: {self._pin_en}", Loglevel.INFO)
 
 
 
@@ -314,8 +328,11 @@ class TMC_2209:
 
     def reverse_direction_pin(self):
         """reverses the motor shaft direction"""
-        self._direction = not self._direction
-        TMC_gpio.gpio_output(self._pin_dir, self._direction)
+        if self._pin_dir != -1:
+            self._direction = not self._direction
+            TMC_gpio.gpio_output(self._pin_dir, self._direction)
+        else:
+            self.tmc_logger.log(f"Direction pin is: {self._pin_dir}", Loglevel.INFO)
 
 
 
@@ -325,8 +342,25 @@ class TMC_2209:
         Args:
             direction (bool): motor shaft direction: False = CCW; True = CW
         """
-        self._direction = direction
-        TMC_gpio.gpio_output(self._pin_dir, direction)
+        if self._pin_dir != -1:
+            self._direction = direction
+            TMC_gpio.gpio_output(self._pin_dir, direction)
+        else:
+            self.tmc_logger.log(f"Direction pin is: {self._pin_dir}", Loglevel.INFO)
+
+
+
+    def set_direction_pin_or_reg(self, direction):
+        """sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
+        will use the reg, if pin==-1, otherwise use the pin
+
+        Args:
+            direction (bool): motor shaft direction: False = CCW; True = CW
+        """
+        if self._pin_dir != -1:
+            self.set_direction_pin(direction)
+        else:
+            self.set_direction_reg(not direction) #no clue, why this has to be inverted
 
 
 

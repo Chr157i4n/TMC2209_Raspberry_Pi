@@ -242,6 +242,7 @@ def set_direction_reg(self, direction):
         self.tmc_logger.log("write normal motor direction", Loglevel.INFO)
         gconf = self.tmc_uart.clear_bit(gconf, tmc_reg.shaft)
     self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf)
+    self._direction = not direction
 
 
 
@@ -505,6 +506,23 @@ def set_interpolation(self, en):
 
 
 
+def get_toff(self):
+    """returns the TOFF register value
+
+    Returns:
+        int: TOFF register value
+    """
+    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+
+    toff = chopconf & (tmc_reg.toff0 | tmc_reg.toff1 |
+                        tmc_reg.toff2 | tmc_reg.toff3)
+
+    toff = toff >> 0
+
+    return toff
+
+
+
 def set_toff(self, toff):
     """Sets TOFF register to value
 
@@ -528,6 +546,7 @@ def set_toff(self, toff):
 
     # Log the action
     self.tmc_logger.log(f"writing toff setting: {str(toff)}", Loglevel.INFO)
+
 
 
 def read_microstepping_resolution(self):
