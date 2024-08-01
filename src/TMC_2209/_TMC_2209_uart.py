@@ -151,7 +151,8 @@ class TMC_UART:
         Args:
             register (int): HEX, which register to read
             tries (int): how many tries, before error is raised (Default value = 10)
-            bypass_serial (bool): if True, the serial connection is not checked (Default value = False)
+            bypass_serial (bool): if True, the serial connection is not checked
+                (Default value = False)
         """
         if not bypass_serial and self.ser is None:
             self.tmc_logger.log("Cannot read int, serial is not initialized", Loglevel.ERROR)
