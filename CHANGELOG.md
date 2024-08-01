@@ -1,5 +1,9 @@
 # Changelog
 
+## version 0.5.2
+
+- added extra error handling for when the UART serial is not set
+
 ## version 0.5.1
 
 - added toff setting

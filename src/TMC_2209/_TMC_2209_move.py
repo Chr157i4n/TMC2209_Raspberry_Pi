@@ -85,7 +85,10 @@ def set_max_speed(self, speed):
         speed = -speed
     if self._max_speed != speed:
         self._max_speed = speed
-        self._cmin = 1000000.0 / speed
+        if speed == 0.0:
+            self._cmin = 0.0
+        else:
+            self._cmin = 1000000.0 / speed
         # Recompute _n from current speed and adjust speed if accelerating or cruising
         if self._n > 0:
             self._n = (self._speed * self._speed) / (2.0 * self._acceleration) # Equation 16
