@@ -144,17 +144,15 @@ class TMC_UART:
 
 
 
-    def read_int(self, register, tries=10, bypass_serial=False):
+    def read_int(self, register, tries=10):
         """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
 
         Args:
             register (int): HEX, which register to read
             tries (int): how many tries, before error is raised (Default value = 10)
-            bypass_serial (bool): if True, the serial connection is not checked
-                (Default value = False)
         """
-        if not bypass_serial and self.ser is None:
+        if self.ser is None:
             self.tmc_logger.log("Cannot read int, serial is not initialized", Loglevel.ERROR)
             return -1
         while True:
