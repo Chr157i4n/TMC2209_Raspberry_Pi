@@ -26,7 +26,7 @@ class TestTMCUart(unittest.TestCase):
         """test_read_int"""
         with mock.patch.object(TMC_UART, 'read_reg', return_value=
                                b'U\x00o\x03\x05\xffo\xc0\x1e\x00\x00\xca'):
-            reg_ans = self.tmc_uart.read_int(0x00)
+            reg_ans = self.tmc_uart.read_int(0x00, bypass_serial=True)
             self.assertEqual(reg_ans, -1071775744, "read_int is wrong")
 
 
