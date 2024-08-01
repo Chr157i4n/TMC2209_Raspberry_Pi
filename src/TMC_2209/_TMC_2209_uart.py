@@ -48,7 +48,7 @@ class TMC_UART:
         if serialport is None:
             return
         try:
-            self.ser = serial.Serial (serialport, baudrate)
+            self.ser = serial.Serial(serialport, baudrate)
         except Exception as e:
             errnum = e.args[0]
             self.tmc_logger.log(f"SERIAL ERROR: {e}")
@@ -61,15 +61,18 @@ class TMC_UART:
                                     with \"sudo usermod -a -G dialout pi\"""")
 
         self.mtr_id = mtr_id
+        # adjust per baud and hardware. Sequential reads without some delay fail.
+        self.communication_pause = 500 / baudrate
+
+        if self.ser is None:
+            return
+
         self.ser.BYTESIZES = 1
         self.ser.PARITIES = serial.PARITY_NONE
         self.ser.STOPBITS = 1
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
         self.ser.timeout = 20000/baudrate
-        # adjust per baud and hardware. Sequential reads without some delay fail.
-        self.communication_pause = 500/baudrate
-
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
@@ -112,6 +115,9 @@ class TMC_UART:
         Args:
             register (int): HEX, which register to read
         """
+        if self.ser is None:
+            self.tmc_logger.log("Cannot read reg, serial is not initialized", Loglevel.ERROR)
+            return False
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
@@ -146,6 +152,9 @@ class TMC_UART:
             register (int): HEX, which register to read
             tries (int): how many tries, before error is raised (Default value = 10)
         """
+        if self.ser is None:
+            self.tmc_logger.log("Cannot read int, serial is not initialized", Loglevel.ERROR)
+            return -1
         while True:
             tries -= 1
             rtn = self.read_reg(register)
@@ -183,6 +192,9 @@ class TMC_UART:
             register (int): HEX, which register to write
             val (int): value for that register
         """
+        if self.ser is None:
+            self.tmc_logger.log("Cannot write reg, serial is not initialized", Loglevel.ERROR)
+            return False
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
@@ -219,6 +231,9 @@ class TMC_UART:
             val: value for that register
             tries: how many tries, before error is raised (Default value = 10)
         """
+        if self.ser is None:
+            self.tmc_logger.log("Cannot write reg check, serial is not initialized", Loglevel.ERROR)
+            return False
         ifcnt1 = self.read_int(reg.IFCNT)
 
         if ifcnt1 == 255:
@@ -230,7 +245,7 @@ class TMC_UART:
             ifcnt2 = self.read_int(reg.IFCNT)
             if ifcnt1 >= ifcnt2:
                 self.tmc_logger.log("writing not successful!", Loglevel.ERROR)
-                self.tmc_logger.log("ifcnt:",ifcnt1,ifcnt2, Loglevel.DEBUG)
+                self.tmc_logger.log(f"ifcnt: {ifcnt1}, {ifcnt2}", Loglevel.DEBUG)
             else:
                 return True
             if tries<=0:
@@ -303,6 +318,10 @@ class TMC_UART:
         Args:
             register (int):  HEX, which register to read
         """
+
+        if self.ser is None:
+            self.tmc_logger.log("Cannot test UART, serial is not initialized", Loglevel.ERROR)
+            return False
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
