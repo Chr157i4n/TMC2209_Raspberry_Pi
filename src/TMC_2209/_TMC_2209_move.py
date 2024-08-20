@@ -76,10 +76,15 @@ def set_current_position(self, new_pos):
 
 
 def set_speed(self, speed):
+    """sets the motor speed in steps per second
+
+    Args:
+        speed (int): speed in steps/sec
+    """
     if speed == self._speed:
         return
     speed = tmc_math.constrain(speed, -self._max_speed, self._max_speed)
-    if (speed == 0.0):
+    if speed == 0.0:
         self._step_interval = 0
     else:
         self._step_interval = abs(1000000.0 / speed)
