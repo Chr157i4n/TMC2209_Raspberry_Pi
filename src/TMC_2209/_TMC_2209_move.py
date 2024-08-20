@@ -14,6 +14,7 @@ import math
 import threading
 from ._TMC_2209_GPIO_board import TMC_gpio, Gpio
 from ._TMC_2209_logger import Loglevel
+from . import _TMC_2209_math as tmc_math
 
 
 
@@ -73,6 +74,31 @@ def set_current_position(self, new_pos):
     """
     self._current_pos = new_pos
 
+
+def set_speed(self, speed):
+    if speed == self._speed:
+        return
+    speed = tmc_math.constrain(speed, -self._max_speed, self._max_speed)
+    if (speed == 0.0):
+        self._step_interval = 0
+    else:
+        self._step_interval = abs(1000000.0 / speed)
+        if speed > 0:
+            self.set_direction_pin_or_reg(1)
+            self.tmc_logger.log("going CW", Loglevel.MOVEMENT)
+        else:
+            self.set_direction_pin_or_reg(0)
+            self.tmc_logger.log("going CCW", Loglevel.MOVEMENT)
+    self._speed = speed
+
+
+def set_speed_fullstep(self, speed):
+    """sets the motor speed in fullsteps per second
+
+    Args:
+        speed (int): speed in fullsteps/sec
+    """
+    self.set_speed(speed*self.get_microstepping_resolution())
 
 
 def set_max_speed(self, speed):
