@@ -45,10 +45,10 @@ class TMC_2209:
     )
 
     from ._TMC_2209_move import (
-        set_movement_abs_rel, get_current_position, set_current_position, set_max_speed,
-        set_max_speed_fullstep, get_max_speed, set_acceleration, set_acceleration_fullstep,
-        get_acceleration, stop, get_movement_phase, run_to_position_steps,
-        run_to_position_revolutions, run_to_position_steps_threaded,
+        set_movement_abs_rel, get_current_position, set_current_position, set_speed,
+        set_speed_fullstep, set_max_speed, set_max_speed_fullstep, get_max_speed,
+        set_acceleration, set_acceleration_fullstep, get_acceleration, stop, get_movement_phase,
+        run_to_position_steps, run_to_position_revolutions, run_to_position_steps_threaded,
         run_to_position_revolutions_threaded, wait_for_movement_finished_threaded, run,
         distance_to_go, compute_new_speed, run_speed, make_a_step
     )

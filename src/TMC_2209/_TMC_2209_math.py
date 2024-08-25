@@ -83,3 +83,21 @@ def steps_to_tstep(steps, msres):
         tstep (int): time per step
     """
     return int(round(12000000 / (steps * 256 / msres)))
+
+
+def constrain(val, min_val, max_val):
+    """constrains a value between a min and a max
+
+    Args:
+        val (int): value that should be constrained
+        min_val (int): minimum value
+        max_val (int): maximum value
+
+    Returns:
+        int: constrained value
+    """
+    if val < min_val:
+        return min_val
+    if val > max_val:
+        return max_val
+    return val
