@@ -1,5 +1,13 @@
 # Changelog
 
+## version 0.5.3
+
+- added math function constrain
+- added function set_speed
+- added function set_speed_fullstep
+- added demo_script_11_continous_movement
+- reworked github actions pipeline (one multi-staged-pipeline)
+
 ## version 0.5.2
 
 - added extra error handling for when the UART serial is not set
