@@ -1,5 +1,9 @@
 # Changelog
 
+## version 0.5.4
+
+- added Orange Pi Support
+
 ## version 0.5.3
 
 - added math function constrain
