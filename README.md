@@ -23,7 +23,7 @@ You can read more about this in the datasheet from Trinamic.
 Because the TMC2209 uses one shared pin for transmit and receive in the UART communication line, the Raspberry Pi also receives what it sends.
 Well, the Pi receives 4 bytes from itself and 8 bytes from the driver. So the Pi receives a total of 12 bytes and only the last 8 are the reply, of which only 4 are data bytes.
 
-The Documentation of the TMC2209 can be found here:  
+The Documentation of the TMC2209 can be found here:
 [TMC2209 - Datsheet](https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC2209_Datasheet_rev1.06.pdf)
 
 The code is also available on [PyPI](https://pypi.org/project/TMC-2209-Raspberry-Pi).
@@ -60,12 +60,14 @@ pip3 install TMC-2209-Raspberry-Pi
 
 The following table shows the supported boards and which libraries for GPIO access is beeing used for that board.
 
-Library | Installation Parameter | Boards
--- | -- | --
-RPi.GPIO | RASPBERRY_PI | Pi4, Pi3 etc.
-gpiozero | RASPBERRY_PI5 | Pi5
-Jetson.GPIO | NVIDIA_JETSON | Nvidia Jetson
-pheriphery | LUCKFOX_PICO | Luckfox Pico
+Library     | Installation Parameter    | Boards
+----------- | ------------------------- | -----------
+RPi.GPIO    | RASPBERRY_PI              | Pi4, Pi3 etc.
+gpiozero    | RASPBERRY_PI5             | Pi5
+Jetson.GPIO | NVIDIA_JETSON             | Nvidia Jetson
+pheriphery  | LUCKFOX_PICO              | Luckfox Pico
+pheriphery  | LUCKFOX_PICO              | Luckfox Pico
+OPi.GPIO    | ORANGE_PI                 | Orange Pi
 
 Those libraries are needed for this library to work. You can either install the correct library yourself.
 You can also install the needed GPIO library by specifing the Installation Parameter while installing this library:

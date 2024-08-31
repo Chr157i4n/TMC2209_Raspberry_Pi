@@ -24,6 +24,7 @@ from ._TMC_2209_logger import TMC_logger, Loglevel
 # Jetson.GPIO   | Nvidia Jetson
 # gpiozero      | Pi5
 # pheriphery    | Luckfox Pico
+# OPi.GPIO      | Orange Pi
 # ------------------------------
 
 class Board(Enum):
@@ -33,6 +34,7 @@ class Board(Enum):
     RASPBERRY_PI5 = 2
     NVIDIA_JETSON = 3
     LUCKFOX_PICO = 4
+    ORANGE_PI = 5
 
 class Gpio(IntEnum):
     """GPIO value"""
@@ -150,6 +152,19 @@ else:
                     "Exiting..."),
                 Loglevel.ERROR)
                 raise
+        elif "orange" in model:
+            try:
+                from OPi import GPIO
+                BOARD = Board.ORANGE_PI
+            except ModuleNotFoundError as err:
+                dependencies_logger.log(
+                    (f"ModuleNotFoundError: {err}\n"
+                    "Board is Orange Pi but module OPi.GPIO isn't installed.\n"
+                    "Follow the installation instructions in the link below to resolve the issue:\n"
+                    "https://github.com/rm-hull/OPi.GPIO\n"
+                    "Exiting..."),
+                Loglevel.ERROR)
+                raise
         else:
             # just in case
             dependencies_logger.log(
@@ -174,6 +189,8 @@ class TMC_gpio:
         if BOARD == Board.RASPBERRY_PI5:
             pass
         elif BOARD == Board.LUCKFOX_PICO:
+            pass
+        elif BOARD == Board.ORANGE_PI:
             pass
         else:
             GPIO.setwarnings(False)
