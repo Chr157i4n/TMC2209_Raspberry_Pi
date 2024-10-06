@@ -1,5 +1,9 @@
 # Changelog
 
+## version 0.5.5
+
+- changed Nvidia Jetson detection
+
 ## version 0.5.4
 
 - added Orange Pi Support
