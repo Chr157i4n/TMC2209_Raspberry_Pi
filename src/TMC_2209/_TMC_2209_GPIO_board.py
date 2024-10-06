@@ -108,7 +108,7 @@ else:
                     "Exiting..."),
                 Loglevel.ERROR)
                 raise
-        elif "nvidia jetson" in model:
+        elif "jetson" in model:
             try:
                 from Jetson import GPIO
                 BOARD = Board.NVIDIA_JETSON
