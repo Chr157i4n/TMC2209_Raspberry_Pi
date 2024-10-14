@@ -590,11 +590,10 @@ def set_microstepping_resolution(self, msres):
     """
     chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
     #setting all bits to zero
-    chopconf = chopconf & (~tmc_reg.msres0 | ~tmc_reg.msres1 |
-                            ~tmc_reg.msres2 | ~tmc_reg.msres3)
+    chopconf = chopconf & (~tmc_reg.msres0 & ~tmc_reg.msres1 &
+                            ~tmc_reg.msres2 & ~tmc_reg.msres3)
     msresdezimal = int(math.log(msres, 2))
     msresdezimal = 8 - msresdezimal
-    chopconf = int(chopconf) & int(4043309055)
     chopconf = chopconf | msresdezimal <<24
 
     self.tmc_logger.log(f"writing {msres} microstep setting", Loglevel.INFO)
