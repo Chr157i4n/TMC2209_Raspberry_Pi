@@ -55,7 +55,7 @@ class TMC_2209:
     )
 
     from ._TMC_2209_test import (
-        test_dir_step_en, test_step, test_uart, test_stallguard_threshold
+        test_pin, test_dir_step_en, test_step, test_uart, test_stallguard_threshold
     )
 
     BOARD = BOARD
