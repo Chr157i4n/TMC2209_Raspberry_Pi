@@ -24,8 +24,8 @@ def test_dir_step_en(self):
     """
     pin_dir_ok = pin_step_ok = pin_en_ok = True
 
-    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
     TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
     TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
     time.sleep(0.1)
     ioin = self.read_ioin()
@@ -36,28 +36,40 @@ def test_dir_step_en(self):
     if not ioin & tmc_reg.io_enn:
         pin_en_ok = False
 
+    TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
     TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
+    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
+    time.sleep(0.1)
+    ioin = self.read_ioin()
+    if not ioin & tmc_reg.io_dir:
+        pin_dir_ok = False
+    if ioin & tmc_reg.io_step:
+        pin_step_ok = False
+    if not ioin & tmc_reg.io_enn:
+        pin_en_ok = False
+
     TMC_gpio.gpio_output(self._pin_dir, Gpio.LOW)
-    TMC_gpio.gpio_output(self._pin_en, Gpio.LOW)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
     time.sleep(0.1)
     ioin = self.read_ioin()
     if ioin & tmc_reg.io_dir:
         pin_dir_ok = False
-    if ioin & tmc_reg.io_step:
+    if not ioin & tmc_reg.io_step:
         pin_step_ok = False
-    if ioin & tmc_reg.io_enn:
+    if not ioin & tmc_reg.io_enn:
         pin_en_ok = False
 
-    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
     TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
-    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_en, Gpio.LOW)
     time.sleep(0.1)
     ioin = self.read_ioin()
     if not ioin & tmc_reg.io_dir:
         pin_dir_ok = False
     if not ioin & tmc_reg.io_step:
         pin_step_ok = False
-    if not ioin & tmc_reg.io_enn:
+    if ioin & tmc_reg.io_enn:
         pin_en_ok = False
 
     self.set_motor_enabled(False)
