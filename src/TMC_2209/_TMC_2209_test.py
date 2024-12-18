@@ -139,7 +139,7 @@ def test_uart(self):
         self.tmc_logger.log("UART connection: not OK", Loglevel.ERROR)
 
     self.tmc_logger.log("---")
-    return True
+    return status
 
 
 
