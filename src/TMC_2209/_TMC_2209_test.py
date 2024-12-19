@@ -16,49 +16,42 @@ from . import _TMC_2209_reg as tmc_reg
 
 
 
+def test_pin(self, pin, ioin_reg):
+    """tests one pin
+
+    this function checks the connection to a pin
+    by toggling it and reading the IOIN register
+    """
+    pin_ok = True
+
+    TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
+
+    ioin = self.read_ioin()
+    if not ioin & ioin_reg:
+        pin_ok = False
+
+    TMC_gpio.gpio_output(pin, Gpio.LOW)
+    time.sleep(0.1)
+
+    ioin = self.read_ioin()
+    if ioin & ioin_reg:
+        pin_ok = False
+
+    return pin_ok
+
+
+
 def test_dir_step_en(self):
     """tests the EN, DIR and STEP pin
 
     this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
     and checks the IOIN Register of the TMC meanwhile
     """
-    pin_dir_ok = pin_step_ok = pin_en_ok = True
-
-    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
-    TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
-    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
-    time.sleep(0.1)
-    ioin = self.read_ioin()
-    if not ioin & tmc_reg.io_dir:
-        pin_dir_ok = False
-    if not ioin & tmc_reg.io_step:
-        pin_step_ok = False
-    if not ioin & tmc_reg.io_enn:
-        pin_en_ok = False
-
-    TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
-    TMC_gpio.gpio_output(self._pin_dir, Gpio.LOW)
-    TMC_gpio.gpio_output(self._pin_en, Gpio.LOW)
-    time.sleep(0.1)
-    ioin = self.read_ioin()
-    if ioin & tmc_reg.io_dir:
-        pin_dir_ok = False
-    if ioin & tmc_reg.io_step:
-        pin_step_ok = False
-    if ioin & tmc_reg.io_enn:
-        pin_en_ok = False
-
-    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
-    TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
-    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
-    time.sleep(0.1)
-    ioin = self.read_ioin()
-    if not ioin & tmc_reg.io_dir:
-        pin_dir_ok = False
-    if not ioin & tmc_reg.io_step:
-        pin_step_ok = False
-    if not ioin & tmc_reg.io_enn:
-        pin_en_ok = False
+    pin_dir_ok = self.test_pin(self._pin_dir, tmc_reg.io_dir)
+    pin_step_ok = self.test_pin(self._pin_step, tmc_reg.io_step)
+    pin_en_ok = self.test_pin(self._pin_en, tmc_reg.io_enn)
 
     self.set_motor_enabled(False)
 
@@ -146,7 +139,7 @@ def test_uart(self):
         self.tmc_logger.log("UART connection: not OK", Loglevel.ERROR)
 
     self.tmc_logger.log("---")
-    return True
+    return status
 
 
 
