@@ -1,5 +1,12 @@
 # Changelog
 
+## version 0.5.6
+
+- fixed return status instead of hardcoded True in test_uart
+- refactored test_dir_step_en function
+- fixed links in readme
+- switched to python 3.13 in unittests
+
 ## version 0.5.5
 
 - changed Nvidia Jetson detection
