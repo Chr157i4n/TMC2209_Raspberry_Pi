@@ -141,6 +141,7 @@ class TMC_2209:
         self.tmc_logger = TMC_logger(loglevel, logprefix, log_handlers, log_formatter)
         self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
 
+        self._fullsteps_per_rev = fullsteps_per_rev
 
         self.tmc_logger.log("Init", Loglevel.INFO)
         TMC_gpio.init(gpio_mode)
@@ -171,8 +172,6 @@ class TMC_2209:
 
         self.set_max_speed_fullstep(100)
         self.set_acceleration_fullstep(100)
-
-        self._fullsteps_per_rev = fullsteps_per_rev
 
 
 
