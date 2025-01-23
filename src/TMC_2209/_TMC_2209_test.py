@@ -104,15 +104,15 @@ def test_uart(self):
     self.tmc_logger.log(str(snd.hex()), Loglevel.DEBUG)
     self.tmc_logger.log(str(rtn.hex()), Loglevel.DEBUG)
 
-    self.tmc_logger.log("just the first 4 bits:", Loglevel.DEBUG)
+    self.tmc_logger.log("just the first 4 bytes:", Loglevel.DEBUG)
     self.tmc_logger.log(str(snd[0:4].hex()), Loglevel.DEBUG)
     self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG)
 
     if len(rtn)==12:
         self.tmc_logger.log("""the Raspberry Pi received the sent
-                            bits and the answer from the TMC""", Loglevel.DEBUG)
+                            bytes and the answer from the TMC""", Loglevel.DEBUG)
     elif len(rtn)==4:
-        self.tmc_logger.log("the Raspberry Pi received only the sent bits",
+        self.tmc_logger.log("the Raspberry Pi received only the sent bytes",
                             Loglevel.ERROR)
         status = False
     elif len(rtn)==0:
@@ -120,16 +120,16 @@ def test_uart(self):
                             Loglevel.ERROR)
         status = False
     else:
-        self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bits: {len(rtn)}",
+        self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bytes: {len(rtn)}",
                             Loglevel.ERROR)
         status = False
 
     if snd[0:4] == rtn[0:4]:
-        self.tmc_logger.log("""the Raspberry Pi received exactly the bits it has send.
-                    the first 4 bits are the same""", Loglevel.DEBUG)
+        self.tmc_logger.log("""the Raspberry Pi received exactly the bytes it has send.
+                    the first 4 bytes are the same""", Loglevel.DEBUG)
     else:
-        self.tmc_logger.log("""the Raspberry Pi did not received the bits it has send.
-                    the first 4 bits are different""", Loglevel.DEBUG)
+        self.tmc_logger.log("""the Raspberry Pi did not received the bytes it has send.
+                    the first 4 bytes are different""", Loglevel.DEBUG)
         status = False
 
     self.tmc_logger.log("---")
