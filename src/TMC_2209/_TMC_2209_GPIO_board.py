@@ -59,44 +59,55 @@ dependencies_logger = TMC_logger(Loglevel.DEBUG, "DEPENDENCIES")
 
 
 class BaseGPIOWrapper:
-    """Base class for GPIO implementations"""
+    """Base class for GPIO wrappers"""
     def init(self, gpio_mode=None):
+        """initialize GPIO library"""
         raise NotImplementedError
 
     def deinit(self):
+        """deinitialize GPIO library"""
         raise NotImplementedError
 
     def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
         raise NotImplementedError
 
     def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
         raise NotImplementedError
 
     def gpio_input(self, pin):
+        """read GPIO pin"""
         raise NotImplementedError
 
     def gpio_output(self, pin, value):
+        """write GPIO pin"""
         raise NotImplementedError
 
     def gpio_add_event_detect(self, pin, callback):
+        """add event detect"""
         raise NotImplementedError
 
     def gpio_remove_event_detect(self, pin):
+        """remove event detect"""
         raise NotImplementedError
 
 class BaseRPiGPIOWrapper(BaseGPIOWrapper):
-    """RPI.GPIO implementation"""
+    """RPI.GPIO base wrapper"""
 
     def init(self, gpio_mode=None):
+        """initialize GPIO library"""
         self.GPIO.setwarnings(False)
         if gpio_mode is None:
             gpio_mode = self.GPIO.BCM
         self.GPIO.setmode(gpio_mode)
 
     def deinit(self):
+        """deinitialize GPIO library"""
         self.GPIO.cleanup()
 
     def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
         initial = int(initial)
         pull_up_down = int(pull_up_down)
         mode = int(mode)
@@ -106,109 +117,134 @@ class BaseRPiGPIOWrapper(BaseGPIOWrapper):
             self.GPIO.setup(pin, mode, pull_up_down=pull_up_down)
 
     def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
         self.GPIO.cleanup(pin)
 
     def gpio_input(self, pin):
+        """read GPIO pin"""
         return self.GPIO.input(pin)
 
     def gpio_output(self, pin, value):
+        """write GPIO pin"""
         self.GPIO.output(pin, value)
 
     def gpio_add_event_detect(self, pin, callback):
+        """add event detect"""
         self.GPIO.add_event_detect(pin, self.GPIO.RISING, callback=callback, bouncetime=300)
 
     def gpio_remove_event_detect(self, pin):
-       self.GPIO.remove_event_detect(pin)
+        """remove event detect"""
+        self.GPIO.remove_event_detect(pin)
 
 class MockGPIOWrapper(BaseRPiGPIOWrapper):
-    """Mock GPIO implementation"""
+    """Mock.GPIO wrapper"""
 
     def __init__(self):
+        """constructor, imports Mock.GPIO"""
         self.GPIO = import_module('Mock.GPIO')
         dependencies_logger.log("using Mock.GPIO for GPIO mocking", Loglevel.INFO)
 
 class RPiGPIOWrapper(BaseRPiGPIOWrapper):
-    """Raspberry Pi GPIO implementation"""
+    """RPi.GPIO wrapper"""
 
     def __init__(self):
+        """constructor, imports RPi.GPIO"""
         self.GPIO = import_module('RPi.GPIO')
         dependencies_logger.log("using RPi.GPIO for GPIO control", Loglevel.INFO)
 
-class GpiozeroWrapper(BaseRPiGPIOWrapper):
-    """Raspberry Pi 5 GPIO implementation"""
+class JetsonGPIOWrapper(BaseRPiGPIOWrapper):
+    """Jetson.GPIO wrapper"""
 
     def __init__(self):
+        """constructor, imports Jetson.GPIO"""
+        self.GPIO = import_module('Jetson.GPIO')
+        dependencies_logger.log("using Jetson.GPIO for GPIO control", Loglevel.INFO)
+
+class OPiGPIOWrapper(BaseRPiGPIOWrapper):
+    """OPi.GPIO wrapper"""
+
+    def __init__(self):
+        """constructor, imports OPi.GPIO"""
+        self.GPIO = import_module('OPi.GPIO')
+        dependencies_logger.log("using OPi.GPIO for GPIO control", Loglevel.INFO)
+
+class GpiozeroWrapper(BaseGPIOWrapper):
+    """gpiozero GPIO wrapper"""
+
+    def __init__(self):
+        """constructor, imports gpiozero"""
         self.gpiozero = import_module('gpiozero')
         dependencies_logger.log("using gpiozero for GPIO control", Loglevel.INFO)
         self._gpios = [None] * 200
 
     def init(self, gpio_mode=None):
+        """initialize GPIO library. pass on gpiozero"""
         pass
 
     def deinit(self):
+        """deinitialize GPIO library. pass on gpiozero"""
         pass
 
     def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
         if mode == GpioMode.OUT:
             self._gpios[pin] = self.gpiozero.DigitalOutputDevice(pin)
         else:
             self._gpios[pin] = self.gpiozero.DigitalInputDevice(pin)
 
     def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
         self._gpios[pin].close()
 
     def gpio_input(self, pin):
+        """read GPIO pin"""
         return self._gpios[pin].value
 
     def gpio_output(self, pin, value):
+        """write GPIO pin"""
         self._gpios[pin].value = value
 
     def gpio_add_event_detect(self, pin, callback):
+        """add event detect"""
         self._gpios[pin].when_activated = callback
 
     def gpio_remove_event_detect(self, pin):
+        """remove event detect"""
         if self._gpios[pin].when_activated is not None:
             self._gpios[pin].when_activated = None
 
-class JetsonGPIOWrapper(BaseRPiGPIOWrapper):
-
+class peripheryWrapper(BaseGPIOWrapper):
+    """periphery GPIO wrapper"""
     def __init__(self):
-        self.GPIO = import_module('Jetson.GPIO')
-        dependencies_logger.log("using Jetson.GPIO for GPIO control", Loglevel.INFO)
-
-class peripheryWrapper(BaseRPiGPIOWrapper):
-    """Luckfox Pico GPIO implementation"""
-    def __init__(self):
+        """constructor, imports periphery"""
         self.periphery = import_module('periphery')
         dependencies_logger.log("using periphery for GPIO control", Loglevel.INFO)
         self._gpios = [None] * 200
 
     def init(self, gpio_mode=None):
+        """initialize GPIO library. pass on periphery"""
         pass
 
     def deinit(self):
+        """deinitialize GPIO library. pass on periphery"""
         pass
 
     def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
         mode = 'out' if (mode == GpioMode.OUT) else 'in'
         self._gpios[pin] = self.periphery.GPIO(pin, mode)
 
     def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
         self._gpios[pin].close()
 
     def gpio_input(self, pin):
+        """read GPIO pin"""
         return self._gpios[pin].read()
 
     def gpio_output(self, pin, value):
+        """write GPIO pin"""
         self._gpios[pin].write(bool(value))
-
-class OPiGPIOWrapper(BaseRPiGPIOWrapper):
-    """Orange Pi GPIO implementation"""
-
-    def __init__(self):
-        self.GPIO = import_module('OPi.GPIO')
-        dependencies_logger.log("using OPi.GPIO for GPIO control", Loglevel.INFO)
-
 
 
 board_mapping = {
@@ -223,12 +259,14 @@ board_mapping = {
 
 # Determine the board and instantiate the appropriate GPIO class
 def get_board_model_name():
+    """get board model name from /proc/device-tree/model file"""
     if not exists('/proc/device-tree/model'):
         return "mock"
     with open('/proc/device-tree/model', encoding="utf-8") as f:
         return f.readline().lower()
 
 def handle_module_not_found_error(err, board_name, module_name, install_link):
+    """handle module not found error"""
     dependencies_logger.log(
         (f"ModuleNotFoundError: {err}\n"
          f"Board is {board_name} but module {module_name} isn't installed.\n"
@@ -239,6 +277,7 @@ def handle_module_not_found_error(err, board_name, module_name, install_link):
     raise
 
 def handle_import_error(err, board_name, module_name, install_link):
+    """handle import error"""
     dependencies_logger.log(
         (f"ImportError: {err}\n"
          f"Board is {board_name} but module {module_name} isn't installed.\n"
@@ -249,6 +288,7 @@ def handle_import_error(err, board_name, module_name, install_link):
     raise
 
 def initialize_gpio():
+    """initialize GPIO"""
     model = get_board_model_name()
     dependencies_logger.log(f"Board model: {model}", Loglevel.INFO)
     if model == "mock":
