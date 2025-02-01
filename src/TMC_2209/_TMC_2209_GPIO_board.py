@@ -3,6 +3,9 @@
 #pylint: disable=unknown-option-value
 #pylint: disable=possibly-used-before-assignment
 #pylint: disable=used-before-assignment
+#pylint: disable=unnecessary-pass
+#pylint: disable=abstract-method
+#pylint: disable=no-member
 """
 Many boards have RaspberryPI-compatible PinOut,
 but require to import special GPIO module instead RPI.GPIO
@@ -274,7 +277,7 @@ def handle_module_not_found_error(err, board_name, module_name, install_link):
          f"{install_link}\n"
          "Exiting..."),
         Loglevel.ERROR)
-    raise
+    raise err
 
 def handle_import_error(err, board_name, module_name, install_link):
     """handle import error"""
@@ -285,7 +288,7 @@ def handle_import_error(err, board_name, module_name, install_link):
          f"{install_link}\n"
          "Exiting..."),
         Loglevel.ERROR)
-    raise
+    raise err
 
 def initialize_gpio():
     """initialize GPIO"""

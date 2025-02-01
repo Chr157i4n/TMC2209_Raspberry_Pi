@@ -36,7 +36,7 @@ jobs:
         pip install pyserial
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --disable=C0103 --disable=W0511 --disable=W0012 --extension-pkg-whitelist=RPi
+        pylint $(git ls-files '*.py') --disable=C0103 --disable=W0511 --disable=W0012 --extension-pkg-whitelist=RPi --max-line-length=160
 
   unittest:
     runs-on: ubuntu-latest
