@@ -210,6 +210,17 @@ class OPiGPIOWrapper(BaseRPiGPIOWrapper):
         dependencies_logger.log("using OPi.GPIO for GPIO control", Loglevel.INFO)
 
 
+
+board_mapping = {
+    "raspberry pi 5": (GpiozeroWrapper, Board.RASPBERRY_PI5, "gpiozero", "https://gpiozero.readthedocs.io/en/stable/installing.html"),
+    "raspberry": (RPiGPIOWrapper, Board.RASPBERRY_PI, "RPi.GPIO", "https://sourceforge.net/p/raspberry-gpio-python/wiki/install"),
+    "jetson": (JetsonGPIOWrapper, Board.NVIDIA_JETSON, "jetson-gpio", "https://github.com/NVIDIA/jetson-gpio"),
+    "luckfox": (peripheryWrapper, Board.LUCKFOX_PICO, "periphery", "https://github.com/vsergeev/python-periphery"),
+    "orange": (OPiGPIOWrapper, Board.ORANGE_PI, "OPi.GPIO", "https://github.com/rm-hull/OPi.GPIO")
+}
+
+
+
 # Determine the board and instantiate the appropriate GPIO class
 def get_board_model_name():
     if not exists('/proc/device-tree/model'):
@@ -243,46 +254,22 @@ def initialize_gpio():
     if model == "mock":
         return MockGPIOWrapper(), Board.UNKNOWN
 
-    if "raspberry pi 5" in model:
-        try:
-            return GpiozeroWrapper(), Board.RASPBERRY_PI5
-        except ModuleNotFoundError as err:
-            handle_module_not_found_error(err, "Raspberry PI 5", "gpiozero", "https://gpiozero.readthedocs.io/en/stable/installing.html")
-        except ImportError as err:
-            handle_import_error(err, "Raspberry PI 5", "gpiozero", "https://gpiozero.readthedocs.io/en/stable/installing.html")
-    elif "raspberry" in model:
-        try:
-            return RPiGPIOWrapper(), Board.RASPBERRY_PI
-        except ModuleNotFoundError as err:
-            handle_module_not_found_error(err, "Raspberry PI", "RPi.GPIO", "https://sourceforge.net/p/raspberry-gpio-python/wiki/install")
-        except ImportError as err:
-            handle_import_error(err, "Raspberry PI", "RPi.GPIO", "https://sourceforge.net/p/raspberry-gpio-python/wiki/install")
-    elif "jetson" in model:
-        try:
-            return JetsonGPIOWrapper(), Board.NVIDIA_JETSON
-        except ModuleNotFoundError as err:
-            handle_module_not_found_error(err, "Nvidia Jetson", "jetson-gpio", "https://github.com/NVIDIA/jetson-gpio")
-        except ImportError as err:
-            handle_import_error(err, "Nvidia Jetson", "jetson-gpio", "https://github.com/NVIDIA/jetson-gpio")
-    elif "luckfox" in model:
-        try:
-            return peripheryWrapper(), Board.LUCKFOX_PICO
-        except ModuleNotFoundError as err:
-            handle_module_not_found_error(err, "Luckfox Pico", "periphery", "https://github.com/vsergeev/python-periphery")
-        except ImportError as err:
-            handle_import_error(err, "Luckfox Pico", "periphery", "https://github.com/vsergeev/python-periphery")
-    elif "orange" in model:
-        try:
-            return OPiGPIOWrapper(), Board.ORANGE_PI
-        except ModuleNotFoundError as err:
-            handle_module_not_found_error(err, "Orange Pi", "OPi.GPIO", "https://github.com/rm-hull/OPi.GPIO")
-    else:
-        dependencies_logger.log(
-            "The board is not recognized. Trying import default RPi.GPIO module...",
-            Loglevel.INFO)
-        try:
-            return RPiGPIOWrapper(), Board.UNKNOWN
-        except ImportError:
-            return MockGPIOWrapper(), Board.UNKNOWN
+
+    for key, (wrapper_class, board_enum, module_name, install_link) in board_mapping.items():
+        if key in model:
+            try:
+                return wrapper_class(), board_enum
+            except ModuleNotFoundError as err:
+                handle_module_not_found_error(err, key.capitalize(), module_name, install_link)
+            except ImportError as err:
+                handle_import_error(err, key.capitalize(), module_name, install_link)
+
+    dependencies_logger.log(
+        "The board is not recognized. Trying import default RPi.GPIO module...",
+        Loglevel.INFO)
+    try:
+        return RPiGPIOWrapper(), Board.UNKNOWN
+    except ImportError:
+        return MockGPIOWrapper(), Board.UNKNOWN
 
 TMC_gpio, BOARD = initialize_gpio()
