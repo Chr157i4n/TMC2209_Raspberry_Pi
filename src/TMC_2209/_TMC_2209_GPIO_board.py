@@ -3,6 +3,9 @@
 #pylint: disable=unknown-option-value
 #pylint: disable=possibly-used-before-assignment
 #pylint: disable=used-before-assignment
+#pylint: disable=unnecessary-pass
+#pylint: disable=abstract-method
+#pylint: disable=no-member
 """
 Many boards have RaspberryPI-compatible PinOut,
 but require to import special GPIO module instead RPI.GPIO
@@ -15,6 +18,7 @@ Can be extended to support BeagleBone or other boards
 
 from os.path import exists
 from enum import Enum, IntEnum
+from importlib import import_module
 from ._TMC_2209_logger import TMC_logger, Loglevel
 
 # ------------------------------
@@ -36,6 +40,7 @@ class Board(Enum):
     LUCKFOX_PICO = 4
     ORANGE_PI = 5
 
+
 class Gpio(IntEnum):
     """GPIO value"""
     LOW = 0
@@ -52,225 +57,262 @@ class GpioPUD(IntEnum):
     PUD_UP = 22
     PUD_DOWN = 21
 
-
-
-
-
 BOARD = Board.UNKNOWN
 dependencies_logger = TMC_logger(Loglevel.DEBUG, "DEPENDENCIES")
 
-if not exists('/proc/device-tree/model'):
-    from Mock import GPIO
-else:
-    with open('/proc/device-tree/model', encoding="utf-8") as f:
-        model = f.readline().lower()
-        if "raspberry pi 5" in model:
-            try:
-                from gpiozero import DigitalOutputDevice, DigitalInputDevice
-                BOARD = Board.RASPBERRY_PI5
-            except ModuleNotFoundError as err:
-                dependencies_logger.log(
-                    (f"ModuleNotFoundError: {err}\n"
-                    "Board is Raspberry PI 5 but module gpiozero isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://gpiozero.readthedocs.io/en/stable/installing.html\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-            except ImportError as err:
-                dependencies_logger.log(
-                    (f"ImportError: {err}\n"
-                    "Board is Raspberry PI 5 but module gpiozero isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://gpiozero.readthedocs.io/en/stable/installing.html\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-        elif "raspberry" in model:
-            try:
-                from RPi import GPIO
-                BOARD = Board.RASPBERRY_PI
-            except ModuleNotFoundError as err:
-                dependencies_logger.log(
-                    (f"ModuleNotFoundError: {err}\n"
-                    "Board is Raspberry PI but module RPi.GPIO isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-            except ImportError as err:
-                dependencies_logger.log(
-                    (f"ImportError: {err}\n"
-                    "Board is Raspberry PI but module RPi.GPIO isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://sourceforge.net/p/raspberry-gpio-python/wiki/install\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-        elif "jetson" in model:
-            try:
-                from Jetson import GPIO
-                BOARD = Board.NVIDIA_JETSON
-            except ModuleNotFoundError as err:
-                dependencies_logger.log(
-                    (f"ModuleNotFoundError: {err}\n"
-                    "Board is Nvidia Jetson but module jetson-gpio isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://github.com/NVIDIA/jetson-gpio\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-            except ImportError as err:
-                dependencies_logger.log(
-                    (f"ImportError: {err}\n"
-                    "Board is Nvidia Jetson but module jetson-gpio isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://github.com/NVIDIA/jetson-gpio\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-        elif "luckfox pico" in model:
-            try:
-                from periphery import GPIO
-                BOARD = Board.LUCKFOX_PICO
-            except ModuleNotFoundError as err:
-                dependencies_logger.log(
-                    (f"ModuleNotFoundError: {err}\n"
-                    "Board is Luckfox Pico but module periphery isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://github.com/vsergeev/python-periphery\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-            except ImportError as err:
-                dependencies_logger.log(
-                    (f"ImportError: {err}\n"
-                    "Board is Luckfox Pico but module periphery isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://github.com/vsergeev/python-periphery\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-        elif "orange" in model:
-            try:
-                from OPi import GPIO
-                BOARD = Board.ORANGE_PI
-            except ModuleNotFoundError as err:
-                dependencies_logger.log(
-                    (f"ModuleNotFoundError: {err}\n"
-                    "Board is Orange Pi but module OPi.GPIO isn't installed.\n"
-                    "Follow the installation instructions in the link below to resolve the issue:\n"
-                    "https://github.com/rm-hull/OPi.GPIO\n"
-                    "Exiting..."),
-                Loglevel.ERROR)
-                raise
-        else:
-            # just in case
-            dependencies_logger.log(
-                "The board is not recognized. Trying import default RPi.GPIO module...",
-                Loglevel.INFO)
-            BOARD = Board.UNKNOWN
-            try:
-                from RPi import GPIO
-            except ImportError:
-                from Mock import GPIO
 
+class BaseGPIOWrapper:
+    """Base class for GPIO wrappers"""
+    def init(self, gpio_mode=None):
+        """initialize GPIO library"""
+        raise NotImplementedError
 
+    def deinit(self):
+        """deinitialize GPIO library"""
+        raise NotImplementedError
 
-class TMC_gpio:
-    """TMC_gpio class"""
+    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
+        raise NotImplementedError
 
-    _gpios = [None] * 200
+    def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
+        raise NotImplementedError
 
-    @staticmethod
-    def init(gpio_mode=None):
-        """init gpio library"""
-        if BOARD == Board.RASPBERRY_PI5:
-            pass
-        elif BOARD == Board.LUCKFOX_PICO:
-            pass
-        elif BOARD == Board.ORANGE_PI:
-            pass
-        else:
-            GPIO.setwarnings(False)
-            if gpio_mode is None:
-                gpio_mode = GPIO.BCM
-            GPIO.setmode(gpio_mode)
+    def gpio_input(self, pin):
+        """read GPIO pin"""
+        raise NotImplementedError
 
-    @staticmethod
-    def deinit():
-        """deinit gpio library"""
-        if BOARD == Board.RASPBERRY_PI5:
-            pass
-        else:
-            pass
+    def gpio_output(self, pin, value):
+        """write GPIO pin"""
+        raise NotImplementedError
 
-    @staticmethod
-    def gpio_setup(pin, mode, initial = Gpio.LOW, pull_up_down = GpioPUD.PUD_OFF):
-        """setup gpio pin"""
-        #print(f"{BOARD}, {pin}, {mode}")
-        if BOARD == Board.RASPBERRY_PI5:
-            if mode == GpioMode.OUT:
-                TMC_gpio._gpios[pin] = DigitalOutputDevice(pin)
-            else:
-                TMC_gpio._gpios[pin] = DigitalInputDevice(pin)
-        elif BOARD == Board.LUCKFOX_PICO:
-            mode = 'out' if (mode == GpioMode.OUT) else 'in'
-            TMC_gpio._gpios[pin] = GPIO(pin, mode)
-        else:
-            initial = int(initial)
-            pull_up_down = int(pull_up_down)
-            mode = int(mode)
-            if mode == GpioMode.OUT: # TODO: better way to pass different params
-                GPIO.setup(pin, mode, initial=initial)
-            else:
-                GPIO.setup(pin, mode, pull_up_down=pull_up_down)
-
-    @staticmethod
-    def gpio_cleanup(pin):
-        """cleanup gpio pin"""
-        if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpios[pin].close()
-        elif BOARD == Board.LUCKFOX_PICO:
-            TMC_gpio._gpios[pin].close()
-        else:
-            GPIO.cleanup(pin)
-
-    @staticmethod
-    def gpio_input(pin):
-        """get input value of gpio pin"""
-        del pin
-        return 0 # TODO: implement
-
-    @staticmethod
-    def gpio_output(pin, value):
-        """set output value of gpio pin"""
-        if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpios[pin].value = value
-        elif BOARD == Board.LUCKFOX_PICO:
-            TMC_gpio._gpios[pin].write(bool(value))
-        else:
-            GPIO.output(pin, value)
-
-    @staticmethod
-    def gpio_add_event_detect(pin, callback):
+    def gpio_add_event_detect(self, pin, callback):
         """add event detect"""
-        if BOARD == Board.RASPBERRY_PI5:
-            TMC_gpio._gpios[pin].when_activated = callback
-        elif BOARD == Board.LUCKFOX_PICO:
-            pass # TODO: implement for stallguard
-        else:
-            GPIO.add_event_detect(pin, GPIO.RISING, callback=callback,
-                                bouncetime=300)
+        raise NotImplementedError
 
-    @staticmethod
-    def gpio_remove_event_detect(pin):
-        """remove event dectect"""
-        if BOARD == Board.RASPBERRY_PI5:
-            if TMC_gpio._gpios[pin].when_activated is not None:
-                TMC_gpio._gpios[pin].when_activated = None
-        elif BOARD == Board.LUCKFOX_PICO:
-            pass # TODO: implement for stallguard
+    def gpio_remove_event_detect(self, pin):
+        """remove event detect"""
+        raise NotImplementedError
+
+class BaseRPiGPIOWrapper(BaseGPIOWrapper):
+    """RPI.GPIO base wrapper"""
+
+    def init(self, gpio_mode=None):
+        """initialize GPIO library"""
+        self.GPIO.setwarnings(False)
+        if gpio_mode is None:
+            gpio_mode = self.GPIO.BCM
+        self.GPIO.setmode(gpio_mode)
+
+    def deinit(self):
+        """deinitialize GPIO library"""
+        self.GPIO.cleanup()
+
+    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
+        initial = int(initial)
+        pull_up_down = int(pull_up_down)
+        mode = int(mode)
+        if mode == GpioMode.OUT:
+            self.GPIO.setup(pin, mode, initial=initial)
         else:
-            GPIO.remove_event_detect(pin)
+            self.GPIO.setup(pin, mode, pull_up_down=pull_up_down)
+
+    def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
+        self.GPIO.cleanup(pin)
+
+    def gpio_input(self, pin):
+        """read GPIO pin"""
+        return self.GPIO.input(pin)
+
+    def gpio_output(self, pin, value):
+        """write GPIO pin"""
+        self.GPIO.output(pin, value)
+
+    def gpio_add_event_detect(self, pin, callback):
+        """add event detect"""
+        self.GPIO.add_event_detect(pin, self.GPIO.RISING, callback=callback, bouncetime=300)
+
+    def gpio_remove_event_detect(self, pin):
+        """remove event detect"""
+        self.GPIO.remove_event_detect(pin)
+
+class MockGPIOWrapper(BaseRPiGPIOWrapper):
+    """Mock.GPIO wrapper"""
+
+    def __init__(self):
+        """constructor, imports Mock.GPIO"""
+        self.GPIO = import_module('Mock.GPIO')
+        dependencies_logger.log("using Mock.GPIO for GPIO mocking", Loglevel.INFO)
+
+class RPiGPIOWrapper(BaseRPiGPIOWrapper):
+    """RPi.GPIO wrapper"""
+
+    def __init__(self):
+        """constructor, imports RPi.GPIO"""
+        self.GPIO = import_module('RPi.GPIO')
+        dependencies_logger.log("using RPi.GPIO for GPIO control", Loglevel.INFO)
+
+class JetsonGPIOWrapper(BaseRPiGPIOWrapper):
+    """Jetson.GPIO wrapper"""
+
+    def __init__(self):
+        """constructor, imports Jetson.GPIO"""
+        self.GPIO = import_module('Jetson.GPIO')
+        dependencies_logger.log("using Jetson.GPIO for GPIO control", Loglevel.INFO)
+
+class OPiGPIOWrapper(BaseRPiGPIOWrapper):
+    """OPi.GPIO wrapper"""
+
+    def __init__(self):
+        """constructor, imports OPi.GPIO"""
+        self.GPIO = import_module('OPi.GPIO')
+        dependencies_logger.log("using OPi.GPIO for GPIO control", Loglevel.INFO)
+
+class GpiozeroWrapper(BaseGPIOWrapper):
+    """gpiozero GPIO wrapper"""
+
+    def __init__(self):
+        """constructor, imports gpiozero"""
+        self.gpiozero = import_module('gpiozero')
+        dependencies_logger.log("using gpiozero for GPIO control", Loglevel.INFO)
+        self._gpios = [None] * 200
+
+    def init(self, gpio_mode=None):
+        """initialize GPIO library. pass on gpiozero"""
+        pass
+
+    def deinit(self):
+        """deinitialize GPIO library. pass on gpiozero"""
+        pass
+
+    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
+        if mode == GpioMode.OUT:
+            self._gpios[pin] = self.gpiozero.DigitalOutputDevice(pin)
+        else:
+            self._gpios[pin] = self.gpiozero.DigitalInputDevice(pin)
+
+    def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
+        self._gpios[pin].close()
+
+    def gpio_input(self, pin):
+        """read GPIO pin"""
+        return self._gpios[pin].value
+
+    def gpio_output(self, pin, value):
+        """write GPIO pin"""
+        self._gpios[pin].value = value
+
+    def gpio_add_event_detect(self, pin, callback):
+        """add event detect"""
+        self._gpios[pin].when_activated = callback
+
+    def gpio_remove_event_detect(self, pin):
+        """remove event detect"""
+        if self._gpios[pin].when_activated is not None:
+            self._gpios[pin].when_activated = None
+
+class peripheryWrapper(BaseGPIOWrapper):
+    """periphery GPIO wrapper"""
+    def __init__(self):
+        """constructor, imports periphery"""
+        self.periphery = import_module('periphery')
+        dependencies_logger.log("using periphery for GPIO control", Loglevel.INFO)
+        self._gpios = [None] * 200
+
+    def init(self, gpio_mode=None):
+        """initialize GPIO library. pass on periphery"""
+        pass
+
+    def deinit(self):
+        """deinitialize GPIO library. pass on periphery"""
+        pass
+
+    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+        """setup GPIO pin"""
+        mode = 'out' if (mode == GpioMode.OUT) else 'in'
+        self._gpios[pin] = self.periphery.GPIO(pin, mode)
+
+    def gpio_cleanup(self, pin):
+        """cleanup GPIO pin"""
+        self._gpios[pin].close()
+
+    def gpio_input(self, pin):
+        """read GPIO pin"""
+        return self._gpios[pin].read()
+
+    def gpio_output(self, pin, value):
+        """write GPIO pin"""
+        self._gpios[pin].write(bool(value))
+
+
+board_mapping = {
+    "raspberry pi 5": (GpiozeroWrapper, Board.RASPBERRY_PI5, "gpiozero", "https://gpiozero.readthedocs.io/en/stable/installing.html"),
+    "raspberry": (RPiGPIOWrapper, Board.RASPBERRY_PI, "RPi.GPIO", "https://sourceforge.net/p/raspberry-gpio-python/wiki/install"),
+    "jetson": (JetsonGPIOWrapper, Board.NVIDIA_JETSON, "jetson-gpio", "https://github.com/NVIDIA/jetson-gpio"),
+    "luckfox": (peripheryWrapper, Board.LUCKFOX_PICO, "periphery", "https://github.com/vsergeev/python-periphery"),
+    "orange": (OPiGPIOWrapper, Board.ORANGE_PI, "OPi.GPIO", "https://github.com/rm-hull/OPi.GPIO")
+}
+
+
+
+# Determine the board and instantiate the appropriate GPIO class
+def get_board_model_name():
+    """get board model name from /proc/device-tree/model file"""
+    if not exists('/proc/device-tree/model'):
+        return "mock"
+    with open('/proc/device-tree/model', encoding="utf-8") as f:
+        return f.readline().lower()
+
+def handle_module_not_found_error(err, board_name, module_name, install_link):
+    """handle module not found error"""
+    dependencies_logger.log(
+        (f"ModuleNotFoundError: {err}\n"
+         f"Board is {board_name} but module {module_name} isn't installed.\n"
+         f"Follow the installation instructions in the link below to resolve the issue:\n"
+         f"{install_link}\n"
+         "Exiting..."),
+        Loglevel.ERROR)
+    raise err
+
+def handle_import_error(err, board_name, module_name, install_link):
+    """handle import error"""
+    dependencies_logger.log(
+        (f"ImportError: {err}\n"
+         f"Board is {board_name} but module {module_name} isn't installed.\n"
+         f"Follow the installation instructions in the link below to resolve the issue:\n"
+         f"{install_link}\n"
+         "Exiting..."),
+        Loglevel.ERROR)
+    raise err
+
+def initialize_gpio():
+    """initialize GPIO"""
+    model = get_board_model_name()
+    dependencies_logger.log(f"Board model: {model}", Loglevel.INFO)
+    if model == "mock":
+        return MockGPIOWrapper(), Board.UNKNOWN
+
+
+    for key, (wrapper_class, board_enum, module_name, install_link) in board_mapping.items():
+        if key in model:
+            try:
+                return wrapper_class(), board_enum
+            except ModuleNotFoundError as err:
+                handle_module_not_found_error(err, key.capitalize(), module_name, install_link)
+            except ImportError as err:
+                handle_import_error(err, key.capitalize(), module_name, install_link)
+
+    dependencies_logger.log(
+        "The board is not recognized. Trying import default RPi.GPIO module...",
+        Loglevel.INFO)
+    try:
+        return RPiGPIOWrapper(), Board.UNKNOWN
+    except ImportError:
+        return MockGPIOWrapper(), Board.UNKNOWN
+
+TMC_gpio, BOARD = initialize_gpio()

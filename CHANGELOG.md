@@ -1,5 +1,12 @@
 # Changelog
 
+## version 0.5.7
+
+- refactored GPIO access to use inherited classes
+- use mapping table for mapping gpio library to the board
+- fixed print output in test_uart()
+- make fullsteps_per_rev configurable in constructor
+
 ## version 0.5.6
 
 - fixed return status instead of hardcoded True in test_uart

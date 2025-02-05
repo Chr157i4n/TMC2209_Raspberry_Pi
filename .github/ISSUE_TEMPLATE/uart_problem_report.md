@@ -1,6 +1,6 @@
 ---
 name: UART connection problem report
-about: Create a report to help us improve
+about: Create a report of you UART connection problem
 title: ''
 labels: ''
 assignees: ''
@@ -25,7 +25,8 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Versions**
-- Raspberry Pi Version
+- Board model
+- Board model Version
 - OS Version
 - Version of this library
 - TMC2209 version and manufacturer

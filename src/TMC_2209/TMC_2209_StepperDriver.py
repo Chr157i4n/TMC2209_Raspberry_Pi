@@ -74,7 +74,7 @@ class TMC_2209:
 
     _msres = -1
     _steps_per_rev = 0
-    _fullsteps_per_rev = 200
+    _fullsteps_per_rev = 0
 
     _current_pos = 0                 # current position of stepper in steps
     _target_pos = 0                  # the target position in steps
@@ -113,7 +113,8 @@ class TMC_2209:
                  logprefix=None,
                  log_handlers: list = None,
                  log_formatter : logging.Formatter = None,
-                 skip_uart_init: bool = False
+                 skip_uart_init: bool = False,
+                 fullsteps_per_rev: int = 200
                  ):
         """constructor
 
@@ -140,6 +141,7 @@ class TMC_2209:
         self.tmc_logger = TMC_logger(loglevel, logprefix, log_handlers, log_formatter)
         self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
 
+        self._fullsteps_per_rev = fullsteps_per_rev
 
         self.tmc_logger.log("Init", Loglevel.INFO)
         TMC_gpio.init(gpio_mode)
