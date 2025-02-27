@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 """
 this file contains:
 1. hexadecimal address of the different registers

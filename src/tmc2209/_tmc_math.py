@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 """
 TMC2209_Raspberry_Pi math library
 """

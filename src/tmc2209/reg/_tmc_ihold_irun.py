@@ -1,3 +1,4 @@
+#pylint: disable=too-many-instance-attributes
 """
 Driver current control register
 """

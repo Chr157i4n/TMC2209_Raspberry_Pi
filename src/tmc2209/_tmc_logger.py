@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 #pylint: disable=protected-access
 """
 TMC_2209 stepper driver logger module

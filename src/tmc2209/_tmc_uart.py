@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 #pylint: disable=import-error
 #pylint: disable=broad-exception-caught
 """

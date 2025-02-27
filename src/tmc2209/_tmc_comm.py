@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 #pylint: disable=too-many-public-methods
 #pylint: disable=too-many-branches
 #pylint: disable=protected-access

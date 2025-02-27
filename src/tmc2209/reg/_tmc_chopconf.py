@@ -5,7 +5,7 @@ Chopper Configuration register
 
 import math
 from . import _tmc_2209_reg as reg
-from .._tmc_logger import TMC_logger, Loglevel
+from .._tmc_logger import TMC_logger
 
 
 

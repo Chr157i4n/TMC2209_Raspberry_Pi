@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 #pylint: disable=no-member
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
@@ -395,6 +394,7 @@ class TMC_220X:
 
 
 class TMC_2209(TMC_220X):
+    """TMC_2209"""
 
     _pin_stallguard = -1
     _sg_callback = None
