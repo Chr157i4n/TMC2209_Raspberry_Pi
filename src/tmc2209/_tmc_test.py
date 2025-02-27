@@ -16,7 +16,7 @@ from .reg import _tmc_2209_reg as tmc_reg
 
 
 
-def test_pin(self, pin, ioin_reg):
+def test_pin(self, pin, ioin_reg_bp):
     """tests one pin
 
     this function checks the connection to a pin
@@ -29,14 +29,14 @@ def test_pin(self, pin, ioin_reg):
     TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
 
     ioin = self.read_ioin()
-    if not ioin & ioin_reg:
+    if not ioin.data >> ioin_reg_bp & 0x1:
         pin_ok = False
 
     TMC_gpio.gpio_output(pin, Gpio.LOW)
     time.sleep(0.1)
 
     ioin = self.read_ioin()
-    if ioin & ioin_reg:
+    if ioin.data >> ioin_reg_bp & 0x1:
         pin_ok = False
 
     return pin_ok
@@ -49,9 +49,9 @@ def test_dir_step_en(self):
     this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
     and checks the IOIN Register of the TMC meanwhile
     """
-    pin_dir_ok = self.test_pin(self._pin_dir, tmc_reg.io_dir)
-    pin_step_ok = self.test_pin(self._pin_step, tmc_reg.io_step)
-    pin_en_ok = self.test_pin(self._pin_en, tmc_reg.io_enn)
+    pin_dir_ok = self.test_pin(self._pin_dir, tmc_reg.io_dir_bp)
+    pin_step_ok = self.test_pin(self._pin_step, tmc_reg.io_step_bp)
+    pin_en_ok = self.test_pin(self._pin_en, tmc_reg.io_enn_bp)
 
     self.set_motor_enabled(False)
 
