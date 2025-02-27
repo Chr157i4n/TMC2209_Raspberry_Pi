@@ -9,8 +9,8 @@ import time
 import struct
 import serial
 
-from .reg import _TMC_2209_reg as reg
-from ._TMC_2209_logger import Loglevel
+from .reg import _tmc_2209_reg as reg
+from ._tmc_logger import Loglevel
 
 
 class TMC_UART:

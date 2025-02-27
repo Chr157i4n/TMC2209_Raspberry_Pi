@@ -19,7 +19,7 @@ Can be extended to support BeagleBone or other boards
 from os.path import exists
 from enum import Enum, IntEnum
 from importlib import import_module
-from ._TMC_2209_logger import TMC_logger, Loglevel
+from ._tmc_logger import TMC_logger, Loglevel
 
 # ------------------------------
 # LIB           | BOARD

@@ -10,7 +10,7 @@ test for TMC_2209_move.py
 """
 
 import unittest
-from src.TMC_2209.TMC_2209_StepperDriver import *
+from src.tmc2209.tmc_2209 import *
 
 class TestTMCMove(unittest.TestCase):
     """TestTMCMove"""

@@ -12,9 +12,9 @@ import time
 from enum import Enum
 import math
 import threading
-from ._TMC_2209_GPIO_board import TMC_gpio, Gpio
-from ._TMC_2209_logger import Loglevel
-from . import _TMC_2209_math as tmc_math
+from ._tmc_gpio_board import TMC_gpio, Gpio
+from ._tmc_logger import Loglevel
+from . import _tmc_math as tmc_math
 
 
 

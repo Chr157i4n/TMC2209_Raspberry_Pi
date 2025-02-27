@@ -6,7 +6,7 @@ test for TMC_2209_math.py
 """
 
 import unittest
-import src.TMC_2209._TMC_2209_math as tmc_math
+import src.tmc2209._tmc_math as tmc_math
 
 class TestTMCMath(unittest.TestCase):
     """TestTMCMath"""

@@ -10,8 +10,8 @@ test file for testing multiple drivers via one UART connection
 
 import time
 try:
-    from src.TMC_2209.TMC_2209_StepperDriver import *
-    from src.TMC_2209._TMC_2209_GPIO_board import Board
+    from src.tmc2209.tmc_2209 import *
+    from src.tmc2209._tmc_gpio_board import Board
 except ModuleNotFoundError:
     from TMC_2209.TMC_2209_StepperDriver import *
     from TMC_2209._TMC_2209_GPIO_board import Board

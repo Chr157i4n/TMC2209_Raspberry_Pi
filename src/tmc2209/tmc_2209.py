@@ -17,11 +17,11 @@ this module has two different functions:
 import time
 import statistics
 import logging
-from ._TMC_2209_GPIO_board import TMC_gpio, Gpio, GpioMode, GpioPUD, BOARD
-from ._TMC_2209_uart import TMC_UART as tmc_uart
-from ._TMC_2209_logger import TMC_logger, Loglevel
-from ._TMC_2209_move import MovementAbsRel, MovementPhase, StopMode
-from . import _TMC_2209_math as tmc_math
+from ._tmc_gpio_board import TMC_gpio, Gpio, GpioMode, GpioPUD, BOARD
+from ._tmc_uart import TMC_UART as tmc_uart
+from ._tmc_logger import TMC_logger, Loglevel
+from ._tmc_move import MovementAbsRel, MovementPhase, StopMode
+from . import _tmc_math as tmc_math
 
 
 
@@ -74,7 +74,7 @@ class TMC_220X:
 
 
 
-    from ._TMC_2209_comm import (
+    from ._tmc_comm import (
         read_drv_status, read_gconf, read_gstat, clear_gstat, read_ioin, read_chopconf,
         get_direction_reg, set_direction_reg, get_iscale_analog, set_iscale_analog, get_vsense,
         set_vsense, get_internal_rsense, set_internal_rsense, set_irun_ihold, set_pdn_disable,
@@ -85,7 +85,7 @@ class TMC_220X:
         get_microstep_counter, get_microstep_counter_in_steps, get_toff, set_toff
     )
 
-    from ._TMC_2209_move import (
+    from ._tmc_move import (
         set_movement_abs_rel, get_current_position, set_current_position, set_speed,
         set_speed_fullstep, set_max_speed, set_max_speed_fullstep, get_max_speed,
         set_acceleration, set_acceleration_fullstep, get_acceleration, stop, get_movement_phase,
@@ -94,7 +94,7 @@ class TMC_220X:
         distance_to_go, compute_new_speed, run_speed, make_a_step
     )
 
-    from ._TMC_2209_test import (
+    from ._tmc_test import (
         test_pin, test_dir_step_en, test_step, test_uart
     )
 
@@ -134,6 +134,7 @@ class TMC_220X:
                 Defaults to None (messages are logged in the format
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s').
             skip_uart_init (bool, optional): skip UART init. Defaults to False.
+            fullsteps_per_rev (int, optional): fullsteps per revolution. Defaults to 200.
         """
         if logprefix is None:
             logprefix = f"TMC2209 {driver_address}"
@@ -508,7 +509,7 @@ class TMC_2209(TMC_220X):
 
 
 
-    from ._TMC_2209_test import (
+    from ._tmc_test import (
         test_stallguard_threshold
     )
 
