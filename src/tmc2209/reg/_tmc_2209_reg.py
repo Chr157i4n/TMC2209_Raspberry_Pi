@@ -1,3 +1,4 @@
+#pylint: disable=unused-wildcard-import
 """
 this file contains:
 1. hexadecimal address of the different registers

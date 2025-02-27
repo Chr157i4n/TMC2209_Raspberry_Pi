@@ -9,6 +9,7 @@ import struct
 import serial
 
 from .reg import _tmc_2209_reg as reg
+from .reg._tmc_gstat import GStat
 from ._tmc_logger import Loglevel
 
 
@@ -79,8 +80,8 @@ class TMC_UART:
 
 
     def __del__(self):
-        """""destructor"""""
-        if self.ser is not None and type(self.ser) == serial.Serial:
+        """destructor"""
+        if self.ser is not None and isinstance(self.ser, serial.Serial):
             self.ser.close()
 
 
@@ -297,13 +298,14 @@ class TMC_UART:
         elif gstat == 0:
             self.tmc_logger.log("Everything looks fine in GSTAT", Loglevel.DEBUG)
         else:
-            if gstat & reg.reset:
+            gstat = GStat(gstat)
+            if gstat.reset:
                 self.tmc_logger.log("The Driver has been reset since the last read access to GSTAT",
                                     Loglevel.DEBUG)
-            if gstat & reg.drv_err:
+            if gstat.drv_err:
                 self.tmc_logger.log("""The driver has been shut down due to overtemperature or short
                       circuit detection since the last read access""", Loglevel.DEBUG)
-            if gstat & reg.uv_cp:
+            if gstat.uv_cp:
                 self.tmc_logger.log("""Undervoltage on the charge pump.
                       The driver is disabled in this case""", Loglevel.DEBUG)
         self.tmc_logger.log("EXITING!", Loglevel.INFO)
