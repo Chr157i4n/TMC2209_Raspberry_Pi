@@ -25,38 +25,13 @@ from . import _TMC_2209_math as tmc_math
 
 
 
-
-class TMC_2209:
-    """TMC_2209
+class TMC_220X:
+    """TMC_220X
 
     this class has two different functions:
     1. change setting in the TMC-driver via UART
     2. move the motor via STEP/DIR pins
     """
-
-    from ._TMC_2209_comm import (
-        read_drv_status, read_gconf, read_gstat, clear_gstat, read_ioin, read_chopconf,
-        get_direction_reg, set_direction_reg, get_iscale_analog, set_iscale_analog,get_vsense,
-        set_vsense, get_internal_rsense, set_internal_rsense, set_irun_ihold, set_pdn_disable,
-        set_current, get_spreadcycle, set_spreadcycle, get_interpolation, set_interpolation,
-        read_microstepping_resolution, get_microstepping_resolution, set_microstepping_resolution,
-        set_mstep_resolution_reg_select, get_interface_transmission_counter, get_tstep, set_vactual,
-        get_stallguard_result, set_stallguard_threshold, set_coolstep_threshold,
-        get_microstep_counter, get_microstep_counter_in_steps, get_toff, set_toff
-    )
-
-    from ._TMC_2209_move import (
-        set_movement_abs_rel, get_current_position, set_current_position, set_speed,
-        set_speed_fullstep, set_max_speed, set_max_speed_fullstep, get_max_speed,
-        set_acceleration, set_acceleration_fullstep, get_acceleration, stop, get_movement_phase,
-        run_to_position_steps, run_to_position_revolutions, run_to_position_steps_threaded,
-        run_to_position_revolutions_threaded, wait_for_movement_finished_threaded, run,
-        distance_to_go, compute_new_speed, run_speed, make_a_step
-    )
-
-    from ._TMC_2209_test import (
-        test_pin, test_dir_step_en, test_step, test_uart, test_stallguard_threshold
-    )
 
     BOARD = BOARD
     tmc_uart = None
@@ -64,13 +39,12 @@ class TMC_2209:
     _pin_step = -1
     _pin_dir = -1
     _pin_en = -1
-    _pin_stallguard = -1
 
     _direction = True
 
     _stop = StopMode.NO
     _starttime = 0
-    _sg_callback = None
+
 
     _msres = -1
     _steps_per_rev = 0
@@ -91,13 +65,38 @@ class TMC_2209:
     _c0 = 0                         # Initial step size in microseconds
     _cn = 0                         # Last step size in microseconds
     _cmin = 0                       # Min step size in microseconds based on maxSpeed
-    _sg_threshold = 100             # threshold for stallguard
     _movement_abs_rel = MovementAbsRel.ABSOLUTE
     _movement_phase = MovementPhase.STANDSTILL
 
     _movement_thread = None
 
     _deinit_finished = False
+
+
+
+    from ._TMC_2209_comm import (
+        read_drv_status, read_gconf, read_gstat, clear_gstat, read_ioin, read_chopconf,
+        get_direction_reg, set_direction_reg, get_iscale_analog, set_iscale_analog, get_vsense,
+        set_vsense, get_internal_rsense, set_internal_rsense, set_irun_ihold, set_pdn_disable,
+        set_current, get_spreadcycle, set_spreadcycle, get_interpolation, set_interpolation,
+        read_microstepping_resolution, get_microstepping_resolution, set_microstepping_resolution,
+        set_mstep_resolution_reg_select, get_interface_transmission_counter, get_tstep, set_vactual,
+        get_stallguard_result, set_stallguard_threshold, set_coolstep_threshold,
+        get_microstep_counter, get_microstep_counter_in_steps, get_toff, set_toff
+    )
+
+    from ._TMC_2209_move import (
+        set_movement_abs_rel, get_current_position, set_current_position, set_speed,
+        set_speed_fullstep, set_max_speed, set_max_speed_fullstep, get_max_speed,
+        set_acceleration, set_acceleration_fullstep, get_acceleration, stop, get_movement_phase,
+        run_to_position_steps, run_to_position_revolutions, run_to_position_steps_threaded,
+        run_to_position_revolutions_threaded, wait_for_movement_finished_threaded, run,
+        distance_to_go, compute_new_speed, run_speed, make_a_step
+    )
+
+    from ._TMC_2209_test import (
+        test_pin, test_dir_step_en, test_step, test_uart
+    )
 
 
 
@@ -498,6 +497,20 @@ class TMC_2209:
             stop (enum): how the movement was finished
         """
         return self.set_vactual_rps(rpm/60, duration, revolutions, acceleration)
+
+
+
+class TMC_2209(TMC_220X):
+
+    _pin_stallguard = -1
+    _sg_callback = None
+    _sg_threshold = 100             # threshold for stallguard
+
+
+
+    from ._TMC_2209_test import (
+        test_stallguard_threshold
+    )
 
 
 

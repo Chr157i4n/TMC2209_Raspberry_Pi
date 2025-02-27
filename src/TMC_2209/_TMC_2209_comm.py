@@ -8,7 +8,7 @@ TMC_2209 stepper driver communication module
 
 import math
 from ._TMC_2209_logger import Loglevel
-from . import _TMC_2209_reg as tmc_reg
+from .reg import _TMC_2209_reg as tmc_reg
 
 
 

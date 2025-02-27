@@ -75,6 +75,7 @@ def set_current_position(self, new_pos):
     self._current_pos = new_pos
 
 
+
 def set_speed(self, speed):
     """sets the motor speed in steps per second
 
@@ -97,6 +98,7 @@ def set_speed(self, speed):
     self._speed = speed
 
 
+
 def set_speed_fullstep(self, speed):
     """sets the motor speed in fullsteps per second
 
@@ -104,6 +106,7 @@ def set_speed_fullstep(self, speed):
         speed (int): speed in fullsteps/sec
     """
     self.set_speed(speed*self.get_microstepping_resolution())
+
 
 
 def set_max_speed(self, speed):

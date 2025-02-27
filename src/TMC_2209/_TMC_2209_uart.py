@@ -9,7 +9,7 @@ import time
 import struct
 import serial
 
-from . import _TMC_2209_reg as reg
+from .reg import _TMC_2209_reg as reg
 from ._TMC_2209_logger import Loglevel
 
 
@@ -81,7 +81,7 @@ class TMC_UART:
 
     def __del__(self):
         """""destructor"""""
-        if self.ser is not None:
+        if self.ser is not None and type(self.ser) == serial.Serial:
             self.ser.close()
 
 

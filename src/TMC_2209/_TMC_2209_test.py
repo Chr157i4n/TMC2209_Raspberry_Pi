@@ -12,7 +12,7 @@ import time
 from ._TMC_2209_GPIO_board import TMC_gpio, Gpio
 from ._TMC_2209_logger import Loglevel
 from ._TMC_2209_move import MovementAbsRel, MovementPhase
-from . import _TMC_2209_reg as tmc_reg
+from .reg import _TMC_2209_reg as tmc_reg
 
 
 
