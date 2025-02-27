@@ -31,7 +31,7 @@ jobs:
         pip install pylint
         pip install gpiozero
         pip install RPi.GPIO
-        pip install Mock.GPIO
+        pip install git+https://github.com/Chr157i4n/Mock.GPIO
         pip install mock
         pip install pyserial
     - name: Analysing the code with pylint
@@ -54,7 +54,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install gpiozero
         pip install RPi.GPIO
-        pip install Mock.GPIO
+        pip install git+https://github.com/Chr157i4n/Mock.GPIO
         pip install pyserial
     - name: Run unittests
       run: |
