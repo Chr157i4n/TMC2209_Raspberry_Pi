@@ -3,7 +3,7 @@ Global status flags register
 """
 
 from . import _tmc_2209_reg as reg
-from .._tmc_logger import TMC_logger, Loglevel
+from .._tmc_logger import TMC_logger
 
 
 class GStat():

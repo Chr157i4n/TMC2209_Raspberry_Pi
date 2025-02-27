@@ -1,10 +1,12 @@
+#pylint: disable=too-many-instance-attributes
 """
 Chopper Configuration register
 """
 
+import math
 from . import _tmc_2209_reg as reg
 from .._tmc_logger import TMC_logger, Loglevel
-import math
+
 
 
 class ChopConf():
@@ -82,7 +84,7 @@ class ChopConf():
         Args:
             logger (TMC_logger): logger
         """
-        logger.log(f"chopconf:")
+        logger.log("chopconf:")
         logger.log(f"diss2vs: {self.diss2vs}")
         logger.log(f"diss2g: {self.diss2g}")
         logger.log(f"dedge: {self.dedge}")
@@ -95,15 +97,15 @@ class ChopConf():
         logger.log(f"toff: {self.toff}")
 
 
-    def convert_mres_to_reg(self, msres: int):
+    def convert_mres_to_reg(self, mres: int):
         """converts the µstep resolution to the corresponding register value
 
         Args:
             msres (int): µstep resolution
         """
-        reg = int(math.log(msres, 2))
-        reg = 8 - reg
-        self.mres = reg
+        mres_reg = int(math.log(mres, 2))
+        mres_reg = 8 - mres_reg
+        self.mres = mres_reg
 
 
     def convert_reg_to_mres(self) -> int:
@@ -113,4 +115,3 @@ class ChopConf():
             int: µstep resolution
         """
         return int(math.pow(2, 8 - self.mres))
-

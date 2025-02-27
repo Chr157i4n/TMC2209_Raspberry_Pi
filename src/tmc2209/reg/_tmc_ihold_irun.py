@@ -3,7 +3,7 @@ Driver current control register
 """
 
 from . import _tmc_2209_reg as reg
-from .._tmc_logger import TMC_logger, Loglevel
+from .._tmc_logger import TMC_logger
 
 
 class IHoldIRun():
@@ -22,7 +22,7 @@ class IHoldIRun():
         Args:
             data (int, optional): register value. Defaults to None.
         """
-        if data != None:
+        if data is not None:
             self.deserialise(data)
 
 

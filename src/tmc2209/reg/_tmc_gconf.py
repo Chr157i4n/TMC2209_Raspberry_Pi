@@ -1,3 +1,4 @@
+#pylint: disable=too-many-instance-attributes
 """
 General Configuration register
 """
