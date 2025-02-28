@@ -3,7 +3,7 @@
 Driver current control register
 """
 
-from . import _tmc_2209_reg as reg
+from .bitfields import _tmc_220x_ihold_irun as bit
 from .._tmc_logger import TMC_logger
 
 
@@ -35,9 +35,9 @@ class IHoldIRun():
         """
         self.data = data
 
-        self.ihold = data >> reg.ihold_irun_ihold_bp & reg.ihold_irun_ihold_bm
-        self.irun = data >> reg.ihold_irun_irun_bp & reg.ihold_irun_irun_bm
-        self.iholddelay = data >> reg.ihold_irun_iholddelay_bp & reg.ihold_irun_iholddelay_bm
+        self.ihold = data >> bit.ihold_bp & bit.ihold_bm
+        self.irun = data >> bit.irun_bp & bit.irun_bm
+        self.iholddelay = data >> bit.iholddelay_bp & bit.iholddelay_bm
 
 
     def serialise(self) -> int:
@@ -48,9 +48,9 @@ class IHoldIRun():
         """
         data = 0
 
-        data |= self.ihold << reg.ihold_irun_ihold_bp
-        data |= self.irun << reg.ihold_irun_irun_bp
-        data |= self.iholddelay << reg.ihold_irun_iholddelay_bp
+        data |= self.ihold << bit.ihold_bp
+        data |= self.irun << bit.irun_bp
+        data |= self.iholddelay << bit.iholddelay_bp
 
         return data
 

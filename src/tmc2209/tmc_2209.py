@@ -74,7 +74,7 @@ class TMC_220X:
 
 
     from ._tmc_comm import (
-        read_drv_status, read_gconf, read_gstat, clear_gstat, read_ioin, read_chopconf,
+        read_reg, read_drv_status, read_gconf, read_gstat, clear_gstat, read_ioin, read_chopconf,
         get_direction_reg, set_direction_reg, get_iscale_analog, set_iscale_analog, get_vsense,
         set_vsense, get_internal_rsense, set_internal_rsense, set_irun_ihold, set_pdn_disable,
         set_current, get_spreadcycle, set_spreadcycle, get_interpolation, set_interpolation,

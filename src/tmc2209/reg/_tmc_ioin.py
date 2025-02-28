@@ -3,7 +3,7 @@
 INPUT register
 """
 
-from . import _tmc_2209_reg as reg
+from .bitfields import _tmc_220x_ioin as bit
 from .._tmc_logger import TMC_logger
 
 
@@ -39,13 +39,13 @@ class IOIN():
         """
         self.data = data
 
-        self.enn = bool(data >> reg.io_enn_bp & reg.io_enn_bm)
-        self.ms1 = bool(data >> reg.io_ms1_bp & reg.io_ms1_bm)
-        self.ms2 = bool(data >> reg.io_ms2_bp & reg.io_ms2_bm)
-        self.step = bool(data >> reg.io_step_bp & reg.io_step_bm)
-        self.spread = bool(data >> reg.io_spread_bp & reg.io_spread_bm)
-        self.dir = bool(data >> reg.io_dir_bp & reg.io_dir_bm)
-        self.version = data >> reg.io_version_bp & reg.io_version_bm
+        self.enn = bool(data >> bit.enn_bp & bit.enn_bm)
+        self.ms1 = bool(data >> bit.ms1_bp & bit.ms1_bm)
+        self.ms2 = bool(data >> bit.ms2_bp & bit.ms2_bm)
+        self.step = bool(data >> bit.step_bp & bit.step_bm)
+        self.spread = bool(data >> bit.spread_bp & bit.spread_bm)
+        self.dir = bool(data >> bit.dir_bp & bit.dir_bm)
+        self.version = data >> bit.version_bp & bit.version_bm
 
 
     def log(self, logger: TMC_logger):

@@ -6,7 +6,7 @@ TMC_2209 stepper driver communication module
 """
 
 from ._tmc_logger import Loglevel
-from .reg import _tmc_2209_reg as tmc_reg
+from .reg._tmc_220x_reg_addr import TmcRegAddr
 from .reg._tmc_drvstatus import DrvStatus
 from .reg._tmc_gconf import GConf
 from .reg._tmc_ioin import IOIN
@@ -15,71 +15,73 @@ from .reg._tmc_ihold_irun import IHoldIRun
 from .reg._tmc_chopconf import ChopConf
 
 
+reg_class_mapping = {
+    TmcRegAddr.DRVSTATUS: DrvStatus,
+    TmcRegAddr.GCONF: GConf,
+    TmcRegAddr.GSTAT: GStat,
+    TmcRegAddr.IOIN: IOIN,
+    TmcRegAddr.CHOPCONF: ChopConf,
+    TmcRegAddr.IHOLD_IRUN: IHoldIRun,
+}
 
-def read_drv_status(self) -> DrvStatus:
-    """read the register Adress "DRV_STATUS" and prints all current settings
+
+def read_reg(self, reg_addr: TmcRegAddr, log:bool = True):
+    """read the register Adress and logs the reg valuess
 
     Returns:
-        int: 32bit DRV_STATUS Register
+        Register instance
     """
-    drvstatus =self.tmc_uart.read_int(tmc_reg.DRVSTATUS)
+    reg_value =self.tmc_uart.read_int(reg_addr)
 
-    self.tmc_logger.log("---", Loglevel.INFO)
-    self.tmc_logger.log("DRIVER STATUS:", Loglevel.INFO)
-    self.tmc_logger.log(bin(drvstatus), Loglevel.INFO)
+    if log:
+        self.tmc_logger.log("---", Loglevel.INFO)
+        self.tmc_logger.log("DRIVER STATUS:", Loglevel.INFO)
+        self.tmc_logger.log(bin(reg_value), Loglevel.INFO)
 
-    drvstatus = DrvStatus(drvstatus)
-    drvstatus.log( self.tmc_logger )
+    reg_class = reg_class_mapping[reg_addr]
+    reg_instance = reg_class(reg_value)
 
-    self.tmc_logger.log("---", Loglevel.INFO)
-    return drvstatus
+    if log:
+        reg_instance.log( self.tmc_logger )
+
+    return reg_instance
+
+
+
+def read_drv_status(self) -> DrvStatus:
+    """read the register Adress "DRV_STATUS" and logs the reg valuess
+
+    Returns:
+        DRV_STATUS Register instance
+    """
+    return self.read_reg(TmcRegAddr.DRVSTATUS)
 
 
 
 def read_gconf(self) -> GConf:
-    """read the register Adress "GCONF" and prints all current setting
+    """read the register Adress "GCONF" and logs the reg values
 
     Returns:
-        int: 10bit GCONF Register
+        GCONF Register instance
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
-
-    self.tmc_logger.log("---")
-    self.tmc_logger.log("GENERAL CONFIG")
-    self.tmc_logger.log(bin(gconf), Loglevel.INFO)
-
-    gconf = GConf(gconf)
-    gconf.log(self.tmc_logger)
-
-    self.tmc_logger.log("---", Loglevel.INFO)
-    return gconf
+    return self.read_reg(TmcRegAddr.GCONF)
 
 
 
 def read_gstat(self) -> GStat:
-    """read the register Adress "GSTAT" and prints all current setting
+    """read the register Adress "GSTAT" and logs the reg values
 
     Returns:
-        int: 3bit GSTAT Register
+        GSTAT Register instance
     """
-    gstat = self.tmc_uart.read_int(tmc_reg.GSTAT)
-
-    self.tmc_logger.log("---")
-    self.tmc_logger.log("GENERAL CONFIG")
-    self.tmc_logger.log(bin(gstat), Loglevel.INFO)
-
-    gstat = GStat(gstat)
-    gstat.log(self.tmc_logger)
-
-    self.tmc_logger.log("---", Loglevel.INFO)
-    return gstat
+    return self.read_reg(TmcRegAddr.GSTAT)
 
 
 
 def clear_gstat(self):
     """clears the "GSTAT" register"""
     self.tmc_logger.log("clearing GSTAT", Loglevel.INFO)
-    gstat = self.tmc_uart.read_int(tmc_reg.GSTAT)
+    gstat = self.tmc_uart.read_int(TmcRegAddr.GSTAT)
 
     gstat = GStat(gstat)
     gstat.reset = True
@@ -87,47 +89,27 @@ def clear_gstat(self):
     gstat.uv_cp = True
     gstat_int = gstat.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.GSTAT, gstat_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.GSTAT, gstat_int)
 
 
 
 def read_ioin(self) -> IOIN:
-    """read the register Adress "IOIN" and prints all current setting
+    """read the register Adress "IOIN" and logs the reg values
 
     Returns:
-        int: 10+8bit IOIN Register
+        IOIN Register instance
     """
-    ioin = self.tmc_uart.read_int(tmc_reg.IOIN)
-
-    self.tmc_logger.log("---")
-    self.tmc_logger.log("IOIN")
-    self.tmc_logger.log(bin(ioin), Loglevel.INFO)
-
-    ioin = IOIN(ioin)
-    ioin.log(self.tmc_logger)
-
-    self.tmc_logger.log("---", Loglevel.INFO)
-    return ioin
+    return self.read_reg(TmcRegAddr.IOIN)
 
 
 
 def read_chopconf(self) -> ChopConf:
-    """read the register Adress "CHOPCONF" and prints all current setting
+    """read the register Adress "CHOPCONF" and logs the reg values
 
     Returns:
-        int: 3bit CHOPCONF Register
+        CHOPCONF Register instance
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
-
-    self.tmc_logger.log("---", Loglevel.INFO)
-    self.tmc_logger.log("CHOPPER CONGIFURATION", Loglevel.INFO)
-    self.tmc_logger.log(bin(chopconf), Loglevel.INFO)
-
-    chopconf = ChopConf(chopconf)
-    chopconf.log(self.tmc_logger)
-
-    self.tmc_logger.log("---", Loglevel.INFO)
-    return chopconf
+    return self.read_reg(TmcRegAddr.CHOPCONF)
 
 
 
@@ -137,7 +119,7 @@ def get_direction_reg(self):
     Returns:
         bool: motor shaft direction: False = CCW; True = CW
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
 
     gconf = GConf(gconf)
     return gconf.shaft
@@ -150,13 +132,13 @@ def set_direction_reg(self, direction):
     Args:
         direction (bool): direction of the motor False = CCW; True = CW
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
 
     gconf = GConf(gconf)
     gconf.shaft = direction
     gconf_int = gconf.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.GCONF, gconf_int)
     self._direction = not direction
 
 
@@ -167,7 +149,7 @@ def get_iscale_analog(self):
     Returns:
         en (bool): whether Vref (True) or 5V (False) is used for current scale
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
     gconf = GConf(gconf)
     return gconf.i_scale_analog
 
@@ -179,13 +161,13 @@ def set_iscale_analog(self,en):
     Args:
         en (bool): True=Vref, False=5V
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
 
     gconf = GConf(gconf)
     gconf.i_scale_analog = en
     gconf_int = gconf.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.GCONF, gconf_int)
 
 
 
@@ -197,7 +179,7 @@ def get_vsense(self):
     Returns:
         bool: whether high sensitivity should is used
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
 
     chopconf = ChopConf(chopconf)
     return chopconf.vsense
@@ -212,13 +194,13 @@ def set_vsense(self,en):
     Args:
         en (bool):
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
 
     chopconf = ChopConf(chopconf)
     chopconf.vsense = en
     chopconf_int = chopconf.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
 
 
 
@@ -232,7 +214,7 @@ def get_internal_rsense(self):
     Returns:
         bool: which sense resistor voltage is used
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
     gconf = GConf(gconf)
     return gconf.internal_rsense
 
@@ -259,12 +241,12 @@ def set_internal_rsense(self,en):
         raise SystemExit
 
 
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
     gconf = GConf(gconf)
     gconf.internal_rsense = en
     gconf_int = gconf.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.GCONF, gconf_int)
 
 
 
@@ -284,7 +266,7 @@ def set_irun_ihold(self, ihold, irun, ihold_delay):
     ihold_irun.iholddelay = ihold_delay
     ihold_irun_int = ihold_irun.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.IHOLD_IRUN, ihold_irun_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.IHOLD_IRUN, ihold_irun_int)
 
 
 
@@ -297,13 +279,13 @@ def set_pdn_disable(self,pdn_disable):
     Args:
         pdn_disable (bool): whether PDN should be disabled
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
 
     gconf = GConf(gconf)
     gconf.pdn_disable = pdn_disable
     gconf_int = gconf.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.GCONF, gconf_int)
 
 
 
@@ -367,7 +349,7 @@ def get_spreadcycle(self):
     Returns:
         bool: True = spreadcycle; False = stealthchop
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
 
     gconf = GConf(gconf)
     return gconf.en_spreadcycle
@@ -381,13 +363,13 @@ def set_spreadcycle(self,en_spread):
       en_spread (bool): true to enable spreadcycle; false to enable stealthchop
 
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
 
     gconf = GConf(gconf)
     gconf.en_spreadcycle = en_spread
     gconf_int = gconf.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.GCONF, gconf_int)
 
 
 
@@ -397,7 +379,7 @@ def get_interpolation(self):
     Returns:
         en (bool): true if internal µstep interpolation is enabled
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
     return chopconf.intpol
@@ -410,12 +392,12 @@ def set_interpolation(self, en):
     Args:
         en (bool): true to enable internal µstep interpolation
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
     chopconf.intpol = en
     chopconf_int = chopconf.serialise()
-    self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
 
 
 
@@ -425,7 +407,7 @@ def get_toff(self):
     Returns:
         int: TOFF register value
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
     return chopconf.toff
@@ -438,12 +420,12 @@ def set_toff(self, toff):
     Args:
         toff (uint8_t): value of toff (must be a four-bit value)
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
     chopconf.toff = toff
     chopconf_int = chopconf.serialise()
-    self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
 
 
 
@@ -454,7 +436,7 @@ def read_microstepping_resolution(self):
     Returns:
         int: µstep resolution
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
     self._msres = chopconf.convert_reg_to_mres()
@@ -481,12 +463,12 @@ def set_microstepping_resolution(self, msres):
     Args:
         msres (int): µstep resolution; has to be a power of 2 or 1 for fullstep
     """
-    chopconf = self.tmc_uart.read_int(tmc_reg.CHOPCONF)
+    chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
     chopconf.convert_mres_to_reg(msres)
     chopconf_int = chopconf.serialise()
-    self.tmc_uart.write_reg_check(tmc_reg.CHOPCONF, chopconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
 
     self._msres = msres
     self._steps_per_rev = self._fullsteps_per_rev * self._msres
@@ -505,13 +487,13 @@ def set_mstep_resolution_reg_select(self, en):
     Args:
         en (bool): true to set µstep resolution via UART
     """
-    gconf = self.tmc_uart.read_int(tmc_reg.GCONF)
+    gconf = self.tmc_uart.read_int(TmcRegAddr.GCONF)
 
     gconf = GConf(gconf)
     gconf.mstep_reg_select = en
     gconf_int = gconf.serialise()
 
-    self.tmc_uart.write_reg_check(tmc_reg.GCONF, gconf_int)
+    self.tmc_uart.write_reg_check(TmcRegAddr.GCONF, gconf_int)
 
 
 
@@ -523,7 +505,7 @@ def get_interface_transmission_counter(self):
     Returns:
         int: 8bit IFCNT Register
     """
-    ifcnt = self.tmc_uart.read_int(tmc_reg.IFCNT)
+    ifcnt = self.tmc_uart.read_int(TmcRegAddr.IFCNT)
     self.tmc_logger.log(f"Interface Transmission Counter: {ifcnt}", Loglevel.INFO)
     return ifcnt
 
@@ -535,7 +517,7 @@ def get_tstep(self):
     Returns:
         int: TStep time
     """
-    tstep = self.tmc_uart.read_int(tmc_reg.TSTEP)
+    tstep = self.tmc_uart.read_int(TmcRegAddr.TSTEP)
     return tstep
 
 
@@ -549,7 +531,7 @@ def set_vactual(self, vactual):
     Args:
         vactual (int): value for VACTUAL
     """
-    self.tmc_uart.write_reg_check(tmc_reg.VACTUAL, vactual)
+    self.tmc_uart.write_reg_check(TmcRegAddr.VACTUAL, vactual)
 
 
 
@@ -561,7 +543,7 @@ def get_stallguard_result(self):
     Returns:
         sg_result (int): StallGuard Result
     """
-    sg_result = self.tmc_uart.read_int(tmc_reg.SG_RESULT)
+    sg_result = self.tmc_uart.read_int(TmcRegAddr.SG_RESULT)
     return sg_result
 
 
@@ -578,7 +560,7 @@ def set_stallguard_threshold(self, threshold):
     self.tmc_logger.log(f"sgthrs {bin(threshold)}", Loglevel.INFO)
 
     self.tmc_logger.log("writing sgthrs", Loglevel.INFO)
-    self.tmc_uart.write_reg_check(tmc_reg.SGTHRS, threshold)
+    self.tmc_uart.write_reg_check(TmcRegAddr.SGTHRS, threshold)
 
 
 
@@ -592,7 +574,7 @@ def set_coolstep_threshold(self, threshold):
     self.tmc_logger.log(f"tcoolthrs {bin(threshold)}", Loglevel.INFO)
 
     self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO)
-    self.tmc_uart.write_reg_check(tmc_reg.TCOOLTHRS, threshold)
+    self.tmc_uart.write_reg_check(TmcRegAddr.TCOOLTHRS, threshold)
 
 
 
@@ -603,7 +585,7 @@ def get_microstep_counter(self):
     Returns:
         int: current Microstep counter
     """
-    mscnt = self.tmc_uart.read_int(tmc_reg.MSCNT)
+    mscnt = self.tmc_uart.read_int(TmcRegAddr.MSCNT)
     return mscnt
 
 

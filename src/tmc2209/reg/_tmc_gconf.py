@@ -3,7 +3,7 @@
 General Configuration register
 """
 
-from . import _tmc_2209_reg as reg
+from .bitfields import _tmc_220x_gconf as bit
 from .._tmc_logger import TMC_logger, Loglevel
 
 
@@ -41,16 +41,16 @@ class GConf():
         """
         self.data = data
 
-        self.i_scale_analog = data >> reg.i_scale_analog_bp & reg.i_scale_analog_bm
-        self.internal_rsense = data >> reg.internal_rsense_bp & reg.internal_rsense_bm
-        self.en_spreadcycle = data >> reg.en_spreadcycle_bp & reg.en_spreadcycle_bm
-        self.shaft = data >> reg.shaft_bp & reg.shaft_bm
-        self.index_otpw = data >> reg.index_otpw_bp & reg.index_otpw_bm
-        self.index_step = data >> reg.index_step_bp & reg.index_step_bm
-        self.pdn_disable = data >> reg.pdn_disable_bp & reg.pdn_disable_bm
-        self.mstep_reg_select = data >> reg.mstep_reg_select_bp & reg.mstep_reg_select_bm
-        self.multistep_filt = data >> reg.multistep_filt_bp & reg.multistep_filt_bm
-        self.test_mode = data >> reg.test_mode_bp & reg.test_mode_bm
+        self.i_scale_analog = data >> bit.i_scale_analog_bp & bit.i_scale_analog_bm
+        self.internal_rsense = data >> bit.internal_rsense_bp & bit.internal_rsense_bm
+        self.en_spreadcycle = data >> bit.en_spreadcycle_bp & bit.en_spreadcycle_bm
+        self.shaft = data >> bit.shaft_bp & bit.shaft_bm
+        self.index_otpw = data >> bit.index_otpw_bp & bit.index_otpw_bm
+        self.index_step = data >> bit.index_step_bp & bit.index_step_bm
+        self.pdn_disable = data >> bit.pdn_disable_bp & bit.pdn_disable_bm
+        self.mstep_reg_select = data >> bit.mstep_reg_select_bp & bit.mstep_reg_select_bm
+        self.multistep_filt = data >> bit.multistep_filt_bp & bit.multistep_filt_bm
+        self.test_mode = data >> bit.test_mode_bp & bit.test_mode_bm
 
 
     def serialise(self) -> int:
@@ -61,16 +61,16 @@ class GConf():
         """
         data = 0
 
-        data |= self.i_scale_analog << reg.i_scale_analog_bp
-        data |= self.internal_rsense << reg.internal_rsense_bp
-        data |= self.en_spreadcycle << reg.en_spreadcycle_bp
-        data |= self.shaft << reg.shaft_bp
-        data |= self.index_otpw << reg.index_otpw_bp
-        data |= self.index_step << reg.index_step_bp
-        data |= self.pdn_disable << reg.pdn_disable_bp
-        data |= self.mstep_reg_select << reg.mstep_reg_select_bp
-        data |= self.multistep_filt << reg.multistep_filt_bp
-        data |= self.test_mode << reg.test_mode_bp
+        data |= self.i_scale_analog << bit.i_scale_analog_bp
+        data |= self.internal_rsense << bit.internal_rsense_bp
+        data |= self.en_spreadcycle << bit.en_spreadcycle_bp
+        data |= self.shaft << bit.shaft_bp
+        data |= self.index_otpw << bit.index_otpw_bp
+        data |= self.index_step << bit.index_step_bp
+        data |= self.pdn_disable << bit.pdn_disable_bp
+        data |= self.mstep_reg_select << bit.mstep_reg_select_bp
+        data |= self.multistep_filt << bit.multistep_filt_bp
+        data |= self.test_mode << bit.test_mode_bp
 
         return data
 

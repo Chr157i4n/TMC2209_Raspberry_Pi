@@ -8,7 +8,7 @@ import time
 import struct
 import serial
 
-from .reg import _tmc_2209_reg as reg
+from .reg._tmc_220x_reg_addr import TmcRegAddr
 from .reg._tmc_gstat import GStat
 from ._tmc_logger import Loglevel
 
@@ -108,7 +108,7 @@ class TMC_UART:
 
 
 
-    def read_reg(self, register):
+    def read_reg(self, register:TmcRegAddr):
         """reads the registry on the TMC with a given address.
         returns the binary value of that register
 
@@ -123,7 +123,7 @@ class TMC_UART:
         self.ser.reset_input_buffer()
 
         self.r_frame[1] = self.mtr_id
-        self.r_frame[2] = register
+        self.r_frame[2] = register.value
         self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
 
         rtn = self.ser.write(self.r_frame)
@@ -144,7 +144,7 @@ class TMC_UART:
 
 
 
-    def read_int(self, register, tries=10):
+    def read_int(self, register:TmcRegAddr, tries:int = 10):
         """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
 
@@ -182,7 +182,7 @@ class TMC_UART:
 
 
 
-    def write_reg(self, register, val):
+    def write_reg(self, register:TmcRegAddr, val:int):
         """this function can write a value to the register of the tmc
         1. use read_int to get the current setting of the TMC
         2. then modify the settings as wished
@@ -200,7 +200,7 @@ class TMC_UART:
         self.ser.reset_input_buffer()
 
         self.w_frame[1] = self.mtr_id
-        self.w_frame[2] =  register | 0x80  # set write bit
+        self.w_frame[2] =  register.value | 0x80  # set write bit
 
         self.w_frame[3] = 0xFF & (val>>24)
         self.w_frame[4] = 0xFF & (val>>16)
@@ -221,7 +221,7 @@ class TMC_UART:
 
 
 
-    def write_reg_check(self, register, val, tries=10):
+    def write_reg_check(self, register:TmcRegAddr, val:int, tries:int=10):
         """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
         the InterfaceTransmissionCounter before and after writing
@@ -234,7 +234,7 @@ class TMC_UART:
         if self.ser is None:
             self.tmc_logger.log("Cannot write reg check, serial is not initialized", Loglevel.ERROR)
             return False
-        ifcnt1 = self.read_int(reg.IFCNT)
+        ifcnt1 = self.read_int(TmcRegAddr.IFCNT)
 
         if ifcnt1 == 255:
             ifcnt1 = -1
@@ -242,7 +242,7 @@ class TMC_UART:
         while True:
             self.write_reg(register, val)
             tries -= 1
-            ifcnt2 = self.read_int(reg.IFCNT)
+            ifcnt2 = self.read_int(TmcRegAddr.IFCNT)
             if ifcnt1 >= ifcnt2:
                 self.tmc_logger.log("writing not successful!", Loglevel.ERROR)
                 self.tmc_logger.log(f"ifcnt: {ifcnt1}, {ifcnt2}", Loglevel.DEBUG)
@@ -264,7 +264,7 @@ class TMC_UART:
 
 
 
-    def set_bit(self, value, bit):
+    def set_bit(self, value:int, bit):
         """this sets a specific bit to 1
 
         Args:
@@ -275,7 +275,7 @@ class TMC_UART:
 
 
 
-    def clear_bit(self, value, bit):
+    def clear_bit(self, value:int, bit):
         """this sets a specific bit to 0
 
         Args:
@@ -291,7 +291,7 @@ class TMC_UART:
         if self.error_handler_running:
             return
         self.error_handler_running = True
-        gstat = self.read_int(reg.GSTAT)
+        gstat = self.read_int(TmcRegAddr.GSTAT)
         self.tmc_logger.log("GSTAT Error check:", Loglevel.DEBUG)
         if gstat == -1:
             self.tmc_logger.log("No answer from Driver", Loglevel.DEBUG)
@@ -313,7 +313,7 @@ class TMC_UART:
 
 
 
-    def test_uart(self, register):
+    def test_uart(self, register:TmcRegAddr):
         """test UART connection
 
         Args:

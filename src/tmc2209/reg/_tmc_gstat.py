@@ -3,7 +3,7 @@
 Global status flags register
 """
 
-from . import _tmc_2209_reg as reg
+from .bitfields import _tmc_220x_gstat as bit
 from .._tmc_logger import TMC_logger
 
 
@@ -33,9 +33,9 @@ class GStat():
         """
         self.data = data
 
-        self.reset = bool(data >> reg.gstat_reset_bp & reg.gstat_reset_bm)
-        self.drv_err = bool(data >> reg.gstat_drv_err_bp & reg.gstat_drv_err_bm)
-        self.uv_cp = bool(data >> reg.gstat_uv_cp_bp & reg.gstat_uv_cp_bm)
+        self.reset = bool(data >> bit.reset_bp & bit.reset_bm)
+        self.drv_err = bool(data >> bit.drv_err_bp & bit.drv_err_bm)
+        self.uv_cp = bool(data >> bit.uv_cp_bp & bit.uv_cp_bm)
 
 
 
@@ -47,9 +47,9 @@ class GStat():
         """
         data = 0
 
-        data |= self.reset << reg.gstat_reset_bp
-        data |= self.drv_err << reg.gstat_drv_err_bp
-        data |= self.uv_cp << reg.gstat_uv_cp_bp
+        data |= self.reset << bit.reset_bp
+        data |= self.drv_err << bit.drv_err_bp
+        data |= self.uv_cp << bit.uv_cp_bp
 
         return data
 

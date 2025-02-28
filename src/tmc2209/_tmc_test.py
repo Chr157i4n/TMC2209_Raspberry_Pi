@@ -11,7 +11,8 @@ import time
 from ._tmc_gpio_board import TMC_gpio, Gpio
 from ._tmc_logger import Loglevel
 from ._tmc_move import MovementAbsRel, MovementPhase
-from .reg import _tmc_2209_reg as tmc_reg
+from .reg.bitfields import _tmc_220x_ioin as tmc_ioin_reg
+from .reg._tmc_220x_reg_addr import TmcRegAddr
 
 
 
@@ -48,9 +49,9 @@ def test_dir_step_en(self):
     this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
     and checks the IOIN Register of the TMC meanwhile
     """
-    pin_dir_ok = self.test_pin(self._pin_dir, tmc_reg.io_dir_bp)
-    pin_step_ok = self.test_pin(self._pin_step, tmc_reg.io_step_bp)
-    pin_en_ok = self.test_pin(self._pin_en, tmc_reg.io_enn_bp)
+    pin_dir_ok = self.test_pin(self._pin_dir, tmc_ioin_reg.dir_bp)
+    pin_step_ok = self.test_pin(self._pin_step, tmc_ioin_reg.step_bp)
+    pin_en_ok = self.test_pin(self._pin_en, tmc_ioin_reg.enn_bp)
 
     self.set_motor_enabled(False)
 
@@ -88,7 +89,7 @@ def test_uart(self):
     """test method"""
     self.tmc_logger.log("---")
     self.tmc_logger.log("TEST UART")
-    result = self.tmc_uart.test_uart(tmc_reg.IOIN)
+    result = self.tmc_uart.test_uart(TmcRegAddr.IOIN)
 
     snd = result[0]
     rtn = result[1]

@@ -4,9 +4,8 @@ Chopper Configuration register
 """
 
 import math
-from . import _tmc_2209_reg as reg
+from .bitfields import _tmc_220x_chopconf as bit
 from .._tmc_logger import TMC_logger
-
 
 
 class ChopConf():
@@ -44,16 +43,16 @@ class ChopConf():
         """
         self.data = data
 
-        self.diss2vs = bool(data >> reg.chopconf_diss2vs_bp & reg.chopconf_diss2vs_bm)
-        self.diss2g = bool(data >> reg.chopconf_diss2g_bp & reg.chopconf_diss2g_bm)
-        self.dedge = bool(data >> reg.chopconf_dedge_bp & reg.chopconf_dedge_bm)
-        self.intpol = bool(data >> reg.chopconf_intpol_bp & reg.chopconf_intpol_bm)
-        self.mres = int(data >> reg.chopconf_mres_bp & reg.chopconf_mres_bm)
-        self.vsense = bool(data >> reg.chopconf_vsense_bp & reg.chopconf_vsense_bm)
-        self.tbl = int(data >> reg.chopconf_tbl_bp & reg.chopconf_tbl_bm)
-        self.hend = int(data >> reg.chopconf_hend_bp & reg.chopconf_hend_bm)
-        self.hstrt = int(data >> reg.chopconf_hstrt_bp & reg.chopconf_hstrt_bm)
-        self.toff = int(data >> reg.chopconf_toff_bp & reg.chopconf_toff_bm)
+        self.diss2vs = bool(data >> bit.diss2vs_bp & bit.diss2vs_bm)
+        self.diss2g = bool(data >> bit.diss2g_bp & bit.diss2g_bm)
+        self.dedge = bool(data >> bit.dedge_bp & bit.dedge_bm)
+        self.intpol = bool(data >> bit.intpol_bp & bit.intpol_bm)
+        self.mres = int(data >> bit.mres_bp & bit.mres_bm)
+        self.vsense = bool(data >> bit.vsense_bp & bit.vsense_bm)
+        self.tbl = int(data >> bit.tbl_bp & bit.tbl_bm)
+        self.hend = int(data >> bit.hend_bp & bit.hend_bm)
+        self.hstrt = int(data >> bit.hstrt_bp & bit.hstrt_bm)
+        self.toff = int(data >> bit.toff_bp & bit.toff_bm)
 
 
     def serialise(self) -> int:
@@ -64,16 +63,16 @@ class ChopConf():
         """
         data = 0
 
-        data |= int(self.diss2vs) << reg.chopconf_diss2vs_bp
-        data |= int(self.diss2g) << reg.chopconf_diss2g_bp
-        data |= int(self.dedge) << reg.chopconf_dedge_bp
-        data |= int(self.intpol) << reg.chopconf_intpol_bp
-        data |= self.mres << reg.chopconf_mres_bp
-        data |= int(self.vsense) << reg.chopconf_vsense_bp
-        data |= self.tbl << reg.chopconf_tbl_bp
-        data |= self.hend << reg.chopconf_hend_bp
-        data |= self.hstrt << reg.chopconf_hstrt_bp
-        data |= self.toff << reg.chopconf_toff_bp
+        data |= int(self.diss2vs) << bit.diss2vs_bp
+        data |= int(self.diss2g) << bit.diss2g_bp
+        data |= int(self.dedge) << bit.dedge_bp
+        data |= int(self.intpol) << bit.intpol_bp
+        data |= self.mres << bit.mres_bp
+        data |= int(self.vsense) << bit.vsense_bp
+        data |= self.tbl << bit.tbl_bp
+        data |= self.hend << bit.hend_bp
+        data |= self.hstrt << bit.hstrt_bp
+        data |= self.toff << bit.toff_bp
 
         return data
 
@@ -103,9 +102,9 @@ class ChopConf():
         Args:
             msres (int): µstep resolution
         """
-        mres_reg = int(math.log(mres, 2))
-        mres_reg = 8 - mres_reg
-        self.mres = mres_reg
+        mres_bit = int(math.log(mres, 2))
+        mres_bit = 8 - mres_bit
+        self.mres = mres_bit
 
 
     def convert_reg_to_mres(self) -> int:

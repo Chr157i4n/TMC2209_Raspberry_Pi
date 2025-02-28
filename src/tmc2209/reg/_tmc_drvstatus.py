@@ -3,7 +3,7 @@
 Driver Status register
 """
 
-from . import _tmc_2209_reg as reg
+from .bitfields import _tmc_220x_drvstatus as bit
 from .._tmc_logger import TMC_logger, Loglevel
 
 
@@ -48,21 +48,21 @@ class DrvStatus():
         """
         self.data = data
 
-        self.stst = bool(data >> reg.stst_bp & reg.stst_bm)
-        self.stealth = bool(data >> reg.stealth_bp & reg.stealth_bm)
-        self.cs_actual = data >> reg.cs_actual_bp & reg.cs_actual_bm
-        self.t157 = bool(data >> reg.t157_bp & reg.t157_bm)
-        self.t150 = bool(data >> reg.t150_bp & reg.t150_bm)
-        self.t143 = bool(data >> reg.t143_bp & reg.t143_bm)
-        self.t120 = bool(data >> reg.t120_bp & reg.t120_bm)
-        self.olb = bool(data >> reg.olb_bp & reg.olb_bm)
-        self.ola = bool(data >> reg.ola_bp & reg.ola_bm)
-        self.s2vsb = bool(data >> reg.s2vsb_bp & reg.s2vsb_bm)
-        self.s2vsa = bool(data >> reg.s2vsa_bp & reg.s2vsa_bm)
-        self.s2gb = bool(data >> reg.s2gb_bp & reg.s2gb_bm)
-        self.s2ga = bool(data >> reg.s2ga_bp & reg.s2ga_bm)
-        self.ot = bool(data >> reg.ot_bp & reg.ot_bm)
-        self.otpw = bool(data >> reg.otpw_bp & reg.otpw_bm)
+        self.stst = bool(data >> bit.stst_bp & bit.stst_bm)
+        self.stealth = bool(data >> bit.stealth_bp & bit.stealth_bm)
+        self.cs_actual = data >> bit.cs_actual_bp & bit.cs_actual_bm
+        self.t157 = bool(data >> bit.t157_bp & bit.t157_bm)
+        self.t150 = bool(data >> bit.t150_bp & bit.t150_bm)
+        self.t143 = bool(data >> bit.t143_bp & bit.t143_bm)
+        self.t120 = bool(data >> bit.t120_bp & bit.t120_bm)
+        self.olb = bool(data >> bit.olb_bp & bit.olb_bm)
+        self.ola = bool(data >> bit.ola_bp & bit.ola_bm)
+        self.s2vsb = bool(data >> bit.s2vsb_bp & bit.s2vsb_bm)
+        self.s2vsa = bool(data >> bit.s2vsa_bp & bit.s2vsa_bm)
+        self.s2gb = bool(data >> bit.s2gb_bp & bit.s2gb_bm)
+        self.s2ga = bool(data >> bit.s2ga_bp & bit.s2ga_bm)
+        self.ot = bool(data >> bit.ot_bp & bit.ot_bm)
+        self.otpw = bool(data >> bit.otpw_bp & bit.otpw_bm)
 
 
     def log(self, logger: TMC_logger):
