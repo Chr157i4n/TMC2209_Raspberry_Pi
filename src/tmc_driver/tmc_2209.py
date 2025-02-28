@@ -30,8 +30,8 @@ class Tmc2209(Tmc220x):
         """destructor"""
         if self._deinit_finished is False:
             if self._pin_stallguard != -1:
-                TMC_gpio.gpio_remove_event_detect(self._pin_stallguard)
-                TMC_gpio.gpio_cleanup(self._pin_stallguard)
+                tmc_gpio.gpio_remove_event_detect(self._pin_stallguard)
+                tmc_gpio.gpio_cleanup(self._pin_stallguard)
 
         super().__del__()
 
@@ -59,10 +59,10 @@ class Tmc2209(Tmc220x):
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
 
-        TMC_gpio.gpio_setup(self._pin_stallguard, GpioMode.IN, pull_up_down=GpioPUD.PUD_DOWN)
+        tmc_gpio.gpio_setup(self._pin_stallguard, GpioMode.IN, pull_up_down=GpioPUD.PUD_DOWN)
         # first remove existing events
-        TMC_gpio.gpio_remove_event_detect(self._pin_stallguard)
-        TMC_gpio.gpio_add_event_detect(self._pin_stallguard, self.stallguard_callback)
+        tmc_gpio.gpio_remove_event_detect(self._pin_stallguard)
+        tmc_gpio.gpio_add_event_detect(self._pin_stallguard, self.stallguard_callback)
 
 
 
