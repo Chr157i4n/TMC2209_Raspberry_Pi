@@ -4,7 +4,7 @@ Global status flags register
 """
 
 from .bitfields import _tmc_220x_gstat as bit
-from .._tmc_logger import TMC_logger
+from .._tmc_logger import TmcLogger
 
 
 class GStat():
@@ -54,11 +54,11 @@ class GStat():
         return data
 
 
-    def log(self, logger: TMC_logger):
+    def log(self, logger: TmcLogger):
         """Logs the register values
 
         Args:
-            logger (TMC_logger): Logger
+            logger (TmcLogger): Logger
         """
         logger.log(f"Reset: {self.reset}")
         logger.log(f"Driver error: {self.drv_err}")

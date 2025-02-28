@@ -4,7 +4,7 @@ General Configuration register
 """
 
 from .bitfields import _tmc_220x_gconf as bit
-from .._tmc_logger import TMC_logger, Loglevel
+from .._tmc_logger import TmcLogger, Loglevel
 
 
 class GConf():
@@ -75,11 +75,11 @@ class GConf():
         return data
 
 
-    def log(self, logger: TMC_logger):
+    def log(self, logger: TmcLogger):
         """Logs the register values
 
         Args:
-            logger (TMC_logger): logger object
+            logger (TmcLogger): logger object
         """
 
         if self.i_scale_analog:

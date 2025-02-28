@@ -1,7 +1,7 @@
 #pylint: disable=missing-function-docstring
 #pylint: disable=missing-class-docstring
 """
-test for TMC_2209_math.py
+test for _tmc_math.py
 """
 
 import unittest

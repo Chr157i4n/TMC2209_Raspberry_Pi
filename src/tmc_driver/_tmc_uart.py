@@ -1,7 +1,7 @@
 #pylint: disable=import-error
 #pylint: disable=broad-exception-caught
 """
-TMC_UART stepper driver uart module
+TmcUart stepper driver uart module
 """
 
 import time
@@ -13,8 +13,8 @@ from .reg._tmc_gstat import GStat
 from ._tmc_logger import Loglevel
 
 
-class TMC_UART:
-    """TMC_UART
+class TmcUart:
+    """TmcUart
 
     this class is used to communicate with the TMC via UART
     it can be used to change the settings of the TMC.

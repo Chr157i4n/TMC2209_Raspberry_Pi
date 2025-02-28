@@ -4,7 +4,7 @@ INPUT register
 """
 
 from .bitfields import _tmc_220x_ioin as bit
-from .._tmc_logger import TMC_logger
+from .._tmc_logger import TmcLogger
 
 
 class IOIN():
@@ -48,11 +48,11 @@ class IOIN():
         self.version = data >> bit.version_bp & bit.version_bm
 
 
-    def log(self, logger: TMC_logger):
+    def log(self, logger: TmcLogger):
         """Logs the register values
 
         Args:
-            logger (TMC_logger): Logger
+            logger (TmcLogger): Logger
         """
         logger.log(f"ENN: {self.enn}")
         logger.log(f"MS1: {self.ms1}")

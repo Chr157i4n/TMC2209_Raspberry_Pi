@@ -7,18 +7,9 @@
 #pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
 """TMC_2209 stepper driver module
-
-this module has two different functions:
-1. change setting in the TMC-driver via UART
-2. move the motor via STEP/DIR pins
 """
 
-import statistics
-from .tmc_220x import Tmc220x
-from ._tmc_gpio_board import TMC_gpio, GpioMode, GpioPUD
-from ._tmc_logger import Loglevel
-from . import _tmc_math as tmc_math
-
+from .tmc_220x import *
 
 
 

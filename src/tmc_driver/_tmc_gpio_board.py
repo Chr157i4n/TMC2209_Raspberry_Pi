@@ -19,7 +19,7 @@ Can be extended to support BeagleBone or other boards
 from os.path import exists
 from enum import Enum, IntEnum
 from importlib import import_module
-from ._tmc_logger import TMC_logger, Loglevel
+from ._tmc_logger import TmcLogger, Loglevel
 
 # ------------------------------
 # LIB           | BOARD
@@ -58,7 +58,7 @@ class GpioPUD(IntEnum):
     PUD_DOWN = 21
 
 BOARD = Board.UNKNOWN
-dependencies_logger = TMC_logger(Loglevel.DEBUG, "DEPENDENCIES")
+dependencies_logger = TmcLogger(Loglevel.DEBUG, "DEPENDENCIES")
 
 
 class BaseGPIOWrapper:

@@ -5,7 +5,7 @@ Chopper Configuration register
 
 import math
 from .bitfields import _tmc_220x_chopconf as bit
-from .._tmc_logger import TMC_logger
+from .._tmc_logger import TmcLogger
 
 
 class ChopConf():
@@ -77,11 +77,11 @@ class ChopConf():
         return data
 
 
-    def log(self, logger: TMC_logger):
+    def log(self, logger: TmcLogger):
         """Logs the object
 
         Args:
-            logger (TMC_logger): logger
+            logger (TmcLogger): logger
         """
         logger.log("chopconf:")
         logger.log(f"diss2vs: {self.diss2vs}")

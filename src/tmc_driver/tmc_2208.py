@@ -1,7 +1,7 @@
 """TMC_2208 stepper driver module
 """
 
-from .tmc_220x import Tmc220x
+from .tmc_220x import *
 
 
 

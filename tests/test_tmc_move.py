@@ -5,7 +5,7 @@
 #pylint: disable=unused-wildcard-import
 #pylint: disable=bare-except
 """
-test for TMC_2209_move.py
+test for _tmc_move.py
 """
 
 import unittest

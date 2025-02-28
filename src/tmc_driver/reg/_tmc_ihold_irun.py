@@ -4,7 +4,7 @@ Driver current control register
 """
 
 from .bitfields import _tmc_220x_ihold_irun as bit
-from .._tmc_logger import TMC_logger
+from .._tmc_logger import TmcLogger
 
 
 class IHoldIRun():
@@ -55,11 +55,11 @@ class IHoldIRun():
         return data
 
 
-    def log(self, logger: TMC_logger):
+    def log(self, logger: TmcLogger):
         """Logs the register values
 
         Args:
-            logger (TMC_logger): Logger
+            logger (TmcLogger): Logger
         """
         logger.log(f"IHOLD: {self.ihold}")
         logger.log(f"IRUN: {self.irun}")

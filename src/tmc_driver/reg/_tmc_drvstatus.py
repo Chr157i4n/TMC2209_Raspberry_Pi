@@ -4,7 +4,7 @@ Driver Status register
 """
 
 from .bitfields import _tmc_220x_drvstatus as bit
-from .._tmc_logger import TMC_logger, Loglevel
+from .._tmc_logger import TmcLogger, Loglevel
 
 
 class DrvStatus():
@@ -65,11 +65,11 @@ class DrvStatus():
         self.otpw = bool(data >> bit.otpw_bp & bit.otpw_bm)
 
 
-    def log(self, logger: TMC_logger):
+    def log(self, logger: TmcLogger):
         """Log the register values
 
         Args:
-            logger (TMC_logger): logger object
+            logger (TmcLogger): logger object
         """
         logger.log(f"Motor is {'standing still' if self.stst else 'moving'}", Loglevel.INFO)
 

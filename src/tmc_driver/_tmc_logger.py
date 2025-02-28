@@ -20,7 +20,7 @@ class Loglevel(Enum):
 
 
 
-class TMC_logger:
+class TmcLogger:
     """TMC_2209_logger
 
     this class has the function:

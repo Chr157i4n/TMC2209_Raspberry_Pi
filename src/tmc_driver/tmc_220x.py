@@ -16,8 +16,8 @@ this module has two different functions:
 import time
 import logging
 from ._tmc_gpio_board import TMC_gpio, Gpio, GpioMode, BOARD
-from ._tmc_uart import TMC_UART as tmc_uart
-from ._tmc_logger import TMC_logger, Loglevel
+from ._tmc_uart import TmcUart
+from ._tmc_logger import TmcLogger, Loglevel
 from ._tmc_move import MovementAbsRel, MovementPhase, StopMode
 from . import _tmc_math as tmc_math
 
@@ -136,8 +136,8 @@ class Tmc220x:
         """
         if logprefix is None:
             logprefix = f"TMC2209 {driver_address}"
-        self.tmc_logger = TMC_logger(loglevel, logprefix, log_handlers, log_formatter)
-        self.tmc_uart = tmc_uart(self.tmc_logger, serialport, baudrate, driver_address)
+        self.tmc_logger = TmcLogger(loglevel, logprefix, log_handlers, log_formatter)
+        self.tmc_uart = TmcUart(self.tmc_logger, serialport, baudrate, driver_address)
 
         self._fullsteps_per_rev = fullsteps_per_rev
 
