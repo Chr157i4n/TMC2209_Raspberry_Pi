@@ -13,8 +13,8 @@ try:
     from src.tmc_driver.tmc_2209 import *
     from src.tmc_driver._tmc_gpio_board import Board
 except ModuleNotFoundError:
-    from TMC_2209.TMC_2209_StepperDriver import *
-    from TMC_2209._TMC_2209_GPIO_board import Board
+    from tmc_driver.tmc_2209 import *
+    from tmc_driver._tmc_gpio_board import Board
 
 
 print("---")
