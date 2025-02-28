@@ -31,12 +31,12 @@ if BOARD == Board.NVIDIA_JETSON:
         Nvidia Jetson has nuances with the parameter pull_up_down for pin_stallguard:
         https://github.com/NVIDIA/jetson-gpio/issues/5''')
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20)
+    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
 elif BOARD == Board.RASPBERRY_PI5:
     tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20)
+    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
 
 
 

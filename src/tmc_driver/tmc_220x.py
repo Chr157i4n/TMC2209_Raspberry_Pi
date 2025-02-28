@@ -202,7 +202,7 @@ class Tmc220x:
                  pin_en:int = None,
                  pin_step:int = None,
                  pin_dir:int = None,
-                 tmc_com:TmcUart = TmcUart("/dev/serial0"),
+                 tmc_com:TmcUart = None,
                  driver_address:int = 0,
                  gpio_mode = None,
                  loglevel:Loglevel = Loglevel.INFO,

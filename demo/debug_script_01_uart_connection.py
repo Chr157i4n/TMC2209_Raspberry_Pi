@@ -33,7 +33,7 @@ elif BOARD == Board.NVIDIA_JETSON:
     tmc = Tmc2209(13, 6, 5, None)
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20)
+    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
 
 
 if BOARD == Board.RASPBERRY_PI:

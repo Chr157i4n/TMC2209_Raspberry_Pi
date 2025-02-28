@@ -3,6 +3,7 @@
 #pylint: disable=protected-access
 #pylint: disable=no-member
 #pylint: disable=bare-except
+#pylint: disable=duplicate-code
 """
 Tmc2209 stepper driver test module
 """
