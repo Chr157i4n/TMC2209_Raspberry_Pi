@@ -6,6 +6,7 @@ from enum import Enum
 
 
 class TmcRegAddr(Enum):
+    """Enum for the register addresses of the TMC220x"""
     GCONF           =   0x00
     GSTAT           =   0x01
     IFCNT           =   0x02

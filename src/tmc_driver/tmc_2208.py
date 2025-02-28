@@ -1,3 +1,5 @@
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """TMC_2208 stepper driver module
 """
 

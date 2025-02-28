@@ -1,4 +1,3 @@
-#pylint: disable=no-member
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
 #pylint: disable=too-many-branches
@@ -6,6 +5,7 @@
 #pylint: disable=too-many-positional-arguments
 #pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
+#pylint: disable=unused-import
 """TMC_220X stepper driver module
 
 this module has two different functions:
@@ -14,8 +14,9 @@ this module has two different functions:
 """
 
 import time
+import statistics
 import logging
-from ._tmc_gpio_board import TMC_gpio, Gpio, GpioMode, BOARD
+from ._tmc_gpio_board import TMC_gpio, Gpio, GpioMode, GpioPUD, BOARD
 from ._tmc_uart import TmcUart
 from ._tmc_logger import TmcLogger, Loglevel
 from ._tmc_move import MovementAbsRel, MovementPhase, StopMode
