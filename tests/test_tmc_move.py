@@ -20,12 +20,11 @@ class TestTMCMove(unittest.TestCase):
         self.tmc = Tmc2209(21, 16, 20, serialport=None, skip_uart_init=True)
 
         # these values are normally set by reading the driver
-        self.tmc._mres = 2
-        self.tmc._steps_per_rev = self.tmc._mres * self.tmc._fullsteps_per_rev
+        self.tmc.mres = 2
 
-        self.tmc.set_acceleration_fullstep(100000)
-        self.tmc.set_max_speed_fullstep(10000)
-        self.tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+        self.tmc.acceleration_fullstep = 100000
+        self.tmc.max_speed_fullstep = 10000
+        self.tmc.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
     def tearDown(self):
         """tearDown"""
@@ -35,38 +34,38 @@ class TestTMCMove(unittest.TestCase):
         """test_run_to_position_steps"""
 
         self.tmc.run_to_position_steps(400, MovementAbsRel.RELATIVE)
-        pos = self.tmc.get_current_position()
+        pos = self.tmc.current_pos
         self.assertEqual(pos, 400, f"actual position: {pos}, expected position: 400")
 
         self.tmc.run_to_position_steps(-200, MovementAbsRel.RELATIVE)
-        pos = self.tmc.get_current_position()
+        pos = self.tmc.current_pos
         self.assertEqual(pos, 200, f"actual position: {pos}, expected position: 200")
 
         self.tmc.run_to_position_steps(400)
-        pos = self.tmc.get_current_position()
+        pos = self.tmc.current_pos
         self.assertEqual(pos, 400, f"actual position: {pos}, expected position: 400")
 
     def test_run_to_position_steps_threaded(self):
         """test_run_to_position_steps_threaded"""
         self.tmc.run_to_position_steps_threaded(400, MovementAbsRel.RELATIVE)
         self.tmc.wait_for_movement_finished_threaded()
-        pos = self.tmc.get_current_position()
+        pos = self.tmc.current_pos
         self.assertEqual(pos, 400, f"actual position: {pos}, expected position: 400")
 
         self.tmc.run_to_position_steps_threaded(-200, MovementAbsRel.RELATIVE)
         self.tmc.wait_for_movement_finished_threaded()
-        pos = self.tmc.get_current_position()
+        pos = self.tmc.current_pos
         self.assertEqual(pos, 200, f"actual position: {pos}, expected position: 200")
 
         self.tmc.run_to_position_steps_threaded(400)
         self.tmc.wait_for_movement_finished_threaded()
-        pos = self.tmc.get_current_position()
+        pos = self.tmc.current_pos
         self.assertEqual(pos, 400, f"actual position: {pos}, expected position: 400")
 
         self.tmc.run_to_position_steps_threaded(800)
         time.sleep(0.05)
         self.tmc.stop()
-        pos = self.tmc.get_current_position()
+        pos = self.tmc.current_pos
         print(f"motorposition: {pos}")
         self.assertTrue(400 < pos < 800, f"actual position: {pos}, expected position: 400 < pos < 800")
 

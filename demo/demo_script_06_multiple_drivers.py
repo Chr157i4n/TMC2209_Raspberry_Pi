@@ -11,10 +11,8 @@ test file for testing multiple drivers via one UART connection
 import time
 try:
     from src.tmc_driver.tmc_2209 import *
-    from src.tmc_driver._tmc_gpio_board import Board
 except ModuleNotFoundError:
     from tmc_driver.tmc_2209 import *
-    from tmc_driver._tmc_gpio_board import Board
 
 
 print("---")
@@ -56,11 +54,11 @@ else:
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.tmc_logger.set_loglevel(Loglevel.DEBUG)
-tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc1.tmc_logger.loglevel = Loglevel.DEBUG
+tmc1.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
-tmc2.tmc_logger.set_loglevel(Loglevel.DEBUG)
-tmc2.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc2.tmc_logger.loglevel = Loglevel.DEBUG
+tmc2.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
 
 

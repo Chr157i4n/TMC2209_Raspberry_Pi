@@ -9,10 +9,8 @@ test file for testing basic movement
 import time
 try:
     from src.tmc_driver.tmc_2209 import *
-    from src.tmc_driver._tmc_gpio_board import Board
 except ModuleNotFoundError:
     from tmc_driver.tmc_2209 import *
-    from tmc_driver._tmc_gpio_board import Board
 
 
 print("---")
@@ -47,8 +45,8 @@ else:
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc.tmc_logger.set_loglevel(Loglevel.DEBUG)
-tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc.tmc_logger.loglevel = Loglevel.DEBUG
+tmc.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
 
 
@@ -94,8 +92,8 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # set the Acceleration and maximal Speed in fullsteps
 #-----------------------------------------------------------------------
-tmc.set_acceleration_fullstep(1000)
-tmc.set_max_speed_fullstep(250)
+tmc.acceleration_fullstep = 1000
+tmc.max_speed_fullstep = 250
 
 
 

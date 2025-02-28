@@ -9,11 +9,8 @@ test file for testing writing the log messages to a file
 import logging
 try:
     from src.tmc_driver.tmc_2209 import *
-    from src.tmc_driver._tmc_gpio_board import Board
 except ModuleNotFoundError:
     from tmc_driver.tmc_2209 import *
-    from tmc_driver._tmc_gpio_board import Board
-
 
 
 print("---")

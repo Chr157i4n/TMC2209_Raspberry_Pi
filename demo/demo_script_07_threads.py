@@ -9,10 +9,9 @@ test file for testing movement of motors with threads
 import time
 try:
     from src.tmc_driver.tmc_2209 import *
-    from src.tmc_driver._tmc_gpio_board import Board
 except ModuleNotFoundError:
     from tmc_driver.tmc_2209 import *
-    from tmc_driver._tmc_gpio_board import Board
+
 
 print("---")
 print("SCRIPT START")
@@ -45,8 +44,8 @@ tmc_driverlist = [tmc1]
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.tmc_logger.set_loglevel(Loglevel.DEBUG)
-tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc1.tmc_logger.loglevel = Loglevel.DEBUG
+tmc1.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
 
 
@@ -63,8 +62,8 @@ for tmc in tmc_driverlist:
     tmc.set_internal_rsense(False)
     tmc.set_motor_enabled(True)
 
-    tmc.set_acceleration_fullstep(1000)
-    tmc.set_max_speed_fullstep(250)
+    tmc.acceleration_fullstep = 1000
+    tmc.max_speed_fullstep = 250
 
 
 print("---\n---")
@@ -87,9 +86,9 @@ tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
 
 
 # while the motor is still moving
-while tmc1.get_movement_phase() != MovementPhase.STANDSTILL:
+while tmc1.movement_phase != MovementPhase.STANDSTILL:
     # print the current movement phase
-    print(tmc1.get_movement_phase())
+    print(tmc1.movement_phase)
     time.sleep(0.02)
 
 tmc1.wait_for_movement_finished_threaded()

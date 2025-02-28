@@ -71,6 +71,108 @@ class Tmc220x:
     _deinit_finished:bool = False
 
 
+    @property
+    def steps_per_rev(self):
+        """_steps_per_rev property"""
+        return self._steps_per_rev
+
+    @property
+    def fullsteps_per_rev(self):
+        """_fullsteps_per_rev property"""
+        return self._fullsteps_per_rev
+
+    @fullsteps_per_rev.setter
+    def fullsteps_per_rev(self, fullsteps_per_rev):
+        """_fullsteps_per_rev setter"""
+        self._fullsteps_per_rev = fullsteps_per_rev
+        self._steps_per_rev = self._fullsteps_per_rev * self._mres
+
+    @property
+    def mres(self):
+        """_mres property"""
+        return self._mres
+
+    @mres.setter
+    def mres(self, mres):
+        """_mres setter"""
+        self._mres = mres
+        self._steps_per_rev = self._fullsteps_per_rev * self._mres
+
+    @property
+    def current_pos(self):
+        """_current_pos property"""
+        return self._current_pos
+
+    @current_pos.setter
+    def current_pos(self, current_pos):
+        """_current_pos setter"""
+        self._current_pos = current_pos
+
+    @property
+    def movement_abs_rel(self):
+        """_movement_abs_rel property"""
+        return self._movement_abs_rel
+
+    @movement_abs_rel.setter
+    def movement_abs_rel(self, movement_abs_rel):
+        """_movement_abs_rel setter"""
+        self._movement_abs_rel = movement_abs_rel
+
+    @property
+    def movement_phase(self):
+        """_movement_phase property"""
+        return self._movement_phase
+
+    @property
+    def speed(self):
+        """_speed property"""
+        return self._speed
+
+    @speed.setter
+    def speed(self, speed):
+        """_speed setter"""
+        self.set_speed(speed)
+
+    @property
+    def max_speed(self):
+        """_max_speed property"""
+        return self._max_speed
+
+    @max_speed.setter
+    def max_speed(self, max_speed):
+        """_max_speed setter"""
+        self.set_max_speed(max_speed)
+
+    @property
+    def max_speed_fullstep(self):
+        """_max_speed_fullstep property"""
+        return self._max_speed
+
+    @max_speed_fullstep.setter
+    def max_speed_fullstep(self, max_speed_fullstep):
+        """_max_speed_fullstep setter"""
+        self.set_max_speed_fullstep(max_speed_fullstep)
+
+    @property
+    def accerlation(self):
+        """_acceleration property"""
+        return self._acceleration
+
+    @accerlation.setter
+    def accerlation(self, accerlation):
+        """_acceleration setter"""
+        self.set_acceleration(accerlation)
+
+    @property
+    def acceleration_fullstep(self):
+        """_acceleration_fullstep property"""
+        return self._acceleration
+
+    @acceleration_fullstep.setter
+    def acceleration_fullstep(self, acceleration_fullstep):
+        """_acceleration_fullstep setter"""
+        self.set_acceleration_fullstep(acceleration_fullstep)
+
 
     from ._tmc_comm import (
         read_reg, read_drv_status, read_gconf, read_gstat, clear_gstat, read_ioin, read_chopconf,
@@ -84,12 +186,10 @@ class Tmc220x:
     )
 
     from ._tmc_move import (
-        set_movement_abs_rel, get_current_position, set_current_position, set_speed,
-        set_speed_fullstep, set_max_speed, set_max_speed_fullstep, get_max_speed,
-        set_acceleration, set_acceleration_fullstep, get_acceleration, stop, get_movement_phase,
-        run_to_position_steps, run_to_position_revolutions, run_to_position_steps_threaded,
-        run_to_position_revolutions_threaded, wait_for_movement_finished_threaded, run,
-        distance_to_go, compute_new_speed, run_speed, make_a_step
+        set_speed, set_speed_fullstep, set_max_speed, set_max_speed_fullstep, get_max_speed,
+        set_acceleration, set_acceleration_fullstep, get_acceleration, stop, run_to_position_steps,
+        run_to_position_revolutions, run_to_position_steps_threaded, run_to_position_revolutions_threaded,
+        wait_for_movement_finished_threaded, run, distance_to_go, compute_new_speed, run_speed, make_a_step
     )
 
     from ._tmc_test import (
@@ -106,7 +206,7 @@ class Tmc220x:
                  serialport:str = "/dev/serial0",
                  driver_address:int = 0,
                  gpio_mode = None,
-                 loglevel:Loglevel = None,
+                 loglevel:Loglevel = Loglevel.INFO,
                  logprefix:str = None,
                  log_handlers: list = None,
                  log_formatter : logging.Formatter = None,
@@ -263,17 +363,6 @@ class Tmc220x:
             int: Steps per revolution
         """
         self._steps_per_rev = self._fullsteps_per_rev*self.read_microstepping_resolution()
-        return self._steps_per_rev
-
-
-
-    def get_steps_per_rev(self):
-        """returns how many steps are needed for one revolution.
-        this gets the cached value from the library.
-
-        Returns:
-            int: Steps per revolution
-        """
         return self._steps_per_rev
 
 
