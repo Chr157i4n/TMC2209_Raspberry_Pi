@@ -19,7 +19,7 @@ class TestTMCUart(unittest.TestCase):
     def setUp(self):
         """setUp"""
         self.tmc_logger = TmcLogger()
-        self.tmc_uart = TmcUart(self.tmc_logger, serialport=None, baudrate=115200)
+        self.tmc_uart = TmcUart(None, 115200, 0, self.tmc_logger)
 
     def test_read_int(self):
         """test_read_int"""

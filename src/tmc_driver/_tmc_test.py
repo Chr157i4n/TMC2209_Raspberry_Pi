@@ -89,7 +89,7 @@ def test_uart(self):
     """test method"""
     self.tmc_logger.log("---")
     self.tmc_logger.log("TEST UART")
-    result = self.tmc_uart.test_uart(TmcRegAddr.IOIN)
+    result = self.tmc_com.test_uart(TmcRegAddr.IOIN)
 
     snd = result[0]
     rtn = result[1]

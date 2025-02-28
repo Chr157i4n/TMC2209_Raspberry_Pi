@@ -36,17 +36,17 @@ logformatter = logging.Formatter('%(name)s %(asctime)s - %(levelname)s - %(messa
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20, skip_uart_init=True,
+    tmc = Tmc2209(21, 16, 20,
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(21, 16, 20, serialport="/dev/ttyAMA0", skip_uart_init=True,
+    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"),
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(13, 6, 5, serialport="/dev/ttyTHS1", skip_uart_init=True,
+    tmc = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"),
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20, skip_uart_init=True,
+    tmc = Tmc2209(21, 16, 20,
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 
 

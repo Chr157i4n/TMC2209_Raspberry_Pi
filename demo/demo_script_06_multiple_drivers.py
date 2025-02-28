@@ -32,10 +32,10 @@ if BOARD == Board.RASPBERRY_PI:
     tmc1 = Tmc2209(21, 16, 20, driver_address=0)
     tmc2 = Tmc2209(26, 13, 19, driver_address=1)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = Tmc2209(21, 16, 20, serialport="/dev/ttyAMA0", driver_address=0)
-    tmc2 = Tmc2209(26, 13, 19, serialport="/dev/ttyAMA0", driver_address=1)
+    tmc1 = Tmc2209(21, 16, 20, tmc_com=TmcUart("/dev/ttyAMA0"), driver_address=0)
+    tmc2 = Tmc2209(26, 13, 19, tmc_com=TmcUart("/dev/ttyAMA0"), driver_address=1)
 elif BOARD == Board.NVIDIA_JETSON:
-    # tmc1 = Tmc2209(13, 6, 5, serialport="/dev/ttyTHS1", driver_address=0)
+    # tmc1 = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"), driver_address=0)
     raise Exception("Not tested for Nvidia Jetson, use with caution")
 else:
     # just in case

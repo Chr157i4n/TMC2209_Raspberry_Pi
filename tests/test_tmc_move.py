@@ -17,7 +17,7 @@ class TestTMCMove(unittest.TestCase):
 
     def setUp(self):
         """setUp"""
-        self.tmc = Tmc2209(21, 16, 20, serialport=None, skip_uart_init=True)
+        self.tmc = Tmc2209(21, 16, 20, tmc_com=None)
 
         # these values are normally set by reading the driver
         self.tmc.mres = 2

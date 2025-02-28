@@ -32,7 +32,7 @@ class Tmc220x:
     """
 
     BOARD:Board = BOARD
-    tmc_uart:TmcUart = None
+    tmc_com:TmcUart = None
     tmc_logger:TmcLogger = None
     _pin_step:int = None
     _pin_dir:int = None
@@ -202,16 +202,13 @@ class Tmc220x:
                  pin_en:int = None,
                  pin_step:int = None,
                  pin_dir:int = None,
-                 baudrate:int = 115200,
-                 serialport:str = "/dev/serial0",
+                 tmc_com:TmcUart = TmcUart("/dev/serial0"),
                  driver_address:int = 0,
                  gpio_mode = None,
                  loglevel:Loglevel = Loglevel.INFO,
                  logprefix:str = None,
-                 log_handlers: list = None,
-                 log_formatter : logging.Formatter = None,
-                 skip_uart_init: bool = False,
-                 fullsteps_per_rev: int = 200
+                 log_handlers:list = None,
+                 log_formatter:logging.Formatter = None
                  ):
         """constructor
 
@@ -219,8 +216,7 @@ class Tmc220x:
             pin_en (int): EN pin number
             pin_step (int, optional): STEP pin number. Defaults to -1.
             pin_dir (int, optional): DIR pin number. Defaults to -1.
-            baudrate (int, optional): baudrate. Defaults to 115200.
-            serialport (str, optional): serialport path. Defaults to "/dev/serial0".
+            tmc_com (TmcUart, optional): TMC UART object. Defaults to None.
             driver_address (int, optional): driver address [0-3]. Defaults to 0.
             gpio_mode (enum, optional): gpio mode. Defaults to None.
             loglevel (enum, optional): loglevel. Defaults to None.
@@ -231,15 +227,15 @@ class Tmc220x:
             log_formatter (logging.Formatter, optional): formatter for the log messages.
                 Defaults to None (messages are logged in the format
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s').
-            skip_uart_init (bool, optional): skip UART init. Defaults to False.
-            fullsteps_per_rev (int, optional): fullsteps per revolution. Defaults to 200.
         """
         if logprefix is None:
             logprefix = f"TMC2209 {driver_address}"
         self.tmc_logger = TmcLogger(loglevel, logprefix, log_handlers, log_formatter)
-        self.tmc_uart = TmcUart(self.tmc_logger, serialport, baudrate, driver_address)
 
-        self._fullsteps_per_rev = fullsteps_per_rev
+        if tmc_com is not None:
+            self.tmc_com = tmc_com
+            self.tmc_com.tmc_logger = self.tmc_logger
+            self.tmc_com.mtr_id = driver_address
 
         self.tmc_logger.log("Init", Loglevel.INFO)
         tmc_gpio.init(gpio_mode)
@@ -261,11 +257,11 @@ class Tmc220x:
 
         self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
 
-        if not skip_uart_init:
+        if tmc_com is not None:
             self.read_steps_per_rev()
             self.clear_gstat()
+            self.tmc_com.flush_serial_buffer()
 
-        self.tmc_uart.flush_serial_buffer()
         self.tmc_logger.log("Init finished", Loglevel.INFO)
 
         self.set_max_speed_fullstep(100)
@@ -292,8 +288,10 @@ class Tmc220x:
             self._deinit_finished= True
         else:
             self.tmc_logger.log("Deinit already finished", Loglevel.INFO)
-        del self.tmc_uart
-        del self.tmc_logger
+        if self.tmc_com is not None:
+            del self.tmc_com
+        if self.tmc_logger is not None:
+            del self.tmc_logger
 
 
 

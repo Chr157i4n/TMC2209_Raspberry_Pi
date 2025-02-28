@@ -27,9 +27,9 @@ print("---")
 if BOARD == Board.RASPBERRY_PI:
     tmc1 = Tmc2209(21, 16, 20)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = Tmc2209(21, 16, 20, serialport="/dev/ttyAMA0")
+    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc1 = Tmc2209(13, 6, 5, serialport="/dev/ttyTHS1")
+    tmc1 = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"))
 else:
     # just in case
     tmc1 = Tmc2209(21, 16, 20)
