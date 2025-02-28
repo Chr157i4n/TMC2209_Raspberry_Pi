@@ -35,7 +35,7 @@ def read_reg(self, reg_addr: TmcRegAddr, log:bool = True):
 
     if log:
         self.tmc_logger.log("---", Loglevel.INFO)
-        self.tmc_logger.log("DRIVER STATUS:", Loglevel.INFO)
+        self.tmc_logger.log(f"{reg_addr.name}:", Loglevel.INFO)
         self.tmc_logger.log(bin(reg_value), Loglevel.INFO)
 
     reg_class = reg_class_mapping[reg_addr]

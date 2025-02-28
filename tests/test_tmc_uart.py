@@ -9,8 +9,8 @@ test for TMC_2209_uart.py
 
 import unittest
 from unittest import  mock
-from src.tmc2209._tmc_logger import *
-from src.tmc2209._tmc_uart import *
+from src.tmc_driver._tmc_logger import *
+from src.tmc_driver._tmc_uart import *
 
 
 class TestTMCUart(unittest.TestCase):

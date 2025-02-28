@@ -88,7 +88,7 @@ class ChopConf():
         logger.log(f"diss2g: {self.diss2g}")
         logger.log(f"dedge: {self.dedge}")
         logger.log(f"intpol: {self.intpol}")
-        logger.log(f"mres: {self.mres} | {self.convert_reg_to_mres()}")
+        logger.log(f"mres: {self.mres} | {self.convert_reg_to_mres()} µsteps")
         logger.log(f"vsense: {self.vsense}")
         logger.log(f"tbl: {self.tbl}")
         logger.log(f"hend: {self.hend}")

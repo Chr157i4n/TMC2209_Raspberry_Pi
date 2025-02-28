@@ -9,14 +9,14 @@ test for TMC_2209_move.py
 """
 
 import unittest
-from src.tmc2209.tmc_2209 import *
+from src.tmc_driver.tmc_2209 import *
 
 class TestTMCMove(unittest.TestCase):
     """TestTMCMove"""
 
     def setUp(self):
         """setUp"""
-        self.tmc = TMC_2209(21, 16, 20, serialport=None, skip_uart_init=True)
+        self.tmc = Tmc2209(21, 16, 20, serialport=None, skip_uart_init=True)
         self.tmc.set_acceleration_fullstep(100000)
         self.tmc.set_max_speed_fullstep(10000)
         self.tmc.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)

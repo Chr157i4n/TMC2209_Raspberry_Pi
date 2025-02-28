@@ -10,8 +10,8 @@ test file for testing multiple drivers via one UART connection
 
 import time
 try:
-    from src.tmc2209.tmc_2209 import *
-    from src.tmc2209._tmc_gpio_board import Board
+    from src.tmc_driver.tmc_2209 import *
+    from src.tmc_driver._tmc_gpio_board import Board
 except ModuleNotFoundError:
     from TMC_2209.TMC_2209_StepperDriver import *
     from TMC_2209._TMC_2209_GPIO_board import Board
@@ -31,18 +31,18 @@ print("---")
 #-----------------------------------------------------------------------
 # Multiple driver not tested
 if BOARD == Board.RASPBERRY_PI:
-    tmc1 = TMC_2209(21, 16, 20, driver_address=0)
-    tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+    tmc1 = Tmc2209(21, 16, 20, driver_address=0)
+    tmc2 = Tmc2209(26, 13, 19, driver_address=1)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0", driver_address=0)
-    tmc2 = TMC_2209(26, 13, 19, serialport="/dev/ttyAMA0", driver_address=1)
+    tmc1 = Tmc2209(21, 16, 20, serialport="/dev/ttyAMA0", driver_address=0)
+    tmc2 = Tmc2209(26, 13, 19, serialport="/dev/ttyAMA0", driver_address=1)
 elif BOARD == Board.NVIDIA_JETSON:
-    # tmc1 = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", driver_address=0)
+    # tmc1 = Tmc2209(13, 6, 5, serialport="/dev/ttyTHS1", driver_address=0)
     raise Exception("Not tested for Nvidia Jetson, use with caution")
 else:
     # just in case
-    tmc1 = TMC_2209(21, 16, 20, driver_address=0)
-    tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+    tmc1 = Tmc2209(21, 16, 20, driver_address=0)
+    tmc2 = Tmc2209(26, 13, 19, driver_address=1)
 
 
 
