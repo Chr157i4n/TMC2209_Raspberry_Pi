@@ -85,11 +85,11 @@ def test_step(self):
 
 
 
-def test_uart(self):
+def test_com(self):
     """test method"""
     self.tmc_logger.log("---")
-    self.tmc_logger.log("TEST UART")
-    result = self.tmc_com.test_uart(TmcRegAddr.IOIN)
+    self.tmc_logger.log("TEST COM")
+    result = self.tmc_com.test_com(TmcRegAddr.IOIN)
 
     snd = result[0]
     rtn = result[1]

@@ -193,7 +193,7 @@ class Tmc220x:
     )
 
     from ._tmc_test import (
-        test_pin, test_dir_step_en, test_step, test_uart
+        test_pin, test_dir_step_en, test_step, test_com
     )
 
 

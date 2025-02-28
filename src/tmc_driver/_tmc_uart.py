@@ -274,28 +274,6 @@ class TmcUart:
 
 
 
-    def set_bit(self, value:int, bit):
-        """this sets a specific bit to 1
-
-        Args:
-            value: value on which the bit should be set
-            bit: which bit to set
-        """
-        return value | (bit)
-
-
-
-    def clear_bit(self, value:int, bit):
-        """this sets a specific bit to 0
-
-        Args:
-            value: value on which the bit should be cleared
-            bit: which bit to clear
-        """
-        return value & ~(bit)
-
-
-
     def handle_error(self):
         """error handling"""
         if self.error_handler_running:
@@ -323,7 +301,7 @@ class TmcUart:
 
 
 
-    def test_uart(self, register:TmcRegAddr):
+    def test_com(self, register:TmcRegAddr):
         """test UART connection
 
         Args:

@@ -65,7 +65,7 @@ tmc.movement_abs_rel = MovementAbsRel.ABSOLUTE
 #-----------------------------------------------------------------------
 print("---\n---")
 
-tmc.test_uart()
+tmc.test_com()
 
 
 print("---\n---")
