@@ -6,7 +6,9 @@
 """TMC_2209 stepper driver module
 """
 
+import statistics
 from .tmc_220x import *
+from ._tmc_gpio_board import GpioPUD
 
 
 
