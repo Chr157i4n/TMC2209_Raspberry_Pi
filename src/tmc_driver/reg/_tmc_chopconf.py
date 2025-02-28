@@ -100,7 +100,7 @@ class ChopConf():
         """converts the µstep resolution to the corresponding register value
 
         Args:
-            msres (int): µstep resolution
+            mres (int): µstep resolution
         """
         mres_bit = int(math.log(mres, 2))
         mres_bit = 8 - mres_bit

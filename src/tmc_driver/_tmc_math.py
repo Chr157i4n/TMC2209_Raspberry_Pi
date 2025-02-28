@@ -57,31 +57,31 @@ def steps_to_rps(steps, steps_per_rev):
     return steps / steps_per_rev
 
 
-def rps_to_tstep(rps, steps_per_rev, msres):
+def rps_to_tstep(rps, steps_per_rev, mres):
     """converts rps -> tstep
 
     Args:
         rps (float): revolutions per second
         steps_per_rev (int): steps per revolution
-        msres (int): µstep resolution
+        mres (int): µstep resolution
 
     Returns:
         tstep (int): time per step
     """
-    return int(round(12000000 / (rps_to_steps(rps, steps_per_rev) * 256 / msres)))
+    return int(round(12000000 / (rps_to_steps(rps, steps_per_rev) * 256 / mres)))
 
 
-def steps_to_tstep(steps, msres):
+def steps_to_tstep(steps, mres):
     """converts steps/second -> tstep
 
     Args:
         steps (int): speed in steps per second
-        msres (int): µstep resolution
+        mres (int): µstep resolution
 
     Returns:
         tstep (int): time per step
     """
-    return int(round(12000000 / (steps * 256 / msres)))
+    return int(round(12000000 / (steps * 256 / mres)))
 
 
 def constrain(val, min_val, max_val):

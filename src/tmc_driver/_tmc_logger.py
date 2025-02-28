@@ -1,6 +1,6 @@
 #pylint: disable=protected-access
 """
-TMC_2209 stepper driver logger module
+Tmc2209 stepper driver logger module
 """
 
 import logging
@@ -21,10 +21,10 @@ class Loglevel(Enum):
 
 
 class TmcLogger:
-    """TMC_2209_logger
+    """Tmc2209_logger
 
     this class has the function:
-    log messages from the TMC_2209 lib
+    log messages from the Tmc2209 lib
     """
 
     def __init__(self,

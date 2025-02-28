@@ -2,7 +2,7 @@
 #pylint: disable=too-many-branches
 #pylint: disable=protected-access
 """
-TMC_2209 stepper driver communication module
+Tmc2209 stepper driver communication module
 """
 
 from ._tmc_logger import Loglevel
@@ -439,10 +439,10 @@ def read_microstepping_resolution(self):
     chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
-    self._msres = chopconf.convert_reg_to_mres()
-    self._steps_per_rev = self._fullsteps_per_rev * self._msres
+    self._mres = chopconf.convert_reg_to_mres()
+    self._steps_per_rev = self._fullsteps_per_rev * self._mres
 
-    return self._msres
+    return self._mres
 
 
 
@@ -453,25 +453,25 @@ def get_microstepping_resolution(self):
     Returns:
         int: µstep resolution
     """
-    return self._msres
+    return self._mres
 
 
 
-def set_microstepping_resolution(self, msres):
+def set_microstepping_resolution(self, mres):
     """sets the current native microstep resolution (1,2,4,8,16,32,64,128,256)
 
     Args:
-        msres (int): µstep resolution; has to be a power of 2 or 1 for fullstep
+        mres (int): µstep resolution; has to be a power of 2 or 1 for fullstep
     """
     chopconf = self.tmc_uart.read_int(TmcRegAddr.CHOPCONF)
     chopconf = ChopConf(chopconf)
 
-    chopconf.convert_mres_to_reg(msres)
+    chopconf.convert_mres_to_reg(mres)
     chopconf_int = chopconf.serialise()
     self.tmc_uart.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
 
-    self._msres = msres
-    self._steps_per_rev = self._fullsteps_per_rev * self._msres
+    self._mres = mres
+    self._steps_per_rev = self._fullsteps_per_rev * self._mres
 
     self.set_mstep_resolution_reg_select(True)
 
@@ -600,7 +600,7 @@ def get_microstep_counter_in_steps(self, offset=0):
     Returns:
         step (int): current Microstep counter convertet to steps
     """
-    step = (self.get_microstep_counter()-64)*(self._msres*4)/1024
-    step = (4*self._msres)-step-1
+    step = (self.get_microstep_counter()-64)*(self._mres*4)/1024
+    step = (4*self._mres)-step-1
     step = round(step)
     return step+offset

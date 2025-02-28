@@ -22,7 +22,7 @@ print("---")
 
 
 #-----------------------------------------------------------------------
-# initiate the TMC_2209 class
+# initiate the Tmc2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
@@ -102,7 +102,7 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# deinitiate the TMC_2209 class
+# deinitiate the Tmc2209 class
 #-----------------------------------------------------------------------
 tmc1.set_motor_enabled(False)
 del tmc1

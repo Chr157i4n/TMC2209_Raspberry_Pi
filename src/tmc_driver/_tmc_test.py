@@ -4,11 +4,11 @@
 #pylint: disable=no-member
 #pylint: disable=bare-except
 """
-TMC_2209 stepper driver communication module
+Tmc2209 stepper driver test module
 """
 
 import time
-from ._tmc_gpio_board import TMC_gpio, Gpio
+from ._tmc_gpio_board import tmc_gpio, Gpio
 from ._tmc_logger import Loglevel
 from ._tmc_move import MovementAbsRel, MovementPhase
 from .reg.bitfields import _tmc_220x_ioin as tmc_ioin_reg
@@ -24,15 +24,15 @@ def test_pin(self, pin, ioin_reg_bp):
     """
     pin_ok = True
 
-    TMC_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
-    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
-    TMC_gpio.gpio_output(self._pin_en, Gpio.HIGH)
+    tmc_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
+    tmc_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    tmc_gpio.gpio_output(self._pin_en, Gpio.HIGH)
 
     ioin = self.read_ioin()
     if not ioin.data >> ioin_reg_bp & 0x1:
         pin_ok = False
 
-    TMC_gpio.gpio_output(pin, Gpio.LOW)
+    tmc_gpio.gpio_output(pin, Gpio.LOW)
     time.sleep(0.1)
 
     ioin = self.read_ioin()
@@ -78,9 +78,9 @@ def test_step(self):
 
     for _ in range(100):
         self._current_pos += 1
-        TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+        tmc_gpio.gpio_output(self._pin_step, Gpio.HIGH)
         time.sleep(0.001)
-        TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
+        tmc_gpio.gpio_output(self._pin_step, Gpio.LOW)
         time.sleep(0.01)
 
 

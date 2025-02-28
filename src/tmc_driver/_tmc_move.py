@@ -4,14 +4,14 @@
 #pylint: disable=protected-access
 #pylint: disable=bare-except
 """
-TMC_2209 stepper driver communication module
+Tmc2209 stepper driver movement module
 """
 
 import time
 from enum import Enum
 import math
 import threading
-from ._tmc_gpio_board import TMC_gpio, Gpio
+from ._tmc_gpio_board import tmc_gpio, Gpio
 from ._tmc_logger import Loglevel
 from . import _tmc_math as tmc_math
 
@@ -44,7 +44,7 @@ class StopMode(Enum):
     HARDSTOP = 2
 
 
-def set_movement_abs_rel(self, movement_abs_rel):
+def set_movement_abs_rel(self, movement_abs_rel:MovementAbsRel):
     """set whether the movement should be relative or absolute by default.
     See the Enum MovementAbsoluteRelative
 
@@ -209,7 +209,7 @@ def get_movement_phase(self):
 
 
 
-def run_to_position_steps(self, steps, movement_abs_rel = None):
+def run_to_position_steps(self, steps, movement_abs_rel:MovementAbsRel = None):
     """runs the motor to the given position.
     with acceleration and deceleration
     blocks the code until finished or stopped from a different thread!
@@ -246,7 +246,7 @@ def run_to_position_steps(self, steps, movement_abs_rel = None):
 
 
 
-def run_to_position_revolutions(self, revolutions, movement_abs_rel = None):
+def run_to_position_revolutions(self, revolutions, movement_abs_rel:MovementAbsRel = None):
     """runs the motor to the given position.
     with acceleration and deceleration
     blocks the code until finished!
@@ -263,7 +263,7 @@ def run_to_position_revolutions(self, revolutions, movement_abs_rel = None):
 
 
 
-def run_to_position_steps_threaded(self, steps, movement_abs_rel = None):
+def run_to_position_steps_threaded(self, steps, movement_abs_rel:MovementAbsRel = None):
     """runs the motor to the given position.
     with acceleration and deceleration
     does not block the code
@@ -284,7 +284,7 @@ def run_to_position_steps_threaded(self, steps, movement_abs_rel = None):
 
 
 
-def run_to_position_revolutions_threaded(self, revolutions, movement_abs_rel = None):
+def run_to_position_revolutions_threaded(self, revolutions, movement_abs_rel:MovementAbsRel = None):
     """runs the motor to the given position.
     with acceleration and deceleration
     does not block the code
@@ -386,7 +386,7 @@ def compute_new_speed(self):
     if self._n == 0:
         # First step from stopped
         self._cn = self._c0
-        TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
+        tmc_gpio.gpio_output(self._pin_step, Gpio.LOW)
         if distance_to > 0:
             self.set_direction_pin_or_reg(1)
             self.tmc_logger.log("going CW", Loglevel.MOVEMENT)
@@ -435,9 +435,9 @@ def make_a_step(self):
 
     for the TMC2209 there needs to be a signal duration of minimum 100 ns
     """
-    TMC_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    tmc_gpio.gpio_output(self._pin_step, Gpio.HIGH)
     time.sleep(1/1000/1000)
-    TMC_gpio.gpio_output(self._pin_step, Gpio.LOW)
+    tmc_gpio.gpio_output(self._pin_step, Gpio.LOW)
     time.sleep(1/1000/1000)
 
     self.tmc_logger.log("one step", Loglevel.MOVEMENT)

@@ -3,7 +3,7 @@
 #pylint: disable=import-outside-toplevel
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
-"""TMC_2209 stepper driver module
+"""Tmc2209 stepper driver module
 """
 
 import statistics
@@ -13,7 +13,7 @@ from ._tmc_gpio_board import GpioPUD
 
 
 class Tmc2209(Tmc220x):
-    """TMC_2209"""
+    """Tmc2209"""
 
     _pin_stallguard = -1
     _sg_callback = None

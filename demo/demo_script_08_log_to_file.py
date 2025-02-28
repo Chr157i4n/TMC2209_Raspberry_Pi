@@ -35,7 +35,7 @@ logformatter = logging.Formatter('%(name)s %(asctime)s - %(levelname)s - %(messa
 
 
 #-----------------------------------------------------------------------
-# initiate the TMC_2209 class
+# initiate the Tmc2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
@@ -73,7 +73,7 @@ tmc.tmc_logger.log("========================", Loglevel.ALL)
 
 
 #-----------------------------------------------------------------------
-# deinitiate the TMC_2209 class
+# deinitiate the Tmc2209 class
 #-----------------------------------------------------------------------
 del tmc
 

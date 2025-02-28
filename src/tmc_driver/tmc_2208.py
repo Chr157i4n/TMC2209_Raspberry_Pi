@@ -1,6 +1,6 @@
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
-"""TMC_2208 stepper driver module
+"""Tmc2208 stepper driver module
 """
 
 from .tmc_220x import *
@@ -8,4 +8,4 @@ from .tmc_220x import *
 
 
 class Tmc2208(Tmc220x):
-    """TMC_2209"""
+    """Tmc2209"""

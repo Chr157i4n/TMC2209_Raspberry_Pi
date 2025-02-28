@@ -5,7 +5,7 @@
 #pylint: disable=too-many-positional-arguments
 #pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
-"""TMC_220X stepper driver module
+"""Tmc220X stepper driver module
 
 this module has two different functions:
 1. change setting in the TMC-driver via UART
@@ -14,7 +14,7 @@ this module has two different functions:
 
 import time
 import logging
-from ._tmc_gpio_board import TMC_gpio, Gpio, GpioMode, BOARD
+from ._tmc_gpio_board import Gpio, GpioMode, Board, BOARD, tmc_gpio
 from ._tmc_uart import TmcUart
 from ._tmc_logger import TmcLogger, Loglevel
 from ._tmc_move import MovementAbsRel, MovementPhase, StopMode
@@ -23,27 +23,27 @@ from . import _tmc_math as tmc_math
 
 
 class Tmc220x:
-    """TMC_220X
+    """Tmc220X
 
     this class has two different functions:
     1. change setting in the TMC-driver via UART
     2. move the motor via STEP/DIR pins
     """
 
-    BOARD = BOARD
-    tmc_uart = None
-    tmc_logger = None
-    _pin_step = -1
-    _pin_dir = -1
-    _pin_en = -1
+    BOARD:Board = BOARD
+    tmc_uart:TmcUart = None
+    tmc_logger:TmcLogger = None
+    _pin_step:int
+    _pin_dir:int
+    _pin_en:int
 
-    _direction = True
+    _direction:bool = True
 
-    _stop = StopMode.NO
+    _stop:StopMode = StopMode.NO
     _starttime = 0
 
 
-    _msres = -1
+    _mres:int = 0
     _steps_per_rev = 0
     _fullsteps_per_rev = 0
 
@@ -98,15 +98,15 @@ class Tmc220x:
 
 
     def __init__(self,
-                 pin_en=-1,
-                 pin_step=-1,
-                 pin_dir=-1,
-                 baudrate=115200,
-                 serialport="/dev/serial0",
-                 driver_address=0,
-                 gpio_mode=None,
-                 loglevel=None,
-                 logprefix=None,
+                 pin_en:int = None,
+                 pin_step:int = None,
+                 pin_dir:int = None,
+                 baudrate:int = 115200,
+                 serialport:str = "/dev/serial0",
+                 driver_address:int = 0,
+                 gpio_mode = None,
+                 loglevel:Loglevel = None,
+                 logprefix:str = None,
                  log_handlers: list = None,
                  log_formatter : logging.Formatter = None,
                  skip_uart_init: bool = False,
@@ -141,22 +141,22 @@ class Tmc220x:
         self._fullsteps_per_rev = fullsteps_per_rev
 
         self.tmc_logger.log("Init", Loglevel.INFO)
-        TMC_gpio.init(gpio_mode)
+        tmc_gpio.init(gpio_mode)
 
         self.tmc_logger.log(f"EN Pin: {pin_en}", Loglevel.DEBUG)
-        if pin_en != -1:
+        if pin_en is not None:
             self._pin_en = pin_en
-            TMC_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
+            tmc_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
 
         self.tmc_logger.log(f"STEP Pin: {pin_step}", Loglevel.DEBUG)
-        if pin_step != -1:
+        if pin_step is not None:
             self._pin_step = pin_step
-            TMC_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
+            tmc_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
 
         self.tmc_logger.log(f"DIR Pin: {pin_dir}", Loglevel.DEBUG)
-        if pin_dir != -1:
+        if pin_dir is not None:
             self._pin_dir = pin_dir
-            TMC_gpio.gpio_setup(self._pin_dir, GpioMode.OUT, initial=self._direction)
+            tmc_gpio.gpio_setup(self._pin_dir, GpioMode.OUT, initial=self._direction)
 
         self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
 
@@ -181,11 +181,11 @@ class Tmc220x:
 
             self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
             if self._pin_step != -1:
-                TMC_gpio.gpio_cleanup(self._pin_step)
+                tmc_gpio.gpio_cleanup(self._pin_step)
             if self._pin_dir != -1:
-                TMC_gpio.gpio_cleanup(self._pin_dir)
+                tmc_gpio.gpio_cleanup(self._pin_dir)
             if self._pin_en != -1:
-                TMC_gpio.gpio_cleanup(self._pin_en)
+                tmc_gpio.gpio_cleanup(self._pin_en)
 
             self.tmc_logger.log("Deinit finished", Loglevel.INFO)
             self._deinit_finished= True
@@ -209,7 +209,7 @@ class Tmc220x:
             en (bool): whether the motor current output should be enabled
         """
         if self._pin_en != -1:
-            TMC_gpio.gpio_output(self._pin_en, not en)
+            tmc_gpio.gpio_output(self._pin_en, not en)
             self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
         else:
             self.tmc_logger.log(f"Motor pin is: {self._pin_en}", Loglevel.INFO)
@@ -220,7 +220,7 @@ class Tmc220x:
         """reverses the motor shaft direction"""
         if self._pin_dir != -1:
             self._direction = not self._direction
-            TMC_gpio.gpio_output(self._pin_dir, self._direction)
+            tmc_gpio.gpio_output(self._pin_dir, self._direction)
         else:
             self.tmc_logger.log(f"Direction pin is: {self._pin_dir}", Loglevel.INFO)
 
@@ -234,7 +234,7 @@ class Tmc220x:
         """
         if self._pin_dir != -1:
             self._direction = direction
-            TMC_gpio.gpio_output(self._pin_dir, direction)
+            tmc_gpio.gpio_output(self._pin_dir, direction)
         else:
             self.tmc_logger.log(f"Direction pin is: {self._pin_dir}", Loglevel.INFO)
 
