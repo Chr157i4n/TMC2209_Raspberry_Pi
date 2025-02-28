@@ -7,6 +7,7 @@
 """
 
 import statistics
+import types
 from .tmc_220x import *
 from ._tmc_gpio_board import GpioPUD
 
@@ -15,9 +16,9 @@ from ._tmc_gpio_board import GpioPUD
 class Tmc2209(Tmc220x):
     """Tmc2209"""
 
-    _pin_stallguard = -1
-    _sg_callback = None
-    _sg_threshold = 100             # threshold for stallguard
+    _pin_stallguard:int = None
+    _sg_callback:types.FunctionType = None
+    _sg_threshold:int = 100             # threshold for stallguard
 
 
 
@@ -29,7 +30,7 @@ class Tmc2209(Tmc220x):
     def __del__(self):
         """destructor"""
         if self._deinit_finished is False:
-            if self._pin_stallguard != -1:
+            if self._pin_stallguard is not None:
                 tmc_gpio.gpio_remove_event_detect(self._pin_stallguard)
                 tmc_gpio.gpio_cleanup(self._pin_stallguard)
 

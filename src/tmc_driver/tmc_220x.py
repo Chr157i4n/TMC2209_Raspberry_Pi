@@ -14,6 +14,7 @@ this module has two different functions:
 
 import time
 import logging
+import threading
 from ._tmc_gpio_board import Gpio, GpioMode, Board, BOARD, tmc_gpio
 from ._tmc_uart import TmcUart
 from ._tmc_logger import TmcLogger, Loglevel
@@ -33,41 +34,41 @@ class Tmc220x:
     BOARD:Board = BOARD
     tmc_uart:TmcUart = None
     tmc_logger:TmcLogger = None
-    _pin_step:int
-    _pin_dir:int
-    _pin_en:int
+    _pin_step:int = None
+    _pin_dir:int = None
+    _pin_en:int = None
 
     _direction:bool = True
 
     _stop:StopMode = StopMode.NO
-    _starttime = 0
+    _starttime:int = 0
 
 
     _mres:int = 0
-    _steps_per_rev = 0
-    _fullsteps_per_rev = 0
+    _steps_per_rev:int = 0
+    _fullsteps_per_rev:int = 0
 
-    _current_pos = 0                 # current position of stepper in steps
-    _target_pos = 0                  # the target position in steps
-    _speed = 0.0                    # the current speed in steps per second
-    _max_speed = 1.0                 # the maximum speed in steps per second
-    _max_speed_homing = 200           # the maximum speed in steps per second for homing
-    _acceleration = 1.0             # the acceleration in steps per second per second
-    _acceleration_homing = 10000     # the acceleration in steps per second per second for homing
-    _sqrt_twoa = 1.0                # Precomputed sqrt(2*_acceleration)
-    _step_interval = 0               # the current interval between two steps
-    _min_pulse_width = 1              # minimum allowed pulse with in microseconds
-    _last_step_time = 0               # The last step time in microseconds
-    _n = 0                          # step counter
-    _c0 = 0                         # Initial step size in microseconds
-    _cn = 0                         # Last step size in microseconds
-    _cmin = 0                       # Min step size in microseconds based on maxSpeed
-    _movement_abs_rel = MovementAbsRel.ABSOLUTE
-    _movement_phase = MovementPhase.STANDSTILL
+    _current_pos:int = 0                 # current position of stepper in steps
+    _target_pos:int = 0                  # the target position in steps
+    _speed:float = 0.0                    # the current speed in steps per second
+    _max_speed:float = 1.0                 # the maximum speed in steps per second
+    _max_speed_homing:float = 200           # the maximum speed in steps per second for homing
+    _acceleration:float = 1.0             # the acceleration in steps per second per second
+    _acceleration_homing:float = 10000     # the acceleration in steps per second per second for homing
+    _sqrt_twoa:float = 1.0                # Precomputed sqrt(2*_acceleration)
+    _step_interval:int = 0               # the current interval between two steps
+    _min_pulse_width:int = 1              # minimum allowed pulse with in microseconds
+    _last_step_time:int = 0               # The last step time in microseconds
+    _n:int = 0                          # step counter
+    _c0:int = 0                         # Initial step size in microseconds
+    _cn:int = 0                         # Last step size in microseconds
+    _cmin:int = 0                       # Min step size in microseconds based on maxSpeed
+    _movement_abs_rel:MovementAbsRel = MovementAbsRel.ABSOLUTE
+    _movement_phase:MovementPhase = MovementPhase.STANDSTILL
 
-    _movement_thread = None
+    _movement_thread:threading.Thread = None
 
-    _deinit_finished = False
+    _deinit_finished:bool = False
 
 
 
@@ -180,11 +181,11 @@ class Tmc220x:
             self.set_motor_enabled(False)
 
             self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
-            if self._pin_step != -1:
+            if self._pin_step is not None:
                 tmc_gpio.gpio_cleanup(self._pin_step)
-            if self._pin_dir != -1:
+            if self._pin_dir is not None:
                 tmc_gpio.gpio_cleanup(self._pin_dir)
-            if self._pin_en != -1:
+            if self._pin_en is not None:
                 tmc_gpio.gpio_cleanup(self._pin_en)
 
             self.tmc_logger.log("Deinit finished", Loglevel.INFO)
