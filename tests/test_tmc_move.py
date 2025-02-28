@@ -4,6 +4,7 @@
 #pylint: disable=pointless-statement
 #pylint: disable=unused-wildcard-import
 #pylint: disable=bare-except
+#pylint: disable=protected-access
 """
 test for _tmc_move.py
 """
