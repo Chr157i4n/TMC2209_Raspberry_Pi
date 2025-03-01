@@ -48,17 +48,17 @@ class Tmc220x:
     _steps_per_rev:int = 0
     _fullsteps_per_rev:int = 0
 
-    _current_pos:int = 0                 # current position of stepper in steps
-    _target_pos:int = 0                  # the target position in steps
-    _speed:float = 0.0                    # the current speed in steps per second
-    _max_speed:float = 1.0                 # the maximum speed in steps per second
-    _max_speed_homing:float = 200           # the maximum speed in steps per second for homing
-    _acceleration:float = 1.0             # the acceleration in steps per second per second
-    _acceleration_homing:float = 10000     # the acceleration in steps per second per second for homing
-    _sqrt_twoa:float = 1.0                # Precomputed sqrt(2*_acceleration)
-    _step_interval:int = 0               # the current interval between two steps
-    _min_pulse_width:int = 1              # minimum allowed pulse with in microseconds
-    _last_step_time:int = 0               # The last step time in microseconds
+    _current_pos:int = 0                # current position of stepper in steps
+    _target_pos:int = 0                 # the target position in steps
+    _speed:int = 0                      # the current speed in steps per second
+    _max_speed:int = 1                  # the maximum speed in steps per second
+    _max_speed_homing:int = 200         # the maximum speed in steps per second for homing
+    _acceleration:int = 1               # the acceleration in steps per second per second
+    _acceleration_homing:int = 10000    # the acceleration in steps per second per second for homing
+    _sqrt_twoa:float = 1.0              # Precomputed sqrt(2*_acceleration)
+    _step_interval:int = 0              # the current interval between two steps
+    _min_pulse_width:int = 1            # minimum allowed pulse with in microseconds
+    _last_step_time:int = 0             # The last step time in microseconds
     _n:int = 0                          # step counter
     _c0:int = 0                         # Initial step size in microseconds
     _cn:int = 0                         # Last step size in microseconds
@@ -82,7 +82,7 @@ class Tmc220x:
         return self._fullsteps_per_rev
 
     @fullsteps_per_rev.setter
-    def fullsteps_per_rev(self, fullsteps_per_rev):
+    def fullsteps_per_rev(self, fullsteps_per_rev:int):
         """_fullsteps_per_rev setter"""
         self._fullsteps_per_rev = fullsteps_per_rev
         self._steps_per_rev = self._fullsteps_per_rev * self._mres
@@ -93,7 +93,7 @@ class Tmc220x:
         return self._mres
 
     @mres.setter
-    def mres(self, mres):
+    def mres(self, mres:int):
         """_mres setter"""
         self._mres = mres
         self._steps_per_rev = self._fullsteps_per_rev * self._mres
@@ -104,7 +104,7 @@ class Tmc220x:
         return self._current_pos
 
     @current_pos.setter
-    def current_pos(self, current_pos):
+    def current_pos(self, current_pos:int):
         """_current_pos setter"""
         self._current_pos = current_pos
 
@@ -114,7 +114,7 @@ class Tmc220x:
         return self._movement_abs_rel
 
     @movement_abs_rel.setter
-    def movement_abs_rel(self, movement_abs_rel):
+    def movement_abs_rel(self, movement_abs_rel:MovementAbsRel):
         """_movement_abs_rel setter"""
         self._movement_abs_rel = movement_abs_rel
 
@@ -129,7 +129,7 @@ class Tmc220x:
         return self._speed
 
     @speed.setter
-    def speed(self, speed):
+    def speed(self, speed:int):
         """_speed setter"""
         self.set_speed(speed)
 
@@ -139,7 +139,7 @@ class Tmc220x:
         return self._max_speed
 
     @max_speed.setter
-    def max_speed(self, max_speed):
+    def max_speed(self, max_speed:int):
         """_max_speed setter"""
         self.set_max_speed(max_speed)
 
@@ -149,7 +149,7 @@ class Tmc220x:
         return self._max_speed
 
     @max_speed_fullstep.setter
-    def max_speed_fullstep(self, max_speed_fullstep):
+    def max_speed_fullstep(self, max_speed_fullstep:int):
         """_max_speed_fullstep setter"""
         self.set_max_speed_fullstep(max_speed_fullstep)
 
@@ -159,7 +159,7 @@ class Tmc220x:
         return self._acceleration
 
     @accerlation.setter
-    def accerlation(self, accerlation):
+    def accerlation(self, accerlation:int):
         """_acceleration setter"""
         self.set_acceleration(accerlation)
 
@@ -169,7 +169,7 @@ class Tmc220x:
         return self._acceleration
 
     @acceleration_fullstep.setter
-    def acceleration_fullstep(self, acceleration_fullstep):
+    def acceleration_fullstep(self, acceleration_fullstep:int):
         """_acceleration_fullstep setter"""
         self.set_acceleration_fullstep(acceleration_fullstep)
 

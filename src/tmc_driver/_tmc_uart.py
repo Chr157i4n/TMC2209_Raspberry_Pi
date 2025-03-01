@@ -7,10 +7,10 @@ TmcUart stepper driver uart module
 import time
 import struct
 import serial
-
+from typing import List
 from .reg._tmc_220x_reg_addr import TmcRegAddr
 from .reg._tmc_gstat import GStat
-from ._tmc_logger import Loglevel
+from ._tmc_logger import TmcLogger, Loglevel
 
 
 class TmcUart:
@@ -20,22 +20,22 @@ class TmcUart:
     it can be used to change the settings of the TMC.
     like the current or the microsteppingmode
     """
-    _tmc_logger = None
+    _tmc_logger:TmcLogger = None
 
-    mtr_id = 0
-    ser = None
-    r_frame  = [0x55, 0, 0, 0  ]
-    w_frame  = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
-    communication_pause = 0
-    error_handler_running = False
+    mtr_id:int = 0
+    ser:serial.Serial = None
+    r_frame:List[int] = [0x55, 0, 0, 0  ]
+    w_frame:List[int] = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
+    communication_pause:int = 0
+    error_handler_running:bool = False
 
     @property
-    def tmc_logger(self):
+    def tmc_logger(self) -> TmcLogger:
         """get the tmc_logger"""
         return self._tmc_logger
 
     @tmc_logger.setter
-    def tmc_logger(self, tmc_logger):
+    def tmc_logger(self, tmc_logger:TmcLogger):
         """set the tmc_logger"""
         self._tmc_logger = tmc_logger
 

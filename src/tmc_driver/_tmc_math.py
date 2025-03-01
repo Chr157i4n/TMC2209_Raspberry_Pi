@@ -4,7 +4,7 @@ TMC2209_Raspberry_Pi math library
 
 
 
-def rps_to_vactual(rps, steps_per_rev, fclk = 12000000):
+def rps_to_vactual(rps, steps_per_rev:int, fclk:int = 12000000) -> int:
     """converts rps -> vactual
 
     Args:
@@ -18,7 +18,7 @@ def rps_to_vactual(rps, steps_per_rev, fclk = 12000000):
     return int(round(rps / (fclk / 16777216) * steps_per_rev))
 
 
-def vactual_to_rps(vactual, steps_per_rev, fclk = 12000000):
+def vactual_to_rps(vactual:int, steps_per_rev:int, fclk:int = 12000000) -> float:
     """converts vactual -> rps
 
     Args:
@@ -32,7 +32,7 @@ def vactual_to_rps(vactual, steps_per_rev, fclk = 12000000):
     return vactual * (fclk / 16777216) / steps_per_rev
 
 
-def rps_to_steps(rps, steps_per_rev):
+def rps_to_steps(rps:float, steps_per_rev:int) -> int:
     """converts rps -> steps/second
 
     Args:
@@ -42,9 +42,9 @@ def rps_to_steps(rps, steps_per_rev):
     Returns:
         steps (int): steps per second
     """
-    return rps * steps_per_rev
+    return int(round(rps * steps_per_rev))
 
-def steps_to_rps(steps, steps_per_rev):
+def steps_to_rps(steps:int, steps_per_rev:int) -> float:
     """converts steps/second -> rps
 
     Args:
@@ -57,7 +57,7 @@ def steps_to_rps(steps, steps_per_rev):
     return steps / steps_per_rev
 
 
-def rps_to_tstep(rps, steps_per_rev, mres):
+def rps_to_tstep(rps:float, steps_per_rev:int, mres:int) -> int:
     """converts rps -> tstep
 
     Args:
@@ -71,7 +71,7 @@ def rps_to_tstep(rps, steps_per_rev, mres):
     return int(round(12000000 / (rps_to_steps(rps, steps_per_rev) * 256 / mres)))
 
 
-def steps_to_tstep(steps, mres):
+def steps_to_tstep(steps:int, mres:int) -> int:
     """converts steps/second -> tstep
 
     Args:
@@ -84,7 +84,7 @@ def steps_to_tstep(steps, mres):
     return int(round(12000000 / (steps * 256 / mres)))
 
 
-def constrain(val, min_val, max_val):
+def constrain(val:int, min_val:int, max_val:int) -> int:
     """constrains a value between a min and a max
 
     Args:
