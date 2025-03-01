@@ -6,8 +6,8 @@ TmcUart stepper driver uart module
 
 import time
 import struct
-import serial
 from typing import List
+import serial
 from .reg._tmc_220x_reg_addr import TmcRegAddr
 from .reg._tmc_gstat import GStat
 from ._tmc_logger import TmcLogger, Loglevel
