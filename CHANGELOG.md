@@ -1,5 +1,11 @@
 # Changelog
 
+## version 0.6
+
+- refactored deserialisation and serialisation of register values to use classes
+- changed file names according to PEP8
+- changed class names according to PEP8
+
 ## version 0.5.7
 
 - refactored GPIO access to use inherited classes

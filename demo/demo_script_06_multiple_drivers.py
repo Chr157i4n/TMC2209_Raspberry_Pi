@@ -10,11 +10,9 @@ test file for testing multiple drivers via one UART connection
 
 import time
 try:
-    from src.TMC_2209.TMC_2209_StepperDriver import *
-    from src.TMC_2209._TMC_2209_GPIO_board import Board
+    from src.tmc_driver.tmc_2209 import *
 except ModuleNotFoundError:
-    from TMC_2209.TMC_2209_StepperDriver import *
-    from TMC_2209._TMC_2209_GPIO_board import Board
+    from tmc_driver.tmc_2209 import *
 
 
 print("---")
@@ -26,23 +24,23 @@ print("---")
 
 
 #-----------------------------------------------------------------------
-# initiate the TMC_2209 class
+# initiate the Tmc2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 # Multiple driver not tested
 if BOARD == Board.RASPBERRY_PI:
-    tmc1 = TMC_2209(21, 16, 20, driver_address=0)
-    tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"), driver_address=0)
+    tmc2 = Tmc2209(26, 13, 19, TmcUart("/dev/serial0"), driver_address=1)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0", driver_address=0)
-    tmc2 = TMC_2209(26, 13, 19, serialport="/dev/ttyAMA0", driver_address=1)
+    tmc1 = Tmc2209(21, 16, 20, tmc_com=TmcUart("/dev/ttyAMA0"), driver_address=0)
+    tmc2 = Tmc2209(26, 13, 19, tmc_com=TmcUart("/dev/ttyAMA0"), driver_address=1)
 elif BOARD == Board.NVIDIA_JETSON:
-    # tmc1 = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1", driver_address=0)
+    # tmc1 = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"), driver_address=0)
     raise Exception("Not tested for Nvidia Jetson, use with caution")
 else:
     # just in case
-    tmc1 = TMC_2209(21, 16, 20, driver_address=0)
-    tmc2 = TMC_2209(26, 13, 19, driver_address=1)
+    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"), driver_address=0)
+    tmc2 = Tmc2209(26, 13, 19, TmcUart("/dev/serial0"), driver_address=1)
 
 
 
@@ -56,11 +54,11 @@ else:
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.tmc_logger.set_loglevel(Loglevel.DEBUG)
-tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc1.tmc_logger.loglevel = Loglevel.DEBUG
+tmc1.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
-tmc2.tmc_logger.set_loglevel(Loglevel.DEBUG)
-tmc2.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc2.tmc_logger.loglevel = Loglevel.DEBUG
+tmc2.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
 
 
@@ -88,7 +86,7 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# deinitiate the TMC_2209 class
+# deinitiate the Tmc2209 class
 #-----------------------------------------------------------------------
 tmc1.set_motor_enabled(False)
 tmc2.set_motor_enabled(False)

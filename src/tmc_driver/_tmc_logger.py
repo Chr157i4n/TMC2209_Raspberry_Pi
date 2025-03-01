@@ -1,7 +1,6 @@
-#pylint: disable=invalid-name
 #pylint: disable=protected-access
 """
-TMC_2209 stepper driver logger module
+Tmc2209 stepper driver logger module
 """
 
 import logging
@@ -21,12 +20,27 @@ class Loglevel(Enum):
 
 
 
-class TMC_logger:
-    """TMC_2209_logger
+class TmcLogger:
+    """Tmc2209_logger
 
     this class has the function:
-    log messages from the TMC_2209 lib
+    log messages from the Tmc2209 lib
     """
+
+    _loglevel: Loglevel = Loglevel.INFO
+
+
+    @property
+    def loglevel(self):
+        """get the loglevel"""
+        return self._loglevel
+
+    @loglevel.setter
+    def loglevel(self, loglevel: Loglevel):
+        """set the loglevel"""
+        self._loglevel = loglevel
+        self.logger.setLevel(loglevel.value)
+
 
     def __init__(self,
                  loglevel: Loglevel = Loglevel.INFO,
@@ -51,7 +65,6 @@ class TMC_logger:
         self.logger = logging.getLogger(logprefix)
 
         self.loglevel = loglevel
-        self.set_loglevel(loglevel)
         if formatter is None:
             formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         self.formatter = formatter
@@ -66,6 +79,7 @@ class TMC_logger:
 
         self.logger.propagate = True
 
+
     def set_logprefix(self, logprefix: str):
         """set the logprefix.
 
@@ -74,17 +88,6 @@ class TMC_logger:
         """
         self.logger.name = logprefix
 
-    def set_loglevel(self, loglevel: Loglevel):
-        """set the loglevel. See the Enum Loglevel
-
-        Args:
-            loglevel (enum): level for which to log
-        """
-        if loglevel is None:
-            # This is safer than setting it to Loglevel.NONE (no messages will be logged)
-            loglevel = Loglevel.INFO
-        self.loglevel = loglevel
-        self.logger.setLevel(loglevel.value)
 
     def add_handler(self, handler, formatter=None):
         """add a handler to the logger
@@ -99,6 +102,7 @@ class TMC_logger:
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
+
     def remove_handler(self, handler):
         """remove a handler from the logger
 
@@ -107,10 +111,12 @@ class TMC_logger:
         """
         self.logger.removeHandler(handler)
 
+
     def remove_all_handlers(self):
         """remove all handlers from the logger"""
         for handler in self.logger.handlers:
             self.logger.removeHandler(handler)
+
 
     def set_formatter(self, formatter, handlers=None):
         """set a new formatter for the log messages
@@ -126,6 +132,7 @@ class TMC_logger:
             handlers = self.logger.handlers
         for handler in handlers:
             handler.setFormatter(formatter)
+
 
     @staticmethod
     def _add_logging_level(level_name: str, level_num: int, method_name: str = None):

@@ -16,10 +16,11 @@ and import the corresponding GPIO module
 Can be extended to support BeagleBone or other boards
 """
 
+import types
 from os.path import exists
 from enum import Enum, IntEnum
 from importlib import import_module
-from ._TMC_2209_logger import TMC_logger, Loglevel
+from ._tmc_logger import TmcLogger, Loglevel
 
 # ------------------------------
 # LIB           | BOARD
@@ -58,11 +59,12 @@ class GpioPUD(IntEnum):
     PUD_DOWN = 21
 
 BOARD = Board.UNKNOWN
-dependencies_logger = TMC_logger(Loglevel.DEBUG, "DEPENDENCIES")
+dependencies_logger = TmcLogger(Loglevel.DEBUG, "DEPENDENCIES")
 
 
 class BaseGPIOWrapper:
     """Base class for GPIO wrappers"""
+
     def init(self, gpio_mode=None):
         """initialize GPIO library"""
         raise NotImplementedError
@@ -71,27 +73,27 @@ class BaseGPIOWrapper:
         """deinitialize GPIO library"""
         raise NotImplementedError
 
-    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+    def gpio_setup(self, pin:int, mode:GpioMode, initial:Gpio=Gpio.LOW, pull_up_down:GpioPUD=GpioPUD.PUD_OFF):
         """setup GPIO pin"""
         raise NotImplementedError
 
-    def gpio_cleanup(self, pin):
+    def gpio_cleanup(self, pin:int):
         """cleanup GPIO pin"""
         raise NotImplementedError
 
-    def gpio_input(self, pin):
+    def gpio_input(self, pin:int):
         """read GPIO pin"""
         raise NotImplementedError
 
-    def gpio_output(self, pin, value):
+    def gpio_output(self, pin:int, value):
         """write GPIO pin"""
         raise NotImplementedError
 
-    def gpio_add_event_detect(self, pin, callback):
+    def gpio_add_event_detect(self, pin:int, callback:types.FunctionType):
         """add event detect"""
         raise NotImplementedError
 
-    def gpio_remove_event_detect(self, pin):
+    def gpio_remove_event_detect(self, pin:int):
         """remove event detect"""
         raise NotImplementedError
 
@@ -109,7 +111,7 @@ class BaseRPiGPIOWrapper(BaseGPIOWrapper):
         """deinitialize GPIO library"""
         self.GPIO.cleanup()
 
-    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+    def gpio_setup(self, pin:int, mode:GpioMode, initial:Gpio=Gpio.LOW, pull_up_down:GpioPUD=GpioPUD.PUD_OFF):
         """setup GPIO pin"""
         initial = int(initial)
         pull_up_down = int(pull_up_down)
@@ -119,23 +121,23 @@ class BaseRPiGPIOWrapper(BaseGPIOWrapper):
         else:
             self.GPIO.setup(pin, mode, pull_up_down=pull_up_down)
 
-    def gpio_cleanup(self, pin):
+    def gpio_cleanup(self, pin:int):
         """cleanup GPIO pin"""
         self.GPIO.cleanup(pin)
 
-    def gpio_input(self, pin):
+    def gpio_input(self, pin:int):
         """read GPIO pin"""
         return self.GPIO.input(pin)
 
-    def gpio_output(self, pin, value):
+    def gpio_output(self, pin:int, value):
         """write GPIO pin"""
         self.GPIO.output(pin, value)
 
-    def gpio_add_event_detect(self, pin, callback):
+    def gpio_add_event_detect(self, pin:int, callback:types.FunctionType):
         """add event detect"""
         self.GPIO.add_event_detect(pin, self.GPIO.RISING, callback=callback, bouncetime=300)
 
-    def gpio_remove_event_detect(self, pin):
+    def gpio_remove_event_detect(self, pin:int):
         """remove event detect"""
         self.GPIO.remove_event_detect(pin)
 
@@ -188,36 +190,37 @@ class GpiozeroWrapper(BaseGPIOWrapper):
         """deinitialize GPIO library. pass on gpiozero"""
         pass
 
-    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+    def gpio_setup(self, pin:int, mode:GpioMode, initial:Gpio=Gpio.LOW, pull_up_down:GpioPUD=GpioPUD.PUD_OFF):
         """setup GPIO pin"""
         if mode == GpioMode.OUT:
             self._gpios[pin] = self.gpiozero.DigitalOutputDevice(pin)
         else:
             self._gpios[pin] = self.gpiozero.DigitalInputDevice(pin)
 
-    def gpio_cleanup(self, pin):
+    def gpio_cleanup(self, pin:int):
         """cleanup GPIO pin"""
         self._gpios[pin].close()
 
-    def gpio_input(self, pin):
+    def gpio_input(self, pin:int):
         """read GPIO pin"""
         return self._gpios[pin].value
 
-    def gpio_output(self, pin, value):
+    def gpio_output(self, pin:int, value):
         """write GPIO pin"""
         self._gpios[pin].value = value
 
-    def gpio_add_event_detect(self, pin, callback):
+    def gpio_add_event_detect(self, pin:int, callback:types.FunctionType):
         """add event detect"""
         self._gpios[pin].when_activated = callback
 
-    def gpio_remove_event_detect(self, pin):
+    def gpio_remove_event_detect(self, pin:int):
         """remove event detect"""
         if self._gpios[pin].when_activated is not None:
             self._gpios[pin].when_activated = None
 
 class peripheryWrapper(BaseGPIOWrapper):
     """periphery GPIO wrapper"""
+
     def __init__(self):
         """constructor, imports periphery"""
         self.periphery = import_module('periphery')
@@ -232,20 +235,20 @@ class peripheryWrapper(BaseGPIOWrapper):
         """deinitialize GPIO library. pass on periphery"""
         pass
 
-    def gpio_setup(self, pin, mode, initial=Gpio.LOW, pull_up_down=GpioPUD.PUD_OFF):
+    def gpio_setup(self, pin:int, mode:GpioMode, initial:Gpio=Gpio.LOW, pull_up_down:GpioPUD=GpioPUD.PUD_OFF):
         """setup GPIO pin"""
         mode = 'out' if (mode == GpioMode.OUT) else 'in'
         self._gpios[pin] = self.periphery.GPIO(pin, mode)
 
-    def gpio_cleanup(self, pin):
+    def gpio_cleanup(self, pin:int):
         """cleanup GPIO pin"""
         self._gpios[pin].close()
 
-    def gpio_input(self, pin):
+    def gpio_input(self, pin:int):
         """read GPIO pin"""
         return self._gpios[pin].read()
 
-    def gpio_output(self, pin, value):
+    def gpio_output(self, pin:int, value):
         """write GPIO pin"""
         self._gpios[pin].write(bool(value))
 
@@ -315,4 +318,4 @@ def initialize_gpio():
     except ImportError:
         return MockGPIOWrapper(), Board.UNKNOWN
 
-TMC_gpio, BOARD = initialize_gpio()
+tmc_gpio, BOARD = initialize_gpio()

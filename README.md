@@ -158,8 +158,8 @@ So you don't need to connect anything to the Vio pin of the driver.
 ## Usage
 
 ```python
-from TMC_2209.TMC_2209_StepperDriver import *
-tmc = TMC_2209(21, 16, 20)
+from tmc_driver.tmc_2209 import *
+tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
 
 tmc.set_direction_reg(False)
 tmc.set_current(300)

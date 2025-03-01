@@ -8,11 +8,10 @@ test file for testing movement of motors with threads
 
 import time
 try:
-    from src.TMC_2209.TMC_2209_StepperDriver import *
-    from src.TMC_2209._TMC_2209_GPIO_board import Board
+    from src.tmc_driver.tmc_2209 import *
 except ModuleNotFoundError:
-    from TMC_2209.TMC_2209_StepperDriver import *
-    from TMC_2209._TMC_2209_GPIO_board import Board
+    from tmc_driver.tmc_2209 import *
+
 
 print("---")
 print("SCRIPT START")
@@ -22,18 +21,18 @@ print("---")
 
 
 #-----------------------------------------------------------------------
-# initiate the TMC_2209 class
+# initiate the Tmc2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc1 = TMC_2209(21, 16, 20)
+    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = TMC_2209(21, 16, 20, serialport="/dev/ttyAMA0")
+    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc1 = TMC_2209(13, 6, 5, serialport="/dev/ttyTHS1")
+    tmc1 = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"))
 else:
     # just in case
-    tmc1 = TMC_2209(21, 16, 20)
+    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
 
 tmc_driverlist = [tmc1]
 
@@ -45,8 +44,8 @@ tmc_driverlist = [tmc1]
 # set whether the movement should be relative or absolute
 # both optional
 #-----------------------------------------------------------------------
-tmc1.tmc_logger.set_loglevel(Loglevel.DEBUG)
-tmc1.set_movement_abs_rel(MovementAbsRel.ABSOLUTE)
+tmc1.tmc_logger.loglevel = Loglevel.DEBUG
+tmc1.movement_abs_rel = MovementAbsRel.ABSOLUTE
 
 
 
@@ -63,8 +62,8 @@ for tmc in tmc_driverlist:
     tmc.set_internal_rsense(False)
     tmc.set_motor_enabled(True)
 
-    tmc.set_acceleration_fullstep(1000)
-    tmc.set_max_speed_fullstep(250)
+    tmc.acceleration_fullstep = 1000
+    tmc.max_speed_fullstep = 250
 
 
 print("---\n---")
@@ -87,9 +86,9 @@ tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
 
 
 # while the motor is still moving
-while tmc1.get_movement_phase() != MovementPhase.STANDSTILL:
+while tmc1.movement_phase != MovementPhase.STANDSTILL:
     # print the current movement phase
-    print(tmc1.get_movement_phase())
+    print(tmc1.movement_phase)
     time.sleep(0.02)
 
 tmc1.wait_for_movement_finished_threaded()
@@ -102,7 +101,7 @@ print("---\n---")
 
 
 #-----------------------------------------------------------------------
-# deinitiate the TMC_2209 class
+# deinitiate the Tmc2209 class
 #-----------------------------------------------------------------------
 tmc1.set_motor_enabled(False)
 del tmc1

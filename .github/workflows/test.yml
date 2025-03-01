@@ -4,7 +4,11 @@ on: [push, pull_request]
 
 jobs:
   markdownlint:
+    name: Markdown-Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     steps:
     - uses: actions/checkout@v4
     - uses: DavidAnson/markdownlint-cli2-action@v14
@@ -14,11 +18,17 @@ jobs:
           CHANGELOG.md
           docs/*.md
 
+
   pylint:
+    name: Pylint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     strategy:
       matrix:
         python-version: ["3.9", "3.12", "3.13"]
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -31,18 +41,24 @@ jobs:
         pip install pylint
         pip install gpiozero
         pip install RPi.GPIO
-        pip install Mock.GPIO
+        pip install git+https://github.com/Chr157i4n/Mock.GPIO
         pip install mock
         pip install pyserial
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py') --disable=C0103 --disable=W0511 --disable=W0012 --extension-pkg-whitelist=RPi --max-line-length=160
 
+
   unittest:
+    name: Unittests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     strategy:
       matrix:
         python-version: ["3.9", "3.12", "3.13"]
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -54,8 +70,70 @@ jobs:
         python -m pip install --upgrade pip
         pip install gpiozero
         pip install RPi.GPIO
-        pip install Mock.GPIO
+        pip install git+https://github.com/Chr157i4n/Mock.GPIO
         pip install pyserial
     - name: Run unittests
       run: |
         python -m unittest
+
+
+  codeql:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: python
+          build-mode: none
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
+
+  grype-scan:
+    permissions:
+      contents: write # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the code
+      uses: actions/checkout@v4
+    - name: Create SBOM
+      run: |
+        npm install -g @cyclonedx/cdxgen
+        cdxgen -r . -o bom.json
+    - name: Upload SBOM Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom
+        path: bom.json
+    - name: Scan project
+      uses: anchore/scan-action@v6.1.0
+      id: scan
+      with:
+        sbom: "bom.json"
+        fail-build: true
+        severity-cutoff: critical
+        add-cpes-if-none: true
+    - name: Upload vulnerability report
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.scan.outputs.sarif }}
