@@ -25,14 +25,14 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc1 = Tmc2209(TmcMotionControlStepDir(16, 20), 21, TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = Tmc2209(TmcMotionControlStepDir(16, 20), 21, TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc1 = Tmc2209(TmcMotionControlStepDir(6, 5), 13, TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
+    tmc1 = Tmc2209(TmcEnableControlPin(13), TmcMotionControlStepDir(6, 5), TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
-    tmc1 = Tmc2209(TmcMotionControlStepDir(16, 20), 21, TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 tmc_driverlist = [tmc1]
 

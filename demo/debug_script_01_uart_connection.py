@@ -26,11 +26,11 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(None)
+    tmc = Tmc2209(None, None)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(None)
+    tmc = Tmc2209(None, None)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(None)
+    tmc = Tmc2209(None, None)
 else:
     # just in case
     tmc = Tmc2209(None)

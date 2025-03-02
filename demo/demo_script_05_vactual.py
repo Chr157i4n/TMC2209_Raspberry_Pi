@@ -26,16 +26,14 @@ print("---")
 # use your pin for pin_en here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(TmcMotionControlVActual(), 21, TmcComUart("/dev/serial0"))
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlVActual(), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(TmcMotionControlVActual(), 21, TmcComUart("/dev/ttyAMA0"))
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlVActual(), TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(TmcMotionControlVActual(), 13, TmcComUart("/dev/ttyTHS1"))
+    tmc = Tmc2209(TmcEnableControlPin(13), TmcMotionControlVActual(), TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
-    tmc = Tmc2209(TmcMotionControlVActual(), 21, TmcComUart("/dev/serial0"))
-
-
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlVActual(), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 
 #-----------------------------------------------------------------------

@@ -14,8 +14,9 @@ this module has the function to move the motor via STEP/DIR pins
 import logging
 from ._tmc_gpio_board import Gpio, GpioMode, Board, BOARD, tmc_gpio
 from .motion_control._tmc_mc import TmcMotionControl, MovementAbsRel, MovementPhase, StopMode
+from .enable_control._tmc_ec import TmcEnableControl
+from .enable_control._tmc_ec_pin import TmcEnableControlPin
 from .motion_control._tmc_mc_step_dir import TmcMotionControlStepDir
-from .motion_control._tmc_mc_vactual import TmcMotionControlVActual
 from ._tmc_logger import TmcLogger, Loglevel
 from . import _tmc_math as tmc_math
 
@@ -31,9 +32,9 @@ class TmcStepperDriver:
 
     BOARD:Board = BOARD
     tmc_mc:TmcMotionControl = None
+    tmc_ec:TmcEnableControl = None
     tmc_logger:TmcLogger = None
 
-    _pin_en:int = None
 
     _deinit_finished:bool = False
 
@@ -47,8 +48,8 @@ class TmcStepperDriver:
 # Constructor/Destructor
 # ----------------------------
     def __init__(self,
+                    tmc_ec:TmcEnableControl,
                     tmc_mc:TmcMotionControl,
-                    pin_en:int = None,
                     gpio_mode = None,
                     loglevel:Loglevel = Loglevel.INFO,
                     logprefix:str = None,
@@ -86,10 +87,10 @@ class TmcStepperDriver:
             self.tmc_mc.tmc_logger = self.tmc_logger
             self.tmc_mc.init()
 
-        self.tmc_logger.log(f"EN Pin: {pin_en}", Loglevel.DEBUG)
-        if pin_en is not None:
-            self._pin_en = pin_en
-            tmc_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
+        if tmc_ec is not None:
+            self.tmc_ec = tmc_ec
+            self.tmc_ec.tmc_logger = self.tmc_logger
+            self.tmc_ec.init()
 
         self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
 
@@ -281,6 +282,4 @@ class TmcStepperDriver:
         Args:
             en (bool): whether the motor current output should be enabled
         """
-        if self._pin_en is not None:
-            tmc_gpio.gpio_output(self._pin_en, not en)
-            self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
+        self.tmc_ec.set_motor_enabled(en)

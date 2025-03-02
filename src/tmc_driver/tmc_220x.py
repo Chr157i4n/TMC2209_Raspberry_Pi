@@ -19,6 +19,9 @@ from ._tmc_stepperdriver import *
 from .com._tmc_com import TmcCom
 from .com._tmc_com_uart import TmcComUart
 from .com._tmc_com_spi import TmcComSpi
+from .motion_control._tmc_mc_step_reg import TmcMotionControlStepReg
+from .enable_control._tmc_ec_toff import TmcEnableControlToff
+from .motion_control._tmc_mc_vactual import TmcMotionControlVActual
 from ._tmc_logger import TmcLogger, Loglevel
 from .reg._tmc_220x_reg_addr import TmcRegAddr
 from .reg._tmc_drvstatus import DrvStatus
