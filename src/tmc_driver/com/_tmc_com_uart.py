@@ -102,7 +102,7 @@ class TmcComUart(TmcCom):
 
         self.r_frame[1] = self.mtr_id
         self.r_frame[2] = register.value
-        self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
+        self.r_frame[3] = compute_crc8_atm(self.r_frame[:-1])
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):
@@ -142,7 +142,7 @@ class TmcComUart(TmcCom):
                 self._tmc_logger.log(f"""UART Communication Error:
                                     {len(rtn_data)} data bytes |
                                     {len(rtn)} total bytes""", Loglevel.ERROR)
-            elif rtn[11] != self.compute_crc8_atm(rtn[4:11]):
+            elif rtn[11] != compute_crc8_atm(rtn[4:11]):
                 self._tmc_logger.log("UART Communication Error: CRC MISMATCH", Loglevel.ERROR)
             else:
                 break
@@ -183,7 +183,7 @@ class TmcComUart(TmcCom):
         self.w_frame[5] = 0xFF & (val>>8)
         self.w_frame[6] = 0xFF & val
 
-        self.w_frame[7] = self.compute_crc8_atm(self.w_frame[:-1])
+        self.w_frame[7] = compute_crc8_atm(self.w_frame[:-1])
 
 
         rtn = self.ser.write(self.w_frame)
@@ -279,7 +279,7 @@ class TmcComUart(TmcCom):
 
         self.r_frame[1] = self.mtr_id
         self.r_frame[2] = register.value
-        self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
+        self.r_frame[3] = compute_crc8_atm(self.r_frame[:-1])
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):
