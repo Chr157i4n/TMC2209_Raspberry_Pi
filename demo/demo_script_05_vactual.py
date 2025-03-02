@@ -26,14 +26,14 @@ print("---")
 # use your pin for pin_en here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc = Tmc2209(TmcMotionControlVActual(), 21, TmcComUart("/dev/serial0"))
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
+    tmc = Tmc2209(TmcMotionControlVActual(), 21, TmcComUart("/dev/ttyAMA0"))
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"))
+    tmc = Tmc2209(TmcMotionControlVActual(), 13, TmcComUart("/dev/ttyTHS1"))
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc = Tmc2209(TmcMotionControlVActual(), 21, TmcComUart("/dev/serial0"))
 
 
 
@@ -94,13 +94,13 @@ tmc.set_motor_enabled(True)
 # move the motor for 1 second forward, stop for 1 second
 # and then move backwards for 1 second
 #-----------------------------------------------------------------------
-#tmc.set_vactual_dur(400)
+#tmc.tmc_mc.set_vactual_dur(400)
 #time.sleep(1)
-#tmc.set_vactual_dur(0)
+#tmc.tmc_mc.set_vactual_dur(0)
 #time.sleep(1)
-#tmc.set_vactual_dur(-400)
+#tmc.tmc_mc.set_vactual_dur(-400)
 #time.sleep(1)
-#tmc.set_vactual_dur(0)
+#tmc.tmc_mc.set_vactual_dur(0)
 
 
 
@@ -109,13 +109,13 @@ tmc.set_motor_enabled(True)
 #-----------------------------------------------------------------------
 # set_vactual_rps uses revolutions per seconds as parameter
 #-----------------------------------------------------------------------
-# tmc.set_vactual_rps(1)
+# tmc.tmc_mc.set_vactual_rps(1)
 # time.sleep(1)
-# tmc.set_vactual_rps(0)
+# tmc.tmc_mc.set_vactual_rps(0)
 # time.sleep(1)
-# tmc.set_vactual_rps(-1)
+# tmc.tmc_mc.set_vactual_rps(-1)
 # time.sleep(1)
-# tmc.set_vactual_rps(0)
+# tmc.tmc_mc.set_vactual_rps(0)
 
 
 
@@ -124,13 +124,13 @@ tmc.set_motor_enabled(True)
 #-----------------------------------------------------------------------
 # set_vactual_rps uses revolutions per seconds as parameter
 #-----------------------------------------------------------------------
-#tmc.set_vactual_rpm(60)
+#tmc.tmc_mc.set_vactual_rpm(60)
 #time.sleep(1)
-#tmc.set_vactual(0)
+#tmc.tmc_mc.set_vactual(0)
 #time.sleep(1)
-#tmc.set_vactual_rpm(-60)
+#tmc.tmc_mc.set_vactual_rpm(-60)
 #time.sleep(1)
-#tmc.set_vactual(0)
+#tmc.tmc_mc.set_vactual(0)
 
 
 
@@ -143,11 +143,11 @@ tmc.set_motor_enabled(True)
 # the script will calculate the duration based on the speed and the revolutions
 # Movement of the Motor will not be very accurate with this way
 #-----------------------------------------------------------------------
-tmc.set_vactual_rpm(30, revolutions=2)
-tmc.set_vactual_rpm(-120, revolutions=2)
+tmc.tmc_mc.set_vactual_rpm(30, revolutions=2)
+tmc.tmc_mc.set_vactual_rpm(-120, revolutions=2)
 time.sleep(1)
-tmc.set_vactual_rpm(30, duration=4)
-tmc.set_vactual_rpm(-120, duration=1)
+tmc.tmc_mc.set_vactual_rpm(30, duration=4)
+tmc.tmc_mc.set_vactual_rpm(-120, duration=1)
 
 
 
@@ -157,7 +157,7 @@ tmc.set_vactual_rpm(-120, duration=1)
 # use acceleration (velocity ramping) with VActual
 # does not work with revolutions as parameter
 #-----------------------------------------------------------------------
-# tmc.set_vactual_rpm(-120, duration=10, acceleration=500)
+# tmc.tmc_mc.set_vactual_rpm(-120, duration=10, acceleration=500)
 
 
 

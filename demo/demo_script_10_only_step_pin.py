@@ -28,9 +28,9 @@ print("---")
 if BOARD == Board.RASPBERRY_PI:
     tmc = Tmc2209(pin_step=16, loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(pin_step=16, tmc_com=TmcUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(pin_step=16, tmc_com=TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(pin_step=13, tmc_com=TmcUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(pin_step=13, tmc_com=TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
     tmc = Tmc2209(pin_step=21, loglevel=Loglevel.DEBUG)

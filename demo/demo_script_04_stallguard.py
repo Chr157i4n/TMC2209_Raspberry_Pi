@@ -31,12 +31,12 @@ if BOARD == Board.NVIDIA_JETSON:
         Nvidia Jetson has nuances with the parameter pull_up_down for pin_stallguard:
         https://github.com/NVIDIA/jetson-gpio/issues/5''')
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc = Tmc2209(TmcMotionControlStepDir(16, 20), 21, TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
+    tmc = Tmc2209(TmcMotionControlStepDir(16, 20), 21, TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc = Tmc2209(TmcMotionControlStepDir(16, 20), 21, TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 
 
@@ -88,8 +88,8 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # set the Accerleration and maximal Speed
 #-----------------------------------------------------------------------
-tmc.set_acceleration(2000)
-tmc.set_max_speed(500)
+tmc.acceleration_fullstep = 1000
+tmc.max_speed_fullstep = 250
 
 
 

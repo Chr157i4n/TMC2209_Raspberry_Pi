@@ -5,6 +5,7 @@
 #pylint: disable=too-many-positional-arguments
 #pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
+#pylint: disable=unused-import
 """Tmc220X stepper driver module
 
 this module has two different functions:
@@ -12,18 +13,34 @@ this module has two different functions:
 2. move the motor via STEP/DIR pins
 """
 
-import time
 import logging
 import threading
-from ._tmc_gpio_board import Gpio, GpioMode, Board, BOARD, tmc_gpio
-from ._tmc_uart import TmcUart
+from ._tmc_stepperdriver import *
+from .com._tmc_com import TmcCom
+from .com._tmc_com_uart import TmcComUart
+from .com._tmc_com_spi import TmcComSpi
 from ._tmc_logger import TmcLogger, Loglevel
-from ._tmc_move import MovementAbsRel, MovementPhase, StopMode
+from .reg._tmc_220x_reg_addr import TmcRegAddr
+from .reg._tmc_drvstatus import DrvStatus
+from .reg._tmc_gconf import GConf
+from .reg._tmc_ioin import IOIN
+from .reg._tmc_gstat import GStat
+from .reg._tmc_ihold_irun import IHoldIRun
+from .reg._tmc_chopconf import ChopConf
 from . import _tmc_math as tmc_math
 
 
+reg_class_mapping = {
+    TmcRegAddr.DRVSTATUS: DrvStatus,
+    TmcRegAddr.GCONF: GConf,
+    TmcRegAddr.GSTAT: GStat,
+    TmcRegAddr.IOIN: IOIN,
+    TmcRegAddr.CHOPCONF: ChopConf,
+    TmcRegAddr.IHOLD_IRUN: IHoldIRun,
+}
 
-class Tmc220x:
+
+class Tmc220x(TmcStepperDriver):
     """Tmc220X
 
     this class has two different functions:
@@ -31,185 +48,28 @@ class Tmc220x:
     2. move the motor via STEP/DIR pins
     """
 
-    BOARD:Board = BOARD
-    tmc_com:TmcUart = None
-    tmc_logger:TmcLogger = None
-    _pin_step:int = None
-    _pin_dir:int = None
-    _pin_en:int = None
-
-    _direction:bool = True
-
-    _stop:StopMode = StopMode.NO
-    _starttime:int = 0
-
-
-    _mres:int = 0
-    _steps_per_rev:int = 0
-    _fullsteps_per_rev:int = 0
-
-    _current_pos:int = 0                # current position of stepper in steps
-    _target_pos:int = 0                 # the target position in steps
-    _speed:int = 0                      # the current speed in steps per second
-    _max_speed:int = 1                  # the maximum speed in steps per second
-    _max_speed_homing:int = 200         # the maximum speed in steps per second for homing
-    _acceleration:int = 1               # the acceleration in steps per second per second
-    _acceleration_homing:int = 10000    # the acceleration in steps per second per second for homing
-    _sqrt_twoa:float = 1.0              # Precomputed sqrt(2*_acceleration)
-    _step_interval:int = 0              # the current interval between two steps
-    _min_pulse_width:int = 1            # minimum allowed pulse with in microseconds
-    _last_step_time:int = 0             # The last step time in microseconds
-    _n:int = 0                          # step counter
-    _c0:int = 0                         # Initial step size in microseconds
-    _cn:int = 0                         # Last step size in microseconds
-    _cmin:int = 0                       # Min step size in microseconds based on maxSpeed
-    _movement_abs_rel:MovementAbsRel = MovementAbsRel.ABSOLUTE
-    _movement_phase:MovementPhase = MovementPhase.STANDSTILL
-
+    tmc_com:TmcComUart = None
     _movement_thread:threading.Thread = None
 
-    _deinit_finished:bool = False
-
-
-    @property
-    def steps_per_rev(self):
-        """_steps_per_rev property"""
-        return self._steps_per_rev
-
-    @property
-    def fullsteps_per_rev(self):
-        """_fullsteps_per_rev property"""
-        return self._fullsteps_per_rev
-
-    @fullsteps_per_rev.setter
-    def fullsteps_per_rev(self, fullsteps_per_rev:int):
-        """_fullsteps_per_rev setter"""
-        self._fullsteps_per_rev = fullsteps_per_rev
-        self._steps_per_rev = self._fullsteps_per_rev * self._mres
-
-    @property
-    def mres(self):
-        """_mres property"""
-        return self._mres
-
-    @mres.setter
-    def mres(self, mres:int):
-        """_mres setter"""
-        self._mres = mres
-        self._steps_per_rev = self._fullsteps_per_rev * self._mres
-
-    @property
-    def current_pos(self):
-        """_current_pos property"""
-        return self._current_pos
-
-    @current_pos.setter
-    def current_pos(self, current_pos:int):
-        """_current_pos setter"""
-        self._current_pos = current_pos
-
-    @property
-    def movement_abs_rel(self):
-        """_movement_abs_rel property"""
-        return self._movement_abs_rel
-
-    @movement_abs_rel.setter
-    def movement_abs_rel(self, movement_abs_rel:MovementAbsRel):
-        """_movement_abs_rel setter"""
-        self._movement_abs_rel = movement_abs_rel
-
-    @property
-    def movement_phase(self):
-        """_movement_phase property"""
-        return self._movement_phase
-
-    @property
-    def speed(self):
-        """_speed property"""
-        return self._speed
-
-    @speed.setter
-    def speed(self, speed:int):
-        """_speed setter"""
-        self.set_speed(speed)
-
-    @property
-    def max_speed(self):
-        """_max_speed property"""
-        return self._max_speed
-
-    @max_speed.setter
-    def max_speed(self, max_speed:int):
-        """_max_speed setter"""
-        self.set_max_speed(max_speed)
-
-    @property
-    def max_speed_fullstep(self):
-        """_max_speed_fullstep property"""
-        return self._max_speed
-
-    @max_speed_fullstep.setter
-    def max_speed_fullstep(self, max_speed_fullstep:int):
-        """_max_speed_fullstep setter"""
-        self.set_max_speed_fullstep(max_speed_fullstep)
-
-    @property
-    def accerlation(self):
-        """_acceleration property"""
-        return self._acceleration
-
-    @accerlation.setter
-    def accerlation(self, accerlation:int):
-        """_acceleration setter"""
-        self.set_acceleration(accerlation)
-
-    @property
-    def acceleration_fullstep(self):
-        """_acceleration_fullstep property"""
-        return self._acceleration
-
-    @acceleration_fullstep.setter
-    def acceleration_fullstep(self, acceleration_fullstep:int):
-        """_acceleration_fullstep setter"""
-        self.set_acceleration_fullstep(acceleration_fullstep)
-
-
-    from ._tmc_comm import (
-        read_reg, read_drv_status, read_gconf, read_gstat, clear_gstat, read_ioin, read_chopconf,
-        get_direction_reg, set_direction_reg, get_iscale_analog, set_iscale_analog, get_vsense,
-        set_vsense, get_internal_rsense, set_internal_rsense, set_irun_ihold, set_pdn_disable,
-        set_current, get_spreadcycle, set_spreadcycle, get_interpolation, set_interpolation,
-        read_microstepping_resolution, get_microstepping_resolution, set_microstepping_resolution,
-        set_mstep_resolution_reg_select, get_interface_transmission_counter, get_tstep, set_vactual,
-        get_stallguard_result, set_stallguard_threshold, set_coolstep_threshold,
-        get_microstep_counter, get_microstep_counter_in_steps, get_toff, set_toff
-    )
-
-    from ._tmc_move import (
-        set_speed, set_speed_fullstep, set_max_speed, set_max_speed_fullstep, get_max_speed,
-        set_acceleration, set_acceleration_fullstep, get_acceleration, stop, run_to_position_steps,
-        run_to_position_revolutions, run_to_position_steps_threaded, run_to_position_revolutions_threaded,
-        wait_for_movement_finished_threaded, run, distance_to_go, compute_new_speed, run_speed, make_a_step
-    )
 
     from ._tmc_test import (
-        test_pin, test_dir_step_en, test_step, test_com
+        test_pin, test_dir_step_en, test_com
     )
 
 
-
+# Constructor/Destructor
+# ----------------------------
     def __init__(self,
-                 pin_en:int = None,
-                 pin_step:int = None,
-                 pin_dir:int = None,
-                 tmc_com:TmcUart = None,
-                 driver_address:int = 0,
-                 gpio_mode = None,
-                 loglevel:Loglevel = Loglevel.INFO,
-                 logprefix:str = None,
-                 log_handlers:list = None,
-                 log_formatter:logging.Formatter = None
-                 ):
+                    tmc_mc:TmcMotionControl,
+                    pin_en:int = None,
+                    tmc_com:TmcCom = None,
+                    driver_address:int = 0,
+                    gpio_mode = None,
+                    loglevel:Loglevel = Loglevel.INFO,
+                    logprefix:str = None,
+                    log_handlers:list = None,
+                    log_formatter:logging.Formatter = None
+                    ):
         """constructor
 
         Args:
@@ -228,70 +88,35 @@ class Tmc220x:
                 Defaults to None (messages are logged in the format
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s').
         """
-        if logprefix is None:
-            logprefix = f"TMC2209 {driver_address}"
-        self.tmc_logger = TmcLogger(loglevel, logprefix, log_handlers, log_formatter)
+        super().__init__(tmc_mc, pin_en, gpio_mode, loglevel, logprefix, log_handlers, log_formatter)
+
+        self.tmc_logger.set_logprefix(f"TMC2209 {driver_address}")
 
         if tmc_com is not None:
             self.tmc_com = tmc_com
             self.tmc_com.tmc_logger = self.tmc_logger
             self.tmc_com.mtr_id = driver_address
+            if hasattr(self.tmc_mc, "tmc_com"):
+                self.tmc_mc.tmc_com = tmc_com
 
-        self.tmc_logger.log("Init", Loglevel.INFO)
-        tmc_gpio.init(gpio_mode)
-
-        self.tmc_logger.log(f"EN Pin: {pin_en}", Loglevel.DEBUG)
-        if pin_en is not None:
-            self._pin_en = pin_en
-            tmc_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
-
-        self.tmc_logger.log(f"STEP Pin: {pin_step}", Loglevel.DEBUG)
-        if pin_step is not None:
-            self._pin_step = pin_step
-            tmc_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
-
-        self.tmc_logger.log(f"DIR Pin: {pin_dir}", Loglevel.DEBUG)
-        if pin_dir is not None:
-            self._pin_dir = pin_dir
-            tmc_gpio.gpio_setup(self._pin_dir, GpioMode.OUT, initial=self._direction)
-
-        self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
-
-        if tmc_com is not None:
-            self.read_steps_per_rev()
+            if self.tmc_mc is not None:
+                self.read_steps_per_rev()
             self.clear_gstat()
             self.tmc_com.flush_serial_buffer()
 
-        self.tmc_logger.log("Init finished", Loglevel.INFO)
 
-        self.set_max_speed_fullstep(100)
-        self.set_acceleration_fullstep(100)
+        self.max_speed_fullstep = 100
+        self.acceleration_fullstep = 100
+
+        self.tmc_logger.log("Init finished", Loglevel.INFO)
 
 
 
     def __del__(self):
-        """destructor"""
-        if self._deinit_finished is False:
-            self.tmc_logger.log("Deinit", Loglevel.INFO)
-
-            self.set_motor_enabled(False)
-
-            self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
-            if self._pin_step is not None:
-                tmc_gpio.gpio_cleanup(self._pin_step)
-            if self._pin_dir is not None:
-                tmc_gpio.gpio_cleanup(self._pin_dir)
-            if self._pin_en is not None:
-                tmc_gpio.gpio_cleanup(self._pin_en)
-
-            self.tmc_logger.log("Deinit finished", Loglevel.INFO)
-            self._deinit_finished= True
-        else:
-            self.tmc_logger.log("Deinit already finished", Loglevel.INFO)
-        if self.tmc_com is not None:
-            del self.tmc_com
-        if self.tmc_logger is not None:
-            del self.tmc_logger
+            """destructor"""
+            if self.tmc_com is not None:
+                del self.tmc_com
+            super().__del__()
 
 
 
@@ -300,73 +125,517 @@ class Tmc220x:
         self._deinit_finished = True
 
 
-
-    def set_motor_enabled(self, en):
-        """enables or disables the motor current output
-
-        Args:
-            en (bool): whether the motor current output should be enabled
-        """
-        if self._pin_en != -1:
-            tmc_gpio.gpio_output(self._pin_en, not en)
-            self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
-        else:
-            self.tmc_logger.log(f"Motor pin is: {self._pin_en}", Loglevel.INFO)
-
-
-
-    def reverse_direction_pin(self):
-        """reverses the motor shaft direction"""
-        if self._pin_dir != -1:
-            self._direction = not self._direction
-            tmc_gpio.gpio_output(self._pin_dir, self._direction)
-        else:
-            self.tmc_logger.log(f"Direction pin is: {self._pin_dir}", Loglevel.INFO)
-
-
-
-    def set_direction_pin(self, direction):
-        """sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
-
-        Args:
-            direction (bool): motor shaft direction: False = CCW; True = CW
-        """
-        if self._pin_dir != -1:
-            self._direction = direction
-            tmc_gpio.gpio_output(self._pin_dir, direction)
-        else:
-            self.tmc_logger.log(f"Direction pin is: {self._pin_dir}", Loglevel.INFO)
-
-
-
-    def set_direction_pin_or_reg(self, direction):
-        """sets the motor shaft direction to the given value: 0 = CCW; 1 = CW
-        will use the reg, if pin==-1, otherwise use the pin
-
-        Args:
-            direction (bool): motor shaft direction: False = CCW; True = CW
-        """
-        if self._pin_dir != -1:
-            self.set_direction_pin(direction)
-        else:
-            self.set_direction_reg(not direction) #no clue, why this has to be inverted
-
-
-
-    def read_steps_per_rev(self):
+# Tmc220x methods
+# ----------------------------
+    def read_steps_per_rev(self) -> int:
         """returns how many steps are needed for one revolution.
         this reads the value from the tmc driver.
 
         Returns:
             int: Steps per revolution
         """
-        self._steps_per_rev = self._fullsteps_per_rev*self.read_microstepping_resolution()
-        return self._steps_per_rev
+        self.tmc_mc._steps_per_rev = self.fullsteps_per_rev*self.read_microstepping_resolution()
+        return self.tmc_mc._steps_per_rev
 
 
 
-    def set_vactual_dur(self, vactual, duration=0, acceleration=0,
-                             show_stallguard_result=False, show_tstep=False):
+    def read_reg(self, reg_addr: TmcRegAddr, log:bool = True):
+        """read the register Adress and logs the reg valuess
+
+        Returns:
+            Register instance
+        """
+        reg_value =self.tmc_com.read_int(reg_addr)
+
+        if log:
+            self.tmc_logger.log("---", Loglevel.INFO)
+            self.tmc_logger.log(f"{reg_addr.name}:", Loglevel.INFO)
+            self.tmc_logger.log(bin(reg_value), Loglevel.INFO)
+
+        reg_class = reg_class_mapping[reg_addr]
+        reg_instance = reg_class(reg_value)
+
+        if log:
+            reg_instance.log( self.tmc_logger )
+
+        return reg_instance
+
+
+
+    def read_drv_status(self) -> DrvStatus:
+        """read the register Adress "DRV_STATUS" and logs the reg valuess
+
+        Returns:
+            DRV_STATUS Register instance
+        """
+        return self.read_reg(TmcRegAddr.DRVSTATUS)
+
+
+
+    def read_gconf(self) -> GConf:
+        """read the register Adress "GCONF" and logs the reg values
+
+        Returns:
+            GCONF Register instance
+        """
+        return self.read_reg(TmcRegAddr.GCONF)
+
+
+
+    def read_gstat(self) -> GStat:
+        """read the register Adress "GSTAT" and logs the reg values
+
+        Returns:
+            GSTAT Register instance
+        """
+        return self.read_reg(TmcRegAddr.GSTAT)
+
+
+
+    def clear_gstat(self):
+        """clears the "GSTAT" register"""
+        self.tmc_logger.log("clearing GSTAT", Loglevel.INFO)
+        gstat = self.tmc_com.read_int(TmcRegAddr.GSTAT)
+
+        gstat = GStat(gstat)
+        gstat.reset = True
+        gstat.drv_err = True
+        gstat.uv_cp = True
+        gstat_int = gstat.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.GSTAT, gstat_int)
+
+
+
+    def read_ioin(self) -> IOIN:
+        """read the register Adress "IOIN" and logs the reg values
+
+        Returns:
+            IOIN Register instance
+        """
+        return self.read_reg(TmcRegAddr.IOIN)
+
+
+
+    def read_chopconf(self) -> ChopConf:
+        """read the register Adress "CHOPCONF" and logs the reg values
+
+        Returns:
+            CHOPCONF Register instance
+        """
+        return self.read_reg(TmcRegAddr.CHOPCONF)
+
+
+
+    def get_direction_reg(self) -> bool:
+        """returns the motor shaft direction: False = CCW; True = CW
+
+        Returns:
+            bool: motor shaft direction: False = CCW; True = CW
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+
+        gconf = GConf(gconf)
+        return gconf.shaft
+
+
+
+    def set_direction_reg(self, direction:bool):
+        """sets the motor shaft direction to the given value: False = CCW; True = CW
+
+        Args:
+            direction (bool): direction of the motor False = CCW; True = CW
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+
+        gconf = GConf(gconf)
+        gconf.shaft = direction
+        gconf_int = gconf.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+        self._direction = not direction
+
+
+
+    def get_iscale_analog(self) -> bool:
+        """return whether Vref (True) or 5V (False) is used for current scale
+
+        Returns:
+            en (bool): whether Vref (True) or 5V (False) is used for current scale
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+        gconf = GConf(gconf)
+        return gconf.i_scale_analog
+
+
+
+    def set_iscale_analog(self,en:bool):
+        """sets Vref (True) or 5V (False) for current scale
+
+        Args:
+            en (bool): True=Vref, False=5V
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+
+        gconf = GConf(gconf)
+        gconf.i_scale_analog = en
+        gconf_int = gconf.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+
+
+
+    def get_vsense(self) -> bool:
+        """returns which sense resistor voltage is used for current scaling
+        False: Low sensitivity, high sense resistor voltage
+        True: High sensitivity, low sense resistor voltage
+
+        Returns:
+            bool: whether high sensitivity should is used
+        """
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+
+        chopconf = ChopConf(chopconf)
+        return chopconf.vsense
+
+
+
+    def set_vsense(self,en:bool):
+        """sets which sense resistor voltage is used for current scaling
+        False: Low sensitivity, high sense resistor voltage
+        True: High sensitivity, low sense resistor voltage
+
+        Args:
+            en (bool):
+        """
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+
+        chopconf = ChopConf(chopconf)
+        chopconf.vsense = en
+        chopconf_int = chopconf.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+
+
+
+    def get_internal_rsense(self) -> bool:
+        """returns which sense resistor voltage is used for current scaling
+        False: Operation with external sense resistors
+        True Internal sense resistors. Use current supplied into
+        VREF as reference for internal sense resistor. VREF
+        pin internally is driven to GND in this mode.
+
+        Returns:
+            bool: which sense resistor voltage is used
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+        gconf = GConf(gconf)
+        return gconf.internal_rsense
+
+
+
+    def set_internal_rsense(self,en:bool):
+        """sets which sense resistor voltage is used for current scaling
+        False: Operation with external sense resistors
+        True: Internal sense resistors. Use current supplied into
+        VREF as reference for internal sense resistor. VREF
+        pin internally is driven to GND in this mode.
+
+        Args:
+        en (bool): which sense resistor voltage is used; true will propably destroy your tmc
+
+            """
+        if en:
+            self.tmc_logger.log("activated internal sense resistors.",
+                                Loglevel.INFO)
+            self.tmc_logger.log("VREF pin internally is driven to GND in this mode.",
+                                Loglevel.INFO)
+            self.tmc_logger.log("This will most likely destroy your driver!!!",
+                                Loglevel.INFO)
+            raise SystemExit
+
+
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+        gconf = GConf(gconf)
+        gconf.internal_rsense = en
+        gconf_int = gconf.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+
+
+
+    def set_irun_ihold(self, ihold:int, irun:int, ihold_delay:int):
+        """sets the current scale (CS) for Running and Holding
+        and the delay, when to be switched to Holding current
+
+        Args:
+        ihold (int): multiplicator for current while standstill [0-31]
+        irun (int): current while running [0-31]
+        ihold_delay (int): delay after standstill for switching to ihold [0-15]
+
+            """
+        ihold_irun = IHoldIRun()
+        ihold_irun.ihold = ihold
+        ihold_irun.irun = irun
+        ihold_irun.iholddelay = ihold_delay
+        ihold_irun_int = ihold_irun.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.IHOLD_IRUN, ihold_irun_int)
+
+
+
+    def set_pdn_disable(self,pdn_disable:bool):
+        """disables PDN on the UART pin
+        False: PDN_UART controls standstill current reduction
+        True: PDN_UART input function disabled. Set this bit,
+        when using the UART interface!
+
+        Args:
+            pdn_disable (bool): whether PDN should be disabled
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+
+        gconf = GConf(gconf)
+        gconf.pdn_disable = pdn_disable
+        gconf_int = gconf.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+
+
+
+    def set_current(self, run_current:int, hold_current_multiplier:float = 0.5,
+                    hold_current_delay:int = 10, pdn_disable:bool = True):
+        """sets the current flow for the motor.
+
+        Args:
+        run_current (int): current during movement in mA
+        hold_current_multiplier (int):current multiplier during standstill (Default value = 0.5)
+        hold_current_delay (int): delay after standstill after which cur drops (Default value = 10)
+        pdn_disable (bool): should be disabled if UART is used (Default value = True)
+
+            """
+        cs_irun = 0
+        rsense = 0.11
+        vfs = 0
+
+        self.set_iscale_analog(False)
+
+        vfs = 0.325
+        cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
+
+        # If Current Scale is too low, turn on high sensitivity VSsense and calculate again
+        if cs_irun < 16:
+            self.tmc_logger.log("CS too low; switching to VSense True", Loglevel.INFO)
+            vfs = 0.180
+            cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
+            self.set_vsense(True)
+        else: # If CS >= 16, turn off high_senser
+            self.tmc_logger.log("CS in range; using VSense False", Loglevel.INFO)
+            self.set_vsense(False)
+
+        cs_irun = min(cs_irun, 31)
+        cs_irun = max(cs_irun, 0)
+
+        CS_IHold = hold_current_multiplier * cs_irun
+
+        cs_irun = round(cs_irun)
+        CS_IHold = round(CS_IHold)
+        hold_current_delay = round(hold_current_delay)
+
+        self.tmc_logger.log(f"cs_irun: {cs_irun}", Loglevel.INFO)
+        self.tmc_logger.log(f"CS_IHold: {CS_IHold}", Loglevel.INFO)
+        self.tmc_logger.log(f"Delay: {hold_current_delay}", Loglevel.INFO)
+
+        # return (float)(CS+1)/32.0 * (vsense() ? 0.180 : 0.325)/(rsense+0.02) / 1.41421 * 1000;
+        run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
+        self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
+                            Loglevel.INFO)
+
+        self.set_irun_ihold(CS_IHold, cs_irun, hold_current_delay)
+
+        self.set_pdn_disable(pdn_disable)
+
+
+
+    def get_spreadcycle(self) -> bool:
+        """reads spreadcycle
+
+        Returns:
+            bool: True = spreadcycle; False = stealthchop
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+
+        gconf = GConf(gconf)
+        return gconf.en_spreadcycle
+
+
+
+    def set_spreadcycle(self,en:bool):
+        """enables spreadcycle (1) or stealthchop (0)
+
+        Args:
+        en (bool): true to enable spreadcycle; false to enable stealthchop
+
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+
+        gconf = GConf(gconf)
+        gconf.en_spreadcycle = en
+        gconf_int = gconf.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+
+
+
+    def get_interpolation(self) -> bool:
+        """return whether the tmc inbuilt interpolation is active
+
+        Returns:
+            en (bool): true if internal µstep interpolation is enabled
+        """
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+        chopconf = ChopConf(chopconf)
+
+        return chopconf.intpol
+
+
+
+    def set_interpolation(self, en:bool):
+        """enables the tmc inbuilt interpolation of the steps to 256 µsteps
+
+        Args:
+            en (bool): true to enable internal µstep interpolation
+        """
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+        chopconf = ChopConf(chopconf)
+
+        chopconf.intpol = en
+        chopconf_int = chopconf.serialise()
+        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+
+
+
+    def get_toff(self) -> int:
+        """returns the TOFF register value
+
+        Returns:
+            int: TOFF register value
+        """
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+        chopconf = ChopConf(chopconf)
+
+        return chopconf.toff
+
+
+
+    def set_toff(self, toff:int):
+        """Sets TOFF register to value
+
+        Args:
+            toff (uint8_t): value of toff (must be a four-bit value)
+        """
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+        chopconf = ChopConf(chopconf)
+
+        chopconf.toff = toff
+        chopconf_int = chopconf.serialise()
+        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+
+
+
+    def read_microstepping_resolution(self) -> int:
+        """returns the current native microstep resolution (1-256)
+        this reads the value from the driver register
+
+        Returns:
+            int: µstep resolution
+        """
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+        chopconf = ChopConf(chopconf)
+
+        self.tmc_mc.mres = chopconf.convert_reg_to_mres()
+
+        return self.tmc_mc.mres
+
+
+
+    def get_microstepping_resolution(self) -> int:
+        """returns the current native microstep resolution (1-256)
+        this returns the cached value from this module
+
+        Returns:
+            int: µstep resolution
+        """
+        return self.tmc_mc.mres
+
+
+
+    def set_microstepping_resolution(self, mres:int):
+        """sets the current native microstep resolution (1,2,4,8,16,32,64,128,256)
+
+        Args:
+            mres (int): µstep resolution; has to be a power of 2 or 1 for fullstep
+        """
+        if self.tmc_mc is not None:
+            self.tmc_mc.mres = mres
+
+        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
+        chopconf = ChopConf(chopconf)
+
+        chopconf.convert_mres_to_reg(mres)
+        chopconf_int = chopconf.serialise()
+        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+
+        self.set_mstep_resolution_reg_select(True)
+
+        return True
+
+
+
+    def set_mstep_resolution_reg_select(self, en:bool):
+        """sets the register bit "mstep_reg_select" to 1 or 0 depending to the given value.
+        this is needed to set the microstep resolution via UART
+        this method is called by "set_microstepping_resolution"
+
+        Args:
+            en (bool): true to set µstep resolution via UART
+        """
+        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
+
+        gconf = GConf(gconf)
+        gconf.mstep_reg_select = en
+        gconf_int = gconf.serialise()
+
+        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+
+
+
+    def get_interface_transmission_counter(self) -> int:
+        """reads the interface transmission counter from the tmc register
+        this value is increased on every succesfull write access
+        can be used to verify a write access
+
+        Returns:
+            int: 8bit IFCNT Register
+        """
+        ifcnt = self.tmc_com.read_int(TmcRegAddr.IFCNT)
+        self.tmc_logger.log(f"Interface Transmission Counter: {ifcnt}", Loglevel.INFO)
+        return ifcnt
+
+
+
+    def get_tstep(self) -> int:
+        """reads the current tstep from the driver register
+
+        Returns:
+            int: TStep time
+        """
+        tstep = self.tmc_com.read_int(TmcRegAddr.TSTEP)
+        return tstep
+
+
+
+    def set_vactual(self, vactual:int):
         """sets the register bit "VACTUAL" to to a given value
         VACTUAL allows moving the motor by UART control.
         It gives the motor velocity in +-(2^23)-1 [μsteps / t]
@@ -374,102 +643,34 @@ class Tmc220x:
 
         Args:
             vactual (int): value for VACTUAL
-            duration (int): after this vactual will be set to 0 (Default value = 0)
-            acceleration (int): use this for a velocity ramp (Default value = 0)
-            show_stallguard_result (bool): prints StallGuard Result during movement
-                (Default value = False)
-            show_tstep (bool): prints TStep during movement (Default value = False)
+        """
+        self.tmc_com.write_reg_check(TmcRegAddr.VACTUAL, vactual)
+
+
+
+    def get_microstep_counter(self) -> int:
+        """returns the current Microstep counter.
+        Indicates actual position in the microstep table for CUR_A
 
         Returns:
-            stop (enum): how the movement was finished
+            int: current Microstep counter
         """
-        self._stop = StopMode.NO
-        current_vactual = 0
-        sleeptime = 0.05
-        time_to_stop = 0
-        if vactual<0:
-            acceleration = -acceleration
-
-        if duration != 0:
-            self.tmc_logger.log(f"vactual: {vactual} for {duration} sec",
-                                Loglevel.INFO)
-        else:
-            self.tmc_logger.log(f"vactual: {vactual}", Loglevel.INFO)
-        self.tmc_logger.log(str(bin(vactual)), Loglevel.INFO)
-
-        self.tmc_logger.log("writing vactual", Loglevel.INFO)
-        if acceleration == 0:
-            self.set_vactual(int(round(vactual)))
-
-        if duration == 0:
-            return -1
-
-        self._starttime = time.time()
-        current_time = time.time()
-        while current_time < self._starttime+duration:
-            if self._stop == StopMode.HARDSTOP:
-                break
-            if acceleration != 0:
-                time_to_stop = self._starttime+duration-abs(current_vactual/acceleration)
-                if self._stop == StopMode.SOFTSTOP:
-                    time_to_stop = current_time-1
-            if acceleration != 0 and current_time > time_to_stop:
-                current_vactual -= acceleration*sleeptime
-                self.set_vactual(int(round(current_vactual)))
-                time.sleep(sleeptime)
-            elif acceleration != 0 and abs(current_vactual)<abs(vactual):
-                current_vactual += acceleration*sleeptime
-                self.set_vactual(int(round(current_vactual)))
-                time.sleep(sleeptime)
-            if show_stallguard_result:
-                self.tmc_logger.log(f"StallGuard result: {self.get_stallguard_result()}",
-                                    Loglevel.INFO)
-                time.sleep(0.1)
-            if show_tstep:
-                self.tmc_logger.log(f"TStep result: {self.get_tstep()}",
-                                    Loglevel.INFO)
-                time.sleep(0.1)
-            current_time = time.time()
-        self.set_vactual(0)
-        return self._stop
+        mscnt = self.tmc_com.read_int(TmcRegAddr.MSCNT)
+        return mscnt
 
 
 
-    def set_vactual_rps(self, rps, duration=0, revolutions=0, acceleration=0):
-        """converts the rps parameter to a vactual value which represents
-        rotation speed in revolutions per second
-        With internal oscillator:
-        VACTUAL[2209] = v[Hz] / 0.715Hz
+    def get_microstep_counter_in_steps(self, offset:int=0) -> int:
+        """returns the current Microstep counter.
+        Indicates actual position in the microstep table for CUR_A
 
         Args:
-            rps (int): value for vactual in rps
-            duration (int): after this vactual will be set to 0 (Default value = 0)
-            revolutions (int): after this vactual will be set to 0 (Default value = 0)
-            acceleration (int): use this for a velocity ramp (Default value = 0)
+            offset (int): offset in steps (Default value = 0)
 
         Returns:
-            stop (enum): how the movement was finished
+            step (int): current Microstep counter convertet to steps
         """
-        vactual = tmc_math.rps_to_vactual(rps, self._steps_per_rev)
-        if revolutions!=0:
-            duration = abs(revolutions/rps)
-        if revolutions<0:
-            vactual = -vactual
-        return self.set_vactual_dur(vactual, duration, acceleration=acceleration)
-
-
-
-    def set_vactual_rpm(self, rpm, duration=0, revolutions=0, acceleration=0):
-        """converts the rps parameter to a vactual value which represents
-        rotation speed in revolutions per minute
-
-        Args:
-            rpm (int): value for vactual in rpm
-            duration (int): after this vactual will be set to 0 (Default value = 0)
-            revolutions (int): after this vactual will be set to 0 (Default value = 0)
-            acceleration (int): use this for a velocity ramp (Default value = 0)
-
-        Returns:
-            stop (enum): how the movement was finished
-        """
-        return self.set_vactual_rps(rpm/60, duration, revolutions, acceleration)
+        step = (self.get_microstep_counter()-64)*(self._mres*4)/1024
+        step = (4*self._mres)-step-1
+        step = round(step)
+        return step+offset

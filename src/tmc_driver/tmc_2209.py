@@ -37,6 +37,7 @@ class Tmc2209(Tmc220x):
         super().__del__()
 
 
+
     def set_stallguard_callback(self, pin_stallguard, threshold, callback,
                                 min_speed = 100):
         """set a function to call back, when the driver detects a stall
@@ -187,3 +188,46 @@ class Tmc2209(Tmc220x):
             self.tmc_logger.log(str(sg_results),Loglevel.DEBUG)
 
         self.tmc_logger.log("---", Loglevel.INFO)
+
+
+
+    def get_stallguard_result(self):
+        """return the current stallguard result
+        its will be calculated with every fullstep
+        higher values means a lower motor load
+
+        Returns:
+            sg_result (int): StallGuard Result
+        """
+        sg_result = self.tmc_com.read_int(TmcRegAddr.SG_RESULT)
+        return sg_result
+
+
+
+    def set_stallguard_threshold(self, threshold):
+        """sets the register bit "SGTHRS" to to a given value
+        this is needed for the stallguard interrupt callback
+        SG_RESULT becomes compared to the double of this threshold.
+        SG_RESULT ≤ SGTHRS*2
+
+        Args:
+            threshold (int): value for SGTHRS
+        """
+        self.tmc_logger.log(f"sgthrs {bin(threshold)}", Loglevel.INFO)
+
+        self.tmc_logger.log("writing sgthrs", Loglevel.INFO)
+        self.tmc_com.write_reg_check(TmcRegAddr.SGTHRS, threshold)
+
+
+
+    def set_coolstep_threshold(self, threshold):
+        """This  is  the  lower  threshold  velocity  for  switching
+        on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
+
+        Args:
+            threshold (int): threshold velocity for coolstep
+        """
+        self.tmc_logger.log(f"tcoolthrs {bin(threshold)}", Loglevel.INFO)
+
+        self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO)
+        self.tmc_com.write_reg_check(TmcRegAddr.TCOOLTHRS, threshold)

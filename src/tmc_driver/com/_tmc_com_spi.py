@@ -3,41 +3,20 @@
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
 """
-TmcSpi stepper driver spi module
+TmcComSpi stepper driver spi module
 """
 
-import time
-import struct
-from typing import List
-from .reg._tmc_220x_reg_addr import TmcRegAddr
-from .reg._tmc_gstat import GStat
-from ._tmc_logger import TmcLogger, Loglevel
+
+from ._tmc_com import *
 
 
-class TmcSpi:
-    """TmcSpi
+class TmcComSpi(TmcCom):
+    """TmcComSpi
 
     this class is used to communicate with the TMC via SPI
     it can be used to change the settings of the TMC.
     like the current or the microsteppingmode
     """
-    _tmc_logger:TmcLogger = None
-
-    mtr_id:int = 0
-    r_frame:List[int] = [0x55, 0, 0, 0  ]
-    w_frame:List[int] = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
-    communication_pause:int = 0
-    error_handler_running:bool = False
-
-    @property
-    def tmc_logger(self):
-        """get the tmc_logger"""
-        return self._tmc_logger
-
-    @tmc_logger.setter
-    def tmc_logger(self, tmc_logger):
-        """set the tmc_logger"""
-        self._tmc_logger = tmc_logger
 
 
     def __init__(self,
@@ -57,30 +36,7 @@ class TmcSpi:
 
     def __del__(self):
         """destructor"""
-        raise NotImplementedError
-
-
-
-    def compute_crc8_atm(self, datagram, initial_value=0):
-        """this function calculates the crc8 parity bit
-
-        Args:
-            datagram (list): datagram
-            initial_value (int): initial value (Default value = 0)
-        """
-        crc = initial_value
-        # Iterate bytes in data
-        for byte in datagram:
-            # Iterate bits in byte
-            for _ in range(0, 8):
-                if (crc >> 7) ^ (byte & 0x01):
-                    crc = ((crc << 1) ^ 0x07) & 0xFF
-                else:
-                    crc = (crc << 1) & 0xFF
-                # Shift to next bit
-                byte = byte >> 1
-        return crc
-
+        pass
 
 
     def read_reg(self, register:TmcRegAddr):
@@ -93,7 +49,6 @@ class TmcSpi:
         raise NotImplementedError
 
 
-
     def read_int(self, register:TmcRegAddr, tries:int = 10):
         """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
@@ -103,7 +58,6 @@ class TmcSpi:
             tries (int): how many tries, before error is raised (Default value = 10)
         """
         raise NotImplementedError
-
 
 
     def write_reg(self, register:TmcRegAddr, val:int):
@@ -119,7 +73,6 @@ class TmcSpi:
         raise NotImplementedError
 
 
-
     def write_reg_check(self, register:TmcRegAddr, val:int, tries:int=10):
         """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
@@ -133,17 +86,14 @@ class TmcSpi:
         raise NotImplementedError
 
 
-
     def flush_serial_buffer(self):
         """this function clear the communication buffers of the Raspberry Pi"""
         raise NotImplementedError
 
 
-
     def handle_error(self):
         """error handling"""
         raise NotImplementedError
-
 
 
     def test_com(self, register:TmcRegAddr):
