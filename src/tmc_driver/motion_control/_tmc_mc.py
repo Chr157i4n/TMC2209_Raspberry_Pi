@@ -3,7 +3,6 @@ Motion Control base module
 """
 
 from enum import Enum
-import math
 from .._tmc_logger import TmcLogger, Loglevel
 from .. import _tmc_math as tmc_math
 
@@ -153,6 +152,11 @@ class TmcMotionControl():
     def max_speed_fullstep(self, max_speed_fullstep:int):
         """_max_speed_fullstep setter"""
         self.max_speed = max_speed_fullstep * self.mres
+
+    @property
+    def max_speed_homing(self):
+        """_max_speed_homing property"""
+        return self._max_speed_homing
 
     @property
     def acceleration(self):

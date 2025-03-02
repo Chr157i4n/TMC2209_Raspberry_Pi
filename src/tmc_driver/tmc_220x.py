@@ -3,9 +3,9 @@
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-instance-attributes
 #pylint: disable=too-many-positional-arguments
-#pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
 #pylint: disable=unused-import
+#pylint: disable=unused-wildcard-import
 """Tmc220X stepper driver module
 
 this module has two different functions:
@@ -113,10 +113,10 @@ class Tmc220x(TmcStepperDriver):
 
 
     def __del__(self):
-            """destructor"""
-            if self.tmc_com is not None:
-                del self.tmc_com
-            super().__del__()
+        """destructor"""
+        if self.tmc_com is not None:
+            del self.tmc_com
+        super().__del__()
 
 
 
@@ -134,8 +134,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             int: Steps per revolution
         """
-        self.tmc_mc._steps_per_rev = self.fullsteps_per_rev*self.read_microstepping_resolution()
-        return self.tmc_mc._steps_per_rev
+        self.read_microstepping_resolution()
+        return self.tmc_mc.steps_per_rev
 
 
 
@@ -253,7 +253,6 @@ class Tmc220x(TmcStepperDriver):
         gconf_int = gconf.serialise()
 
         self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
-        self._direction = not direction
 
 
 
@@ -436,14 +435,14 @@ class Tmc220x(TmcStepperDriver):
         cs_irun = min(cs_irun, 31)
         cs_irun = max(cs_irun, 0)
 
-        CS_IHold = hold_current_multiplier * cs_irun
+        cs_ihold = hold_current_multiplier * cs_irun
 
         cs_irun = round(cs_irun)
-        CS_IHold = round(CS_IHold)
+        cs_ihold = round(cs_ihold)
         hold_current_delay = round(hold_current_delay)
 
         self.tmc_logger.log(f"cs_irun: {cs_irun}", Loglevel.INFO)
-        self.tmc_logger.log(f"CS_IHold: {CS_IHold}", Loglevel.INFO)
+        self.tmc_logger.log(f"CS_IHold: {cs_ihold}", Loglevel.INFO)
         self.tmc_logger.log(f"Delay: {hold_current_delay}", Loglevel.INFO)
 
         # return (float)(CS+1)/32.0 * (vsense() ? 0.180 : 0.325)/(rsense+0.02) / 1.41421 * 1000;
@@ -451,7 +450,7 @@ class Tmc220x(TmcStepperDriver):
         self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
                             Loglevel.INFO)
 
-        self.set_irun_ihold(CS_IHold, cs_irun, hold_current_delay)
+        self.set_irun_ihold(cs_ihold, cs_irun, hold_current_delay)
 
         self.set_pdn_disable(pdn_disable)
 
@@ -670,7 +669,7 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             step (int): current Microstep counter convertet to steps
         """
-        step = (self.get_microstep_counter()-64)*(self._mres*4)/1024
-        step = (4*self._mres)-step-1
+        step = (self.get_microstep_counter()-64)*(self.tmc_mc.mres*4)/1024
+        step = (4*self.tmc_mc.mres)-step-1
         step = round(step)
         return step+offset

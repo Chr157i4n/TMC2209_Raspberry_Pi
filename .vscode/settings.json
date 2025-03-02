@@ -1,0 +1,8 @@
+{
+    "pylint.args": [
+        "--max-line-length=160",
+        "--disable=W0511",
+        "--disable=W0012",
+        "--extension-pkg-whitelist=RPi",
+    ]
+}

@@ -284,7 +284,7 @@ class TmcMotionControlStepDir(TmcMotionControl):
         """
         distance_to = self.distance_to_go() # +ve is clockwise from current location
         steps_to_stop = (self._speed * self._speed) / (2.0 * self._acceleration) # Equation 16
-        if ((distance_to == 0 and steps_to_stop <= 2) or (self._stop == StopMode.SOFTSTOP and steps_to_stop <= 1)):
+        if (distance_to == 0 and steps_to_stop <= 2) or (self._stop == StopMode.SOFTSTOP and steps_to_stop <= 1):
             # We are at the target and its time to stop
             self._step_interval = 0
             self._speed = 0.0

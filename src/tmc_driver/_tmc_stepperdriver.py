@@ -74,7 +74,7 @@ class TmcStepperDriver:
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s').
         """
         if logprefix is None:
-            logprefix = f"StepperDriver"
+            logprefix = "StepperDriver"
         self.tmc_logger = TmcLogger(loglevel, logprefix, log_handlers, log_formatter)
 
         self.tmc_logger.log("Init", Loglevel.INFO)
@@ -100,25 +100,25 @@ class TmcStepperDriver:
 
 
     def __del__(self):
-            """destructor"""
-            if self._deinit_finished is False:
-                self.tmc_logger.log("Deinit", Loglevel.INFO)
+        """destructor"""
+        if self._deinit_finished is False:
+            self.tmc_logger.log("Deinit", Loglevel.INFO)
 
-                self.set_motor_enabled(False)
+            self.set_motor_enabled(False)
 
-                self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
+            self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
 
-                if self._pin_en is not None:
-                    tmc_gpio.gpio_cleanup(self._pin_en)
+            if self._pin_en is not None:
+                tmc_gpio.gpio_cleanup(self._pin_en)
 
-                self.tmc_logger.log("Deinit finished", Loglevel.INFO)
-                self._deinit_finished= True
-            else:
-                self.tmc_logger.log("Deinit already finished", Loglevel.INFO)
-            if self.tmc_mc is not None:
-                del self.tmc_mc
-            if self.tmc_logger is not None:
-                del self.tmc_logger
+            self.tmc_logger.log("Deinit finished", Loglevel.INFO)
+            self._deinit_finished= True
+        else:
+            self.tmc_logger.log("Deinit already finished", Loglevel.INFO)
+        if self.tmc_mc is not None:
+            del self.tmc_mc
+        if self.tmc_logger is not None:
+            del self.tmc_logger
 
 
 
@@ -129,6 +129,8 @@ class TmcStepperDriver:
         """_current_pos property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.current_pos
+        else:
+            return None
 
     @current_pos.setter
     def current_pos(self, current_pos:int):
@@ -141,6 +143,8 @@ class TmcStepperDriver:
         """_mres property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.mres
+        else:
+            return None
 
     @mres.setter
     def mres(self, mres:int):
@@ -153,12 +157,16 @@ class TmcStepperDriver:
         """_steps_per_rev property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.steps_per_rev
+        else:
+            return None
 
     @property
     def fullsteps_per_rev(self):
         """_fullsteps_per_rev property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.fullsteps_per_rev
+        else:
+            return None
 
     @fullsteps_per_rev.setter
     def fullsteps_per_rev(self, fullsteps_per_rev:int):
@@ -171,6 +179,8 @@ class TmcStepperDriver:
         """_movement_abs_rel property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.movement_abs_rel
+        else:
+            return None
 
     @movement_abs_rel.setter
     def movement_abs_rel(self, movement_abs_rel:MovementAbsRel):
@@ -183,12 +193,16 @@ class TmcStepperDriver:
         """_movement_phase property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.movement_phase
+        else:
+            return None
 
     @property
     def speed(self):
         """_speed property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.speed
+        else:
+            return None
 
     @speed.setter
     def speed(self, speed:int):
@@ -201,6 +215,8 @@ class TmcStepperDriver:
         """_max_speed property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.max_speed
+        else:
+            return None
 
     @max_speed.setter
     def max_speed(self, speed:int):
@@ -213,6 +229,8 @@ class TmcStepperDriver:
         """_max_speed_fullstep property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.max_speed_fullstep
+        else:
+            return None
 
     @max_speed_fullstep.setter
     def max_speed_fullstep(self, max_speed_fullstep:int):
@@ -225,6 +243,8 @@ class TmcStepperDriver:
         """_acceleration property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.acceleration
+        else:
+            return None
 
     @acceleration.setter
     def acceleration(self, acceleration:int):
@@ -237,6 +257,8 @@ class TmcStepperDriver:
         """_acceleration_fullstep property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.acceleration_fullstep
+        else:
+            return None
 
     @acceleration_fullstep.setter
     def acceleration_fullstep(self, acceleration_fullstep:int):
