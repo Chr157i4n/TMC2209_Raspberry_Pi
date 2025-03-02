@@ -36,7 +36,6 @@ class TmcComSpi(TmcCom):
 
     def __del__(self):
         """destructor"""
-        pass
 
 
     def read_reg(self, register:TmcRegAddr):

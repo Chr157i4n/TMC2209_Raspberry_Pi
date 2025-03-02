@@ -4,7 +4,6 @@ Motion Control base module
 
 from enum import Enum
 from .._tmc_logger import TmcLogger, Loglevel
-from .. import _tmc_math as tmc_math
 
 
 class Direction(Enum):
@@ -181,7 +180,6 @@ class TmcMotionControl():
 
     def __init__(self):
         """constructor"""
-        pass
 
 
     def init(self):
@@ -202,7 +200,7 @@ class TmcMotionControl():
             direction (bool): motor shaft direction: False = CCW; True = CW
         """
         self._direction = direction
-        self.tmc_logger.log(f"New Direction is: {direction}", Loglevel.MOVEMENT)
+        self._tmc_logger.log(f"New Direction is: {direction}", Loglevel.MOVEMENT)
 
 
     def stop(self, stop_mode = StopMode.HARDSTOP):

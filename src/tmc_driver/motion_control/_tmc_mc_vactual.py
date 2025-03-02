@@ -77,15 +77,15 @@ class TmcMotionControlVActual(TmcMotionControl):
 
 
     def set_vactual(self, vactual:int):
-            """sets the register bit "VACTUAL" to to a given value
-            VACTUAL allows moving the motor by UART control.
-            It gives the motor velocity in +-(2^23)-1 [μsteps / t]
-            0: Normal operation. Driver reacts to STEP input
+        """sets the register bit "VACTUAL" to to a given value
+        VACTUAL allows moving the motor by UART control.
+        It gives the motor velocity in +-(2^23)-1 [μsteps / t]
+        0: Normal operation. Driver reacts to STEP input
 
-            Args:
-                vactual (int): value for VACTUAL
-            """
-            self.tmc_com.write_reg_check(TmcRegAddr.VACTUAL, vactual)
+        Args:
+            vactual (int): value for VACTUAL
+        """
+        self.tmc_com.write_reg_check(TmcRegAddr.VACTUAL, vactual)
 
 
     def set_vactual_dur(self, vactual, duration=0, acceleration=0,
@@ -114,13 +114,13 @@ class TmcMotionControlVActual(TmcMotionControl):
             acceleration = -acceleration
 
         if duration != 0:
-            self.tmc_logger.log(f"vactual: {vactual} for {duration} sec",
+            self._tmc_logger.log(f"vactual: {vactual} for {duration} sec",
                                 Loglevel.INFO)
         else:
-            self.tmc_logger.log(f"vactual: {vactual}", Loglevel.INFO)
-        self.tmc_logger.log(str(bin(vactual)), Loglevel.INFO)
+            self._tmc_logger.log(f"vactual: {vactual}", Loglevel.INFO)
+        self._tmc_logger.log(str(bin(vactual)), Loglevel.INFO)
 
-        self.tmc_logger.log("writing vactual", Loglevel.INFO)
+        self._tmc_logger.log("writing vactual", Loglevel.INFO)
         if acceleration == 0:
             self.set_vactual(int(round(vactual)))
 
@@ -145,11 +145,11 @@ class TmcMotionControlVActual(TmcMotionControl):
                 self.set_vactual(int(round(current_vactual)))
                 time.sleep(sleeptime)
             if show_stallguard_result:
-                self.tmc_logger.log(f"StallGuard result: {self.get_stallguard_result()}",
+                self._tmc_logger.log(f"StallGuard result: {self.get_stallguard_result()}",
                                     Loglevel.INFO)
                 time.sleep(0.1)
             if show_tstep:
-                self.tmc_logger.log(f"TStep result: {self.get_tstep()}",
+                self._tmc_logger.log(f"TStep result: {self.get_tstep()}",
                                     Loglevel.INFO)
                 time.sleep(0.1)
             current_time = time.time()

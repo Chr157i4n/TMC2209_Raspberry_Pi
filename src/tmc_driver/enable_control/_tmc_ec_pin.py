@@ -3,8 +3,8 @@ Enable Control base module
 """
 
 from ._tmc_ec import TmcEnableControl
-from .._tmc_gpio_board import Gpio, GpioMode, Board, BOARD, tmc_gpio
-from .._tmc_logger import TmcLogger, Loglevel
+from .._tmc_gpio_board import Gpio, GpioMode, tmc_gpio
+from .._tmc_logger import Loglevel
 
 
 class TmcEnableControlPin(TmcEnableControl):
@@ -20,7 +20,7 @@ class TmcEnableControlPin(TmcEnableControl):
 
     def init(self):
         """init: called by the Tmc class"""
-        self.tmc_logger.log(f"EN Pin: {self._pin_en}", Loglevel.DEBUG)
+        self._tmc_logger.log(f"EN Pin: {self._pin_en}", Loglevel.DEBUG)
         tmc_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
 
 
@@ -38,4 +38,4 @@ class TmcEnableControlPin(TmcEnableControl):
         """
         if self._pin_en is not None:
             tmc_gpio.gpio_output(self._pin_en, not en)
-            self.tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
+            self._tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)

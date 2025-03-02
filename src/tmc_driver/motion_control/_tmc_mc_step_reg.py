@@ -26,7 +26,7 @@ class TmcMotionControlStepReg(TmcMotionControlStepDir):
 
     def init(self):
         """init: called by the Tmc class"""
-        self.tmc_logger.log(f"STEP Pin: {self._pin_step}", Loglevel.DEBUG)
+        self._tmc_logger.log(f"STEP Pin: {self._pin_step}", Loglevel.DEBUG)
         tmc_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
 
         super().init()
@@ -45,5 +45,5 @@ class TmcMotionControlStepReg(TmcMotionControlStepDir):
             direction (bool): motor shaft direction: False = CCW; True = CW
         """
         self._direction = direction
-        self.tmc_logger.log(f"New Direction is: {direction}", Loglevel.MOVEMENT)
+        self._tmc_logger.log(f"New Direction is: {direction}", Loglevel.MOVEMENT)
         # TODO

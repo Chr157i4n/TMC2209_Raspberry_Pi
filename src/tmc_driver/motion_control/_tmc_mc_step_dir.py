@@ -1,4 +1,7 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=too-many-arguments
+#pylint: disable=too-many-branches
+#pylint: disable=too-many-positional-arguments
 """
 STEP/DIR Motion Control module
 """
@@ -84,10 +87,10 @@ class TmcMotionControlStepDir(TmcMotionControl):
             self._step_interval = abs(1000000.0 / speed)
             if speed > 0:
                 tmc_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
-                self.tmc_logger.log("going CW", Loglevel.MOVEMENT)
+                self._tmc_logger.log("going CW", Loglevel.MOVEMENT)
             else:
                 tmc_gpio.gpio_output(self._pin_dir, Gpio.LOW)
-                self.tmc_logger.log("going CCW", Loglevel.MOVEMENT)
+                self._tmc_logger.log("going CCW", Loglevel.MOVEMENT)
 
         self._speed = speed
 
@@ -110,10 +113,10 @@ class TmcMotionControlStepDir(TmcMotionControl):
 
     def init(self):
         """init: called by the Tmc class"""
-        self.tmc_logger.log(f"STEP Pin: {self._pin_step}", Loglevel.DEBUG)
+        self._tmc_logger.log(f"STEP Pin: {self._pin_step}", Loglevel.DEBUG)
         tmc_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
 
-        self.tmc_logger.log(f"DIR Pin: {self._pin_dir}", Loglevel.DEBUG)
+        self._tmc_logger.log(f"DIR Pin: {self._pin_dir}", Loglevel.DEBUG)
         tmc_gpio.gpio_setup(self._pin_dir, GpioMode.OUT, initial=self._direction.value)
 
         super().init()
@@ -137,8 +140,8 @@ class TmcMotionControlStepDir(TmcMotionControl):
         tmc_gpio.gpio_output(self._pin_step, Gpio.LOW)
         time.sleep(1/1000/1000)
 
-        # self.tmc_logger.log("one step", Loglevel.MOVEMENT)
-        self.tmc_logger.log(f"one step | cur: {self.current_pos} | tar: {self._target_pos}", Loglevel.MOVEMENT)
+        # self._tmc_logger.log("one step", Loglevel.MOVEMENT)
+        self._tmc_logger.log(f"one step | cur: {self.current_pos} | tar: {self._target_pos}", Loglevel.MOVEMENT)
 
 
     def set_direction(self, direction:Direction):
@@ -174,8 +177,8 @@ class TmcMotionControlStepDir(TmcMotionControl):
         else:
             self._target_pos = steps
 
-        self.tmc_logger.log(f"cur: {self._current_pos} | tar: {self._target_pos}", Loglevel.MOVEMENT)
-        # self.tmc_logger.log(f"mov: {movement_abs_rel}", Loglevel.MOVEMENT)
+        self._tmc_logger.log(f"cur: {self._current_pos} | tar: {self._target_pos}", Loglevel.MOVEMENT)
+        # self._tmc_logger.log(f"mov: {movement_abs_rel}", Loglevel.MOVEMENT)
 
         self._stop = StopMode.NO
         self._step_interval = 0
@@ -270,7 +273,7 @@ class TmcMotionControlStepDir(TmcMotionControl):
     def distance_to_go(self):
         """returns the remaining distance the motor should run"""
         distance_to_go = self._target_pos - self._current_pos
-        # self.tmc_logger.log(f"cur: {self.current_pos} | tar: {self._target_pos} | dis: {distance_to_go}", Loglevel.MOVEMENT)
+        # self._tmc_logger.log(f"cur: {self.current_pos} | tar: {self._target_pos} | dis: {distance_to_go}", Loglevel.MOVEMENT)
         return distance_to_go
 
 
@@ -290,7 +293,7 @@ class TmcMotionControlStepDir(TmcMotionControl):
             self._speed = 0.0
             self._n = 0
             self._movement_phase = MovementPhase.STANDSTILL
-            self.tmc_logger.log("time to stop", Loglevel.MOVEMENT)
+            self._tmc_logger.log("time to stop", Loglevel.MOVEMENT)
             return
 
         if distance_to > 0:
@@ -326,7 +329,7 @@ class TmcMotionControlStepDir(TmcMotionControl):
             tmc_gpio.gpio_output(self._pin_step, Gpio.LOW)
             if distance_to > 0:
                 self.set_direction(Direction.CW)
-                self.tmc_logger.log("going CW", Loglevel.MOVEMENT)
+                self._tmc_logger.log("going CW", Loglevel.MOVEMENT)
             else:
                 self.set_direction(Direction.CCW)
             self._movement_phase = MovementPhase.ACCELERATING
@@ -347,7 +350,7 @@ class TmcMotionControlStepDir(TmcMotionControl):
         """this methods does the actual steps with the current speed"""
         # Don't do anything unless we actually have a step interval
 
-        # self.tmc_logger.log(f"si: {self._step_interval}")
+        # self._tmc_logger.log(f"si: {self._step_interval}")
 
         if not self._step_interval:
             return False
@@ -356,7 +359,7 @@ class TmcMotionControlStepDir(TmcMotionControl):
 
         if curtime - self._last_step_time >= self._step_interval:
 
-            self.tmc_logger.log(f"dir: {self._direction}", Loglevel.MOVEMENT)
+            self._tmc_logger.log(f"dir: {self._direction}", Loglevel.MOVEMENT)
 
             if self._direction == Direction.CW: # Clockwise
                 self._current_pos += 1

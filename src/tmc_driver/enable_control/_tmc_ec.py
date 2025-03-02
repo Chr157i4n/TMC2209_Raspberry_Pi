@@ -2,7 +2,7 @@
 Enable Control base module
 """
 
-from .._tmc_logger import TmcLogger, Loglevel
+from .._tmc_logger import TmcLogger
 
 
 class TmcEnableControl():
@@ -24,7 +24,6 @@ class TmcEnableControl():
 
     def init(self):
         """init: called by the Tmc class"""
-        pass
 
 
     def set_motor_enabled(self, en):

@@ -3,8 +3,10 @@
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-instance-attributes
 #pylint: disable=too-many-positional-arguments
+#pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
 #pylint: disable=unused-import
+#pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
 """Tmc220X stepper driver module
 
