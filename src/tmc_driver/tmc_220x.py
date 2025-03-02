@@ -54,7 +54,6 @@ class Tmc220x(TmcStepperDriver):
     """
 
     tmc_com:TmcComUart = None
-    _movement_thread:threading.Thread = None
 
 
     from ._tmc_test import (

@@ -2,6 +2,8 @@
 #pylint: disable=broad-exception-caught
 #pylint: disable=unused-import
 #pylint: disable=duplicate-code
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 TmcComSpi stepper driver spi module
 """

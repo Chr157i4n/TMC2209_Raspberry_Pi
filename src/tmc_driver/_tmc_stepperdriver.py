@@ -1,7 +1,6 @@
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
 #pylint: disable=too-many-branches
-#pylint: disable=too-many-instance-attributes
 #pylint: disable=too-many-positional-arguments
 #pylint: disable=import-outside-toplevel
 #pylint: disable=bare-except
@@ -167,8 +166,7 @@ class TmcStepperDriver:
         """_fullsteps_per_rev property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.fullsteps_per_rev
-        else:
-            return None
+        return None
 
     @fullsteps_per_rev.setter
     def fullsteps_per_rev(self, fullsteps_per_rev:int):

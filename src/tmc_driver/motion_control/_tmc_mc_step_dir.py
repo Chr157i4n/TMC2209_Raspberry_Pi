@@ -10,7 +10,7 @@ import time
 import math
 import threading
 from ._tmc_mc import TmcMotionControl, MovementAbsRel, MovementPhase, Direction, StopMode
-from .._tmc_logger import TmcLogger, Loglevel
+from .._tmc_logger import Loglevel
 from .._tmc_gpio_board import tmc_gpio, Gpio, GpioMode
 from .. import _tmc_math as tmc_math
 
@@ -20,6 +20,8 @@ class TmcMotionControlStepDir(TmcMotionControl):
 
     _pin_step:int = None
     _pin_dir:int = None
+
+    _movement_thread:threading.Thread = None
 
     _sqrt_twoa:float = 1.0              # Precomputed sqrt(2*_acceleration)
     _step_interval:int = 0              # the current interval between two steps
@@ -314,7 +316,7 @@ class TmcMotionControlStepDir(TmcMotionControl):
             # Need to go anticlockwise from here, maybe decelerate
             if self._n > 0:
                 # Currently accelerating, need to decel now? Or maybe going the wrong way?
-                if (((steps_to_stop >= -distance_to) or self._direction == Direction.CW or self._stop == StopMode.SOFTSTOP)):
+                if (steps_to_stop >= -distance_to) or self._direction == Direction.CW or self._stop == StopMode.SOFTSTOP:
                     self._n = -steps_to_stop # Start deceleration
                     self._movement_phase = MovementPhase.DECELERATING
             elif self._n < 0:

@@ -45,14 +45,13 @@ class TmcMotionControlVActual(TmcMotionControl):
         self._tmc_com = tmc_com
 
 
-    def __init__(self):
-        """constructor"""
-        pass
+    # def __init__(self):
+    #     """constructor"""
 
 
-    def init(self):
-        """init: called by the Tmc class"""
-        super().init()
+    # def init(self):
+    #     """init: called by the Tmc class"""
+    #     super().init()
 
 
     def make_a_step(self):
@@ -76,7 +75,7 @@ class TmcMotionControlVActual(TmcMotionControl):
         Returns:
             stop (enum): how the movement was finished
         """
-        rps = tmc_math.steps_to_rps(self.max_speed_fullstep)
+        rps = tmc_math.steps_to_rps(self.max_speed_fullstep, self.steps_per_rev)
         self.set_vactual_rps(rps, revolutions=steps/self.steps_per_rev)
 
 
@@ -149,12 +148,12 @@ class TmcMotionControlVActual(TmcMotionControl):
                 self.set_vactual(int(round(current_vactual)))
                 time.sleep(sleeptime)
             if show_stallguard_result:
-                self._tmc_logger.log(f"StallGuard result: {self.get_stallguard_result()}",
-                                    Loglevel.INFO)
+                # self._tmc_logger.log(f"StallGuard result: {self.get_stallguard_result()}",
+                #                     Loglevel.INFO)
                 time.sleep(0.1)
             if show_tstep:
-                self._tmc_logger.log(f"TStep result: {self.get_tstep()}",
-                                    Loglevel.INFO)
+                # self._tmc_logger.log(f"TStep result: {self.get_tstep()}",
+                #                     Loglevel.INFO)
                 time.sleep(0.1)
             current_time = time.time()
         self.set_vactual(0)

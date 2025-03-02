@@ -3,14 +3,10 @@
 STEP/REG Motion Control module
 """
 
-import time
-import math
-import threading
-from ._tmc_mc import TmcMotionControl, MovementAbsRel, MovementPhase, Direction, StopMode
+from ._tmc_mc import Direction
 from ._tmc_mc_step_dir import TmcMotionControlStepDir
-from .._tmc_logger import TmcLogger, Loglevel
+from .._tmc_logger import Loglevel
 from .._tmc_gpio_board import tmc_gpio, Gpio, GpioMode
-from .. import _tmc_math as tmc_math
 
 
 class TmcMotionControlStepReg(TmcMotionControlStepDir):
@@ -20,8 +16,8 @@ class TmcMotionControlStepReg(TmcMotionControlStepDir):
 
     def __init__(self, pin_dir:int):
         """constructor"""
+        super().__init__(None, pin_dir)
         del self._pin_step
-        self._pin_dir = pin_dir
 
 
     def init(self):

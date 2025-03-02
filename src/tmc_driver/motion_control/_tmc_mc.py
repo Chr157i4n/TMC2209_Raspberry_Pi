@@ -1,3 +1,4 @@
+#pylint: disable=too-many-instance-attributes
 """
 Motion Control base module
 """
@@ -165,7 +166,7 @@ class TmcMotionControl():
     @acceleration.setter
     def acceleration(self, acceleration:int):
         """_acceleration setter"""
-        acceleration = abs(acceleration)
+        self._acceleration = abs(acceleration)
 
     @property
     def acceleration_fullstep(self):
@@ -178,8 +179,8 @@ class TmcMotionControl():
         self.acceleration = acceleration_fullstep * self.mres
 
 
-    def __init__(self):
-        """constructor"""
+    # def __init__(self):
+    #     """constructor"""
 
 
     def init(self):

@@ -14,6 +14,28 @@ from ..reg._tmc_gstat import GStat
 from .._tmc_logger import TmcLogger, Loglevel
 
 
+def compute_crc8_atm(datagram, initial_value=0):
+        """this function calculates the crc8 parity bit
+
+        Args:
+            datagram (list): datagram
+            initial_value (int): initial value (Default value = 0)
+        """
+        crc = initial_value
+        # Iterate bytes in data
+        for byte in datagram:
+            # Iterate bits in byte
+            for _ in range(0, 8):
+                if (crc >> 7) ^ (byte & 0x01):
+                    crc = ((crc << 1) ^ 0x07) & 0xFF
+                else:
+                    crc = (crc << 1) & 0xFF
+                # Shift to next bit
+                byte = byte >> 1
+        return crc
+
+
+
 class TmcCom:
     """TmcCom
     """
@@ -50,31 +72,8 @@ class TmcCom:
         self.mtr_id = mtr_id
 
 
-
-    def __del__(self):
-        """destructor"""
-        pass
-
-
-    def compute_crc8_atm(self, datagram, initial_value=0):
-        """this function calculates the crc8 parity bit
-
-        Args:
-            datagram (list): datagram
-            initial_value (int): initial value (Default value = 0)
-        """
-        crc = initial_value
-        # Iterate bytes in data
-        for byte in datagram:
-            # Iterate bits in byte
-            for _ in range(0, 8):
-                if (crc >> 7) ^ (byte & 0x01):
-                    crc = ((crc << 1) ^ 0x07) & 0xFF
-                else:
-                    crc = (crc << 1) & 0xFF
-                # Shift to next bit
-                byte = byte >> 1
-        return crc
+    # def __del__(self):
+    #     """destructor"""
 
 
     def read_reg(self, register:TmcRegAddr):
