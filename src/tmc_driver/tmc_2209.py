@@ -81,7 +81,7 @@ class Tmc2209(Tmc220x):
 
 
 
-    def do_homing(self, diag_pin, revolutions = 10, threshold = None, speed_rpm = None):
+    def do_homing(self, diag_pin, revolutions = 10, threshold = None, speed_rpm = None) -> bool:
         """homes the motor in the given direction using stallguard.
         this method is using vactual to move the motor and an interrupt on the DIAG pin
 
@@ -97,7 +97,7 @@ class Tmc2209(Tmc220x):
         """
         if self.tmc_com is None:
             self.tmc_logger.log("do_homing only works with VActual register control via COM", Loglevel.ERROR)
-            return
+            return False
 
         if threshold is not None:
             self._sg_threshold = threshold

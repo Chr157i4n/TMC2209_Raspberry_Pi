@@ -29,8 +29,8 @@ class TmcComSpi(TmcCom):
             _tmc_logger (class): TMCLogger class
             mtr_id (int, optional): driver address [0-3]. Defaults to 0.
         """
-        self._tmc_logger = tmc_logger
-        self.mtr_id = mtr_id
+        super().__init__(mtr_id, tmc_logger)
+        raise NotImplementedError
 
 
 

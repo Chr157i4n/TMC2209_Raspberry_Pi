@@ -44,7 +44,8 @@ class TmcComUart(TmcCom):
             baudrate (int): baudrate
             mtr_id (int, optional): driver address [0-3]. Defaults to 0.
         """
-        self._tmc_logger = tmc_logger
+        super().__init__(mtr_id, tmc_logger)
+
         if serialport is None:
             return
         try:
@@ -60,7 +61,6 @@ class TmcComUart(TmcCom):
                                     You may need to add your user to the dialout group
                                     with \"sudo usermod -a -G dialout pi\"""")
 
-        self.mtr_id = mtr_id
         # adjust per baud and hardware. Sequential reads without some delay fail.
         self.communication_pause = 500 / baudrate
 
