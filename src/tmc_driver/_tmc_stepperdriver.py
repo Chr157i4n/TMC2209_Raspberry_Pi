@@ -107,20 +107,24 @@ class TmcStepperDriver:
 
             self.set_motor_enabled(False)
 
-            self.tmc_logger.log("GPIO cleanup", Loglevel.INFO)
-
-            if self._pin_en is not None:
-                tmc_gpio.gpio_cleanup(self._pin_en)
-
             self.tmc_logger.log("Deinit finished", Loglevel.INFO)
             self._deinit_finished= True
         else:
             self.tmc_logger.log("Deinit already finished", Loglevel.INFO)
+        if self.tmc_ec is not None:
+            del self.tmc_ec
         if self.tmc_mc is not None:
             del self.tmc_mc
         if self.tmc_logger is not None:
             del self.tmc_logger
 
+
+# TmcEnableControl Wrapper
+# ----------------------------
+    def set_motor_enabled(self, en:bool):
+        """enable control wrapper"""
+        if self.tmc_ec is not None:
+            self.tmc_ec.set_motor_enabled(en)
 
 
 # TmcMotionControl Wrapper
@@ -130,8 +134,7 @@ class TmcStepperDriver:
         """_current_pos property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.current_pos
-        else:
-            return None
+        return None
 
     @current_pos.setter
     def current_pos(self, current_pos:int):
@@ -144,8 +147,7 @@ class TmcStepperDriver:
         """_mres property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.mres
-        else:
-            return None
+        return None
 
     @mres.setter
     def mres(self, mres:int):
@@ -158,8 +160,7 @@ class TmcStepperDriver:
         """_steps_per_rev property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.steps_per_rev
-        else:
-            return None
+        return None
 
     @property
     def fullsteps_per_rev(self):
@@ -180,8 +181,7 @@ class TmcStepperDriver:
         """_movement_abs_rel property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.movement_abs_rel
-        else:
-            return None
+        return None
 
     @movement_abs_rel.setter
     def movement_abs_rel(self, movement_abs_rel:MovementAbsRel):
@@ -194,16 +194,14 @@ class TmcStepperDriver:
         """_movement_phase property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.movement_phase
-        else:
-            return None
+        return None
 
     @property
     def speed(self):
         """_speed property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.speed
-        else:
-            return None
+        return None
 
     @speed.setter
     def speed(self, speed:int):
@@ -216,8 +214,7 @@ class TmcStepperDriver:
         """_max_speed property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.max_speed
-        else:
-            return None
+        return None
 
     @max_speed.setter
     def max_speed(self, speed:int):
@@ -230,8 +227,7 @@ class TmcStepperDriver:
         """_max_speed_fullstep property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.max_speed_fullstep
-        else:
-            return None
+        return None
 
     @max_speed_fullstep.setter
     def max_speed_fullstep(self, max_speed_fullstep:int):
@@ -244,8 +240,7 @@ class TmcStepperDriver:
         """_acceleration property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.acceleration
-        else:
-            return None
+        return None
 
     @acceleration.setter
     def acceleration(self, acceleration:int):
@@ -258,8 +253,7 @@ class TmcStepperDriver:
         """_acceleration_fullstep property"""
         if self.tmc_mc is not None:
             return self.tmc_mc.acceleration_fullstep
-        else:
-            return None
+        return None
 
     @acceleration_fullstep.setter
     def acceleration_fullstep(self, acceleration_fullstep:int):
@@ -272,14 +266,3 @@ class TmcStepperDriver:
         """motioncontrol wrapper"""
         if self.tmc_mc is not None:
             self.tmc_mc.run_to_position_steps(steps, movement_abs_rel)
-
-
-# TmcStepperDriver methods
-# ----------------------------
-    def set_motor_enabled(self, en:bool):
-        """enables or disables the motor current output
-
-        Args:
-            en (bool): whether the motor current output should be enabled
-        """
-        self.tmc_ec.set_motor_enabled(en)

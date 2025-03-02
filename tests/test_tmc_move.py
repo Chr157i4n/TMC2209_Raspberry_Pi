@@ -18,7 +18,7 @@ class TestTMCMove(unittest.TestCase):
 
     def setUp(self):
         """setUp"""
-        self.tmc = Tmc2209(TmcMotionControlStepDir(16, 20), 21)
+        self.tmc = Tmc2209(None, TmcMotionControlStepDir(16, 20))
 
         # these values are normally set by reading the driver
         self.tmc.mres = 2

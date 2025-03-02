@@ -63,8 +63,8 @@ class Tmc220x(TmcStepperDriver):
 # Constructor/Destructor
 # ----------------------------
     def __init__(self,
+                    tmc_ec:TmcEnableControl,
                     tmc_mc:TmcMotionControl,
-                    pin_en:int = None,
                     tmc_com:TmcCom = None,
                     driver_address:int = 0,
                     gpio_mode = None,
@@ -91,7 +91,7 @@ class Tmc220x(TmcStepperDriver):
                 Defaults to None (messages are logged in the format
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s').
         """
-        super().__init__(tmc_mc, pin_en, gpio_mode, loglevel, logprefix, log_handlers, log_formatter)
+        super().__init__(tmc_ec, tmc_mc, gpio_mode, loglevel, logprefix, log_handlers, log_formatter)
 
         self.tmc_logger.set_logprefix(f"TMC2209 {driver_address}")
 

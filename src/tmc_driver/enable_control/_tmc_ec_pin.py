@@ -24,6 +24,12 @@ class TmcEnableControlPin(TmcEnableControl):
         tmc_gpio.gpio_setup(self._pin_en, GpioMode.OUT, initial=Gpio.HIGH)
 
 
+    def __del__(self):
+        """destructor"""
+        if self._pin_en is not None:
+            tmc_gpio.gpio_cleanup(self._pin_en)
+
+
     def set_motor_enabled(self, en):
         """enables or disables the motor current output
 
