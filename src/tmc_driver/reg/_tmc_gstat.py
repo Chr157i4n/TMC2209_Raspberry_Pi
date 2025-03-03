@@ -4,10 +4,10 @@ Global status flags register
 """
 
 from .bitfields import _tmc_220x_gstat as bit
-from .._tmc_logger import TmcLogger
+from ._tmc_reg import *
 
 
-class GStat():
+class GStat(TmcReg):
     """Global status flags register"""
 
     data: int
@@ -16,13 +16,15 @@ class GStat():
     drv_err: bool
     uv_cp: bool
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.GSTAT
+        if data is not None:
+            self.deserialise(data)
 
 
     def deserialise(self, data: int):

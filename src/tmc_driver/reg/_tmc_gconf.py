@@ -4,10 +4,10 @@ General Configuration register
 """
 
 from .bitfields import _tmc_220x_gconf as bit
-from .._tmc_logger import TmcLogger, Loglevel
+from ._tmc_reg import *
 
 
-class GConf():
+class GConf(TmcReg):
     """General Configuration register"""
 
     data: int
@@ -24,16 +24,18 @@ class GConf():
     test_mode: bool
 
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.GCONF
+        if data is not None:
+            self.deserialise(data)
 
 
-    def deserialise(self, data: int):
+    def deserialise(self, data:int):
         """Deserialises the register value
 
         Args:
@@ -75,7 +77,7 @@ class GConf():
         return data
 
 
-    def log(self, logger: TmcLogger):
+    def log(self, logger:TmcLogger):
         """Logs the register values
 
         Args:

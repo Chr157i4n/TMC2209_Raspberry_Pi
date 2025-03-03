@@ -4,10 +4,10 @@ Driver current control register
 """
 
 from .bitfields import _tmc_220x_ihold_irun as bit
-from .._tmc_logger import TmcLogger
+from ._tmc_reg import *
 
 
-class IHoldIRun():
+class IHoldIRun(TmcReg):
     """Driver current control register"""
 
     data: int
@@ -17,12 +17,13 @@ class IHoldIRun():
     iholddelay: int
 
 
-    def __init__(self, data: int=None):
+    def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
             data (int, optional): register value. Defaults to None.
         """
+        self.addr = TmcRegAddr.IHOLD_IRUN
         if data is not None:
             self.deserialise(data)
 

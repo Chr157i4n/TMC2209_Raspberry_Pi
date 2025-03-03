@@ -4,10 +4,10 @@ INPUT register
 """
 
 from .bitfields import _tmc_220x_ioin as bit
-from .._tmc_logger import TmcLogger
+from ._tmc_reg import *
 
 
-class IOIN():
+class IOIN(TmcReg):
     """INPUT register"""
 
     data: int
@@ -22,13 +22,15 @@ class IOIN():
     dir: bool
     version: int
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.IOIN
+        if data is not None:
+            self.deserialise(data)
 
 
     def deserialise(self, data: int):

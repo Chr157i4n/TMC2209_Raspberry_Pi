@@ -4,10 +4,10 @@ Driver Status register
 """
 
 from .bitfields import _tmc_220x_drvstatus as bit
-from .._tmc_logger import TmcLogger, Loglevel
+from ._tmc_reg import *
 
 
-class DrvStatus():
+class DrvStatus(TmcReg):
     """Driver Status register"""
 
     data: int
@@ -31,13 +31,15 @@ class DrvStatus():
     otpw: bool      # overtemperature prewarning flag
 
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialise the DrvStatus object
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.DRVSTATUS
+        if data is not None:
+            self.deserialise(data)
 
 
     def deserialise(self, data: int):
