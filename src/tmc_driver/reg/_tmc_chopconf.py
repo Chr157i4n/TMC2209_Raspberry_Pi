@@ -1,4 +1,6 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 Chopper Configuration register
 """

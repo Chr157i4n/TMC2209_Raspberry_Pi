@@ -10,7 +10,7 @@ VActual Motion Control module
 import time
 from ._tmc_mc import TmcMotionControl, MovementAbsRel, StopMode
 from ..com._tmc_com import TmcCom
-from .._tmc_logger import TmcLogger, Loglevel
+from .._tmc_logger import Loglevel
 from .. import _tmc_math as tmc_math
 from ..reg._tmc_220x_reg_addr import TmcRegAddr
 

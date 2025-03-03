@@ -1,4 +1,6 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 Driver Status register
 """
@@ -65,6 +67,15 @@ class DrvStatus(TmcReg):
         self.s2ga = bool(data >> bit.s2ga_bp & bit.s2ga_bm)
         self.ot = bool(data >> bit.ot_bp & bit.ot_bm)
         self.otpw = bool(data >> bit.otpw_bp & bit.otpw_bm)
+
+
+    def serialise(self) -> int:
+        """Serialises the object to a register value
+
+        Returns:
+            int: register value
+        """
+        raise NotImplementedError
 
 
     def log(self, logger: TmcLogger):

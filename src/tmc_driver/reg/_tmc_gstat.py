@@ -1,4 +1,6 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 Global status flags register
 """
@@ -38,7 +40,6 @@ class GStat(TmcReg):
         self.reset = bool(data >> bit.reset_bp & bit.reset_bm)
         self.drv_err = bool(data >> bit.drv_err_bp & bit.drv_err_bm)
         self.uv_cp = bool(data >> bit.uv_cp_bp & bit.uv_cp_bm)
-
 
 
     def serialise(self) -> int:

@@ -1,4 +1,6 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 INPUT register
 """
@@ -48,6 +50,15 @@ class IOIN(TmcReg):
         self.spread = bool(data >> bit.spread_bp & bit.spread_bm)
         self.dir = bool(data >> bit.dir_bp & bit.dir_bm)
         self.version = data >> bit.version_bp & bit.version_bm
+
+
+    def serialise(self) -> int:
+        """Serialises the object to a register value
+
+        Returns:
+            int: register value
+        """
+        raise NotImplementedError
 
 
     def log(self, logger: TmcLogger):
