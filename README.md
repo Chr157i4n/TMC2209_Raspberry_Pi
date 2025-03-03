@@ -159,7 +159,7 @@ So you don't need to connect anything to the Vio pin of the driver.
 
 ```python
 from tmc_driver.tmc_2209 import *
-tmc = Tmc2209(TmcMotionControlStepDir(16, 20), 21, TmcComUart("/dev/serial0"))
+tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"))
 
 tmc.set_direction_reg(False)
 tmc.set_current(300)
