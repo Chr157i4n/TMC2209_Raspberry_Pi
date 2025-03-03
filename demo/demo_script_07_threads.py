@@ -25,14 +25,14 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc1 = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"))
+    tmc1 = Tmc2209(TmcEnableControlPin(13), TmcMotionControlStepDir(6, 5), TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
-    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 tmc_driverlist = [tmc1]
 
@@ -74,15 +74,15 @@ print("---\n---")
 #-----------------------------------------------------------------------
 
 # move 4000 steps forward
-tmc1.run_to_position_steps_threaded(4000, MovementAbsRel.RELATIVE)
+tmc1.tmc_mc.run_to_position_steps_threaded(4000, MovementAbsRel.RELATIVE)
 
 time.sleep(1)
-tmc1.stop()     # stop the movement after 1 second
+tmc1.tmc_mc.stop()     # stop the movement after 1 second
 
-tmc1.wait_for_movement_finished_threaded()
+tmc1.tmc_mc.wait_for_movement_finished_threaded()
 
 # move 4000 steps backward
-tmc1.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
+tmc1.tmc_mc.run_to_position_steps_threaded(-4000, MovementAbsRel.RELATIVE)
 
 
 # while the motor is still moving
@@ -91,7 +91,7 @@ while tmc1.movement_phase != MovementPhase.STANDSTILL:
     print(tmc1.movement_phase)
     time.sleep(0.02)
 
-tmc1.wait_for_movement_finished_threaded()
+tmc1.tmc_mc.wait_for_movement_finished_threaded()
 
 
 

@@ -1,13 +1,15 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 INPUT register
 """
 
 from .bitfields import _tmc_220x_ioin as bit
-from .._tmc_logger import TmcLogger
+from ._tmc_reg import *
 
 
-class IOIN():
+class IOIN(TmcReg):
     """INPUT register"""
 
     data: int
@@ -22,13 +24,15 @@ class IOIN():
     dir: bool
     version: int
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.IOIN
+        if data is not None:
+            self.deserialise(data)
 
 
     def deserialise(self, data: int):
@@ -46,6 +50,15 @@ class IOIN():
         self.spread = bool(data >> bit.spread_bp & bit.spread_bm)
         self.dir = bool(data >> bit.dir_bp & bit.dir_bm)
         self.version = data >> bit.version_bp & bit.version_bm
+
+
+    def serialise(self) -> int:
+        """Serialises the object to a register value
+
+        Returns:
+            int: register value
+        """
+        raise NotImplementedError
 
 
     def log(self, logger: TmcLogger):

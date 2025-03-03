@@ -37,6 +37,7 @@ class Tmc2209(Tmc220x):
         super().__del__()
 
 
+
     def set_stallguard_callback(self, pin_stallguard, threshold, callback,
                                 min_speed = 100):
         """set a function to call back, when the driver detects a stall
@@ -49,14 +50,11 @@ class Tmc2209(Tmc220x):
             callback (func): will be called on StallGuard trigger
             min_speed (int): min speed [steps/s] for StallGuard (Default value = 100)
         """
-        self.tmc_logger.log(f"setup stallguard callback on GPIO {pin_stallguard}",
-                            Loglevel.INFO)
-        self.tmc_logger.log(f"""StallGuard Threshold: {threshold}
-                            minimum Speed: {min_speed}""", Loglevel.INFO)
+        self.tmc_logger.log(f"setup stallguard callback on GPIO {pin_stallguard}", Loglevel.INFO)
+        self.tmc_logger.log(f"StallGuard Threshold: {threshold} | minimum Speed: {min_speed}", Loglevel.INFO)
 
         self.set_stallguard_threshold(threshold)
-        self.set_coolstep_threshold(tmc_math.steps_to_tstep(
-            min_speed, self.get_microstepping_resolution()))
+        self.set_coolstep_threshold(tmc_math.steps_to_tstep(min_speed, self.get_microstepping_resolution()))
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
 
@@ -83,7 +81,7 @@ class Tmc2209(Tmc220x):
 
 
 
-    def do_homing(self, diag_pin, revolutions = 10, threshold = None, speed_rpm = None):
+    def do_homing(self, diag_pin, revolutions = 10, threshold = None, speed_rpm = None) -> bool:
         """homes the motor in the given direction using stallguard.
         this method is using vactual to move the motor and an interrupt on the DIAG pin
 
@@ -97,10 +95,17 @@ class Tmc2209(Tmc220x):
         Returns:
             not homing_failed (bool): true when homing was successful
         """
+        if self.tmc_com is None:
+            self.tmc_logger.log("do_homing only works with VActual register control via COM", Loglevel.ERROR)
+            return False
+
         if threshold is not None:
             self._sg_threshold = threshold
+
+        self.tmc_logger.log(f"Stallguard threshold: {self._sg_threshold}", Loglevel.DEBUG)
+
         if speed_rpm is None:
-            speed_rpm = tmc_math.steps_to_rps(self._max_speed_homing, self._steps_per_rev)*60
+            speed_rpm = tmc_math.steps_to_rps(self.tmc_mc.max_speed_homing, self.tmc_mc.steps_per_rev)*60
 
         self.tmc_logger.log("---", Loglevel.INFO)
         self.tmc_logger.log("homing", Loglevel.INFO)
@@ -108,19 +113,21 @@ class Tmc2209(Tmc220x):
         # StallGuard only works with StealthChop
         self.set_spreadcycle(0)
 
-        self.tmc_logger.log(f"Stallguard threshold: {self._sg_threshold}", Loglevel.DEBUG)
+        mc_homing = TmcMotionControlVActual()
+        mc_homing.tmc_com = self.tmc_com
+        mc_homing.tmc_logger = self.tmc_logger
 
-        self.set_stallguard_callback(diag_pin, self._sg_threshold, self.stop,
-                                     0.5*tmc_math.rps_to_steps(speed_rpm/60, self._steps_per_rev))
+        self.set_stallguard_callback(diag_pin, self._sg_threshold, mc_homing.stop,
+                                    0.5*tmc_math.rps_to_steps(speed_rpm/60, self.tmc_mc.steps_per_rev))
 
-        homing_failed = self.set_vactual_rpm(speed_rpm, revolutions=revolutions)
+        homing_failed = mc_homing.set_vactual_rpm(speed_rpm, revolutions=revolutions)
 
         if homing_failed:
             self.tmc_logger.log("homing failed", Loglevel.INFO)
         else:
             self.tmc_logger.log("homing successful",Loglevel.INFO)
 
-        self._current_pos = 0
+        self.tmc_mc.current_pos = 0
 
         self.tmc_logger.log("---", Loglevel.INFO)
         return not homing_failed
@@ -136,6 +143,9 @@ class Tmc2209(Tmc220x):
             revolutions (int): max number of revolutions. Can be negative for inverse direction
             threshold (int, optional): StallGuard detection threshold (Default value = None)
         """
+        if not isinstance(self.tmc_mc, TmcMotionControlStepDir):
+            self.tmc_logger.log("do_homing2 only works with STEP/DIR Control", Loglevel.ERROR)
+            return
         sg_results = []
 
         if threshold is not None:
@@ -146,29 +156,30 @@ class Tmc2209(Tmc220x):
 
         self.tmc_logger.log(f"Stallguard threshold: {self._sg_threshold}", Loglevel.DEBUG)
 
-        self.set_direction_pin(revolutions > 0)
+        self.tmc_mc.set_direction_pin(revolutions > 0)
 
         # StallGuard only works with StealthChop
         self.set_spreadcycle(0)
 
-        self._target_pos = self._steps_per_rev * revolutions
-        self._step_interval = 0
-        self._speed = 0.0
-        self._n = 0
-        self.set_acceleration(10000)
-        self.set_max_speed(self._max_speed_homing)
-        coolstep_thres = tmc_math.steps_to_tstep(self._max_speed_homing*0.5,
-                                                 self.get_microstepping_resolution())
+        self.tmc_mc.target_pos = self.tmc_mc.steps_per_rev * revolutions
+        # self._step_interval = 0
+        # self._speed = 0.0
+        # self._n = 0
+        self.tmc_mc.acceleration = 10000
+        self.tmc_mc.max_speed = self.tmc_mc.max_speed_homing
+
+        coolstep_thres = tmc_math.steps_to_tstep(self.tmc_mc.max_speed_homing*0.5,
+                                                 self.tmc_mc.mres)
         self.set_coolstep_threshold(coolstep_thres)
-        self.compute_new_speed()
+        self.tmc_mc.compute_new_speed()
 
 
         step_counter=0
         #self.tmc_logger.log("Steps per Revolution: {self._steps_per_rev}"")
-        while step_counter<self._target_pos:
-            if self.run_speed(): #returns true, when a step is made
+        while step_counter<self.tmc_mc.target_pos:
+            if self.tmc_mc.run_speed(): #returns true, when a step is made
                 step_counter += 1
-                self.compute_new_speed()
+                self.tmc_mc.compute_new_speed()
                 sg_result = self.get_stallguard_result()
                 sg_results.append(sg_result)
                 if len(sg_results)>20:
@@ -176,14 +187,57 @@ class Tmc2209(Tmc220x):
                     if sg_result_average < self._sg_threshold:
                         break
 
-        if step_counter<self._steps_per_rev:
+        if step_counter<self.tmc_mc.steps_per_rev:
             self.tmc_logger.log("homing successful",Loglevel.INFO)
             self.tmc_logger.log(f"Stepcounter: {step_counter}",Loglevel.DEBUG)
             self.tmc_logger.log(str(sg_results),Loglevel.DEBUG)
-            self._current_pos = 0
+            self.tmc_mc.current_pos = 0
         else:
             self.tmc_logger.log("homing failed", Loglevel.INFO)
             self.tmc_logger.log(f"Stepcounter: {step_counter}", Loglevel.DEBUG)
             self.tmc_logger.log(str(sg_results),Loglevel.DEBUG)
 
         self.tmc_logger.log("---", Loglevel.INFO)
+
+
+
+    def get_stallguard_result(self):
+        """return the current stallguard result
+        its will be calculated with every fullstep
+        higher values means a lower motor load
+
+        Returns:
+            sg_result (int): StallGuard Result
+        """
+        sg_result = self.tmc_com.read_int(TmcRegAddr.SG_RESULT)
+        return sg_result
+
+
+
+    def set_stallguard_threshold(self, threshold):
+        """sets the register bit "SGTHRS" to to a given value
+        this is needed for the stallguard interrupt callback
+        SG_RESULT becomes compared to the double of this threshold.
+        SG_RESULT ≤ SGTHRS*2
+
+        Args:
+            threshold (int): value for SGTHRS
+        """
+        self.tmc_logger.log(f"sgthrs {bin(threshold)}", Loglevel.INFO)
+
+        self.tmc_logger.log("writing sgthrs", Loglevel.INFO)
+        self.tmc_com.write_reg_check(TmcRegAddr.SGTHRS, threshold)
+
+
+
+    def set_coolstep_threshold(self, threshold):
+        """This  is  the  lower  threshold  velocity  for  switching
+        on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
+
+        Args:
+            threshold (int): threshold velocity for coolstep
+        """
+        self.tmc_logger.log(f"tcoolthrs {bin(threshold)}", Loglevel.INFO)
+
+        self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO)
+        self.tmc_com.write_reg_check(TmcRegAddr.TCOOLTHRS, threshold)

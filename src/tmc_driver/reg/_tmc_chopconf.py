@@ -1,14 +1,16 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 Chopper Configuration register
 """
 
 import math
 from .bitfields import _tmc_220x_chopconf as bit
-from .._tmc_logger import TmcLogger
+from ._tmc_reg import *
 
 
-class ChopConf():
+class ChopConf(TmcReg):
     """Chopper Configuration register"""
 
     data: int
@@ -26,13 +28,15 @@ class ChopConf():
     toff: int
 
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.CHOPCONF
+        if data is not None:
+            self.deserialise(data)
 
 
     def deserialise(self, data: int):

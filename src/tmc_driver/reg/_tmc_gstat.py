@@ -1,13 +1,15 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 Global status flags register
 """
 
 from .bitfields import _tmc_220x_gstat as bit
-from .._tmc_logger import TmcLogger
+from ._tmc_reg import *
 
 
-class GStat():
+class GStat(TmcReg):
     """Global status flags register"""
 
     data: int
@@ -16,13 +18,15 @@ class GStat():
     drv_err: bool
     uv_cp: bool
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.GSTAT
+        if data is not None:
+            self.deserialise(data)
 
 
     def deserialise(self, data: int):
@@ -36,7 +40,6 @@ class GStat():
         self.reset = bool(data >> bit.reset_bp & bit.reset_bm)
         self.drv_err = bool(data >> bit.drv_err_bp & bit.drv_err_bm)
         self.uv_cp = bool(data >> bit.uv_cp_bp & bit.uv_cp_bm)
-
 
 
     def serialise(self) -> int:

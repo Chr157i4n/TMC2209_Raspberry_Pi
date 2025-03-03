@@ -36,19 +36,18 @@ logformatter = logging.Formatter('%(name)s %(asctime)s - %(levelname)s - %(messa
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"),
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"),
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"),
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/ttyAMA0"),
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"),
+    tmc = Tmc2209(TmcEnableControlPin(13), TmcMotionControlStepDir(6, 5), TmcComUart("/dev/ttyTHS1"),
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"),
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"),
                    loglevel=loglevel, log_handlers=[logging_handler], log_formatter=logformatter)
-
 
 
 

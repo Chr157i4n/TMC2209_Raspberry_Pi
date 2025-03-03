@@ -26,14 +26,14 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(pin_step=16, loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlToff(), TmcMotionControlStepReg(16), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(pin_step=16, tmc_com=TmcUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlToff(), TmcMotionControlStepReg(16), TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(pin_step=13, tmc_com=TmcUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlToff(), TmcMotionControlStepReg(6), TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
-    tmc = Tmc2209(pin_step=21, loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlToff(), TmcMotionControlStepReg(16), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 
 
@@ -105,8 +105,8 @@ tmc.max_speed_fullstep = 250
 #-----------------------------------------------------------------------
 # activate the motor current output
 #-----------------------------------------------------------------------
-#tmc.set_motor_enabled(True)
-tmc.set_toff(3)
+tmc.set_motor_enabled(True)
+# tmc.set_toff(3)
 
 
 
@@ -130,8 +130,8 @@ tmc.run_to_position_steps(0)                               #move to position 0
 #-----------------------------------------------------------------------
 # deactivate the motor current output
 #-----------------------------------------------------------------------
-#tmc.set_motor_enabled(False)
-tmc.set_toff(0)
+tmc.set_motor_enabled(False)
+# tmc.set_toff(0)
 
 print("---\n---")
 

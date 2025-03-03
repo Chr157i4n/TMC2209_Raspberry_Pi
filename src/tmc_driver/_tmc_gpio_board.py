@@ -129,7 +129,7 @@ class BaseRPiGPIOWrapper(BaseGPIOWrapper):
         """read GPIO pin"""
         return self.GPIO.input(pin)
 
-    def gpio_output(self, pin:int, value):
+    def gpio_output(self, pin:int, value:int):
         """write GPIO pin"""
         self.GPIO.output(pin, value)
 

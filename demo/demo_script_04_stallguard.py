@@ -25,20 +25,18 @@ print("---")
 # initiate the Tmc2209 class
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
-if BOARD == Board.NVIDIA_JETSON:
+if BOARD == Board.RASPBERRY_PI:
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
+elif BOARD == Board.RASPBERRY_PI5:
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
+elif BOARD == Board.NVIDIA_JETSON:
     raise NotImplementedError('''
         Not implemented. Needs refinement.\n
         Nvidia Jetson has nuances with the parameter pull_up_down for pin_stallguard:
         https://github.com/NVIDIA/jetson-gpio/issues/5''')
-if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
-elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
-
-
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 
 
@@ -88,8 +86,8 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # set the Accerleration and maximal Speed
 #-----------------------------------------------------------------------
-tmc.set_acceleration(2000)
-tmc.set_max_speed(500)
+tmc.acceleration_fullstep = 1000
+tmc.max_speed_fullstep = 250
 
 
 

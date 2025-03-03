@@ -26,14 +26,14 @@ print("---")
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlPin(13), TmcMotionControlStepDir(6, 5), TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
+    tmc = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 
 
@@ -88,8 +88,8 @@ print("---\n---")
 #-----------------------------------------------------------------------
 # set the max Speed and Speed in fullsteps
 #-----------------------------------------------------------------------
-tmc.max_speed_fullstep = 200
-tmc.speed_fullstep = 100
+tmc.tmc_mc.max_speed_fullstep = 200
+tmc.tmc_mc.speed_fullstep = 100
 
 
 
@@ -112,7 +112,7 @@ tmc.set_motor_enabled(True)
 time_start = time.time()
 
 while time.time() < time_start + 4:
-    tmc.run_speed()
+    tmc.tmc_mc.run_speed()
 
 
 

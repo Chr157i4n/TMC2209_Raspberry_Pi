@@ -26,14 +26,14 @@ tmc:Tmc2209 = None
 # use your pins for pin_en, pin_step, pin_dir here
 #-----------------------------------------------------------------------
 if BOARD == Board.RASPBERRY_PI:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc = Tmc2209(None, None, TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/ttyAMA0"))
+    tmc = Tmc2209(None, None, TmcComUart("/dev/ttyAMA0"), loglevel=Loglevel.DEBUG)
 elif BOARD == Board.NVIDIA_JETSON:
-    tmc = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"))
+    tmc = Tmc2209(None, None, TmcComUart("/dev/ttyTHS1"), loglevel=Loglevel.DEBUG)
 else:
     # just in case
-    tmc = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"))
+    tmc = Tmc2209(None, None, TmcComUart("/dev/serial0"), loglevel=Loglevel.DEBUG)
 
 
 #-----------------------------------------------------------------------

@@ -29,20 +29,17 @@ print("---")
 #-----------------------------------------------------------------------
 # Multiple driver not tested
 if BOARD == Board.RASPBERRY_PI:
-    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"), driver_address=0)
-    tmc2 = Tmc2209(26, 13, 19, TmcUart("/dev/serial0"), driver_address=1)
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), driver_address=0)
+    tmc2 = Tmc2209(TmcEnableControlPin(26), TmcMotionControlStepDir(13, 19), TmcComUart("/dev/serial0"), driver_address=0)
 elif BOARD == Board.RASPBERRY_PI5:
-    tmc1 = Tmc2209(21, 16, 20, tmc_com=TmcUart("/dev/ttyAMA0"), driver_address=0)
-    tmc2 = Tmc2209(26, 13, 19, tmc_com=TmcUart("/dev/ttyAMA0"), driver_address=1)
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/ttyAMA0"), driver_address=0)
+    tmc2 = Tmc2209(TmcEnableControlPin(26), TmcMotionControlStepDir(13, 19), TmcComUart("/dev/ttyAMA0"), driver_address=0)
 elif BOARD == Board.NVIDIA_JETSON:
-    # tmc1 = Tmc2209(13, 6, 5, TmcUart("/dev/ttyTHS1"), driver_address=0)
     raise Exception("Not tested for Nvidia Jetson, use with caution")
 else:
     # just in case
-    tmc1 = Tmc2209(21, 16, 20, TmcUart("/dev/serial0"), driver_address=0)
-    tmc2 = Tmc2209(26, 13, 19, TmcUart("/dev/serial0"), driver_address=1)
-
-
+    tmc1 = Tmc2209(TmcEnableControlPin(21), TmcMotionControlStepDir(16, 20), TmcComUart("/dev/serial0"), driver_address=0)
+    tmc2 = Tmc2209(TmcEnableControlPin(26), TmcMotionControlStepDir(13, 19), TmcComUart("/dev/serial0"), driver_address=0)
 
 
 

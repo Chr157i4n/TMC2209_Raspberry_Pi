@@ -1,13 +1,15 @@
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
 Driver Status register
 """
 
 from .bitfields import _tmc_220x_drvstatus as bit
-from .._tmc_logger import TmcLogger, Loglevel
+from ._tmc_reg import *
 
 
-class DrvStatus():
+class DrvStatus(TmcReg):
     """Driver Status register"""
 
     data: int
@@ -31,13 +33,15 @@ class DrvStatus():
     otpw: bool      # overtemperature prewarning flag
 
 
-    def __init__(self, data: int):
+    def __init__(self, data:int = None):
         """Initialise the DrvStatus object
 
         Args:
             data (int): register value
         """
-        self.deserialise(data)
+        self.addr = TmcRegAddr.DRVSTATUS
+        if data is not None:
+            self.deserialise(data)
 
 
     def deserialise(self, data: int):
@@ -63,6 +67,15 @@ class DrvStatus():
         self.s2ga = bool(data >> bit.s2ga_bp & bit.s2ga_bm)
         self.ot = bool(data >> bit.ot_bp & bit.ot_bm)
         self.otpw = bool(data >> bit.otpw_bp & bit.otpw_bm)
+
+
+    def serialise(self) -> int:
+        """Serialises the object to a register value
+
+        Returns:
+            int: register value
+        """
+        raise NotImplementedError
 
 
     def log(self, logger: TmcLogger):

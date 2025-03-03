@@ -1,33 +1,25 @@
 #pylint: disable=import-error
 #pylint: disable=broad-exception-caught
+#pylint: disable=wildcard-import
+#pylint: disable=unused-wildcard-import
 """
-TmcUart stepper driver uart module
+TmcComUart stepper driver uart module
 """
 
-import time
-import struct
-from typing import List
 import serial
-from .reg._tmc_220x_reg_addr import TmcRegAddr
-from .reg._tmc_gstat import GStat
-from ._tmc_logger import TmcLogger, Loglevel
+from ._tmc_com import *
 
 
-class TmcUart:
-    """TmcUart
+class TmcComUart(TmcCom):
+    """TmcComUart
 
     this class is used to communicate with the TMC via UART
     it can be used to change the settings of the TMC.
     like the current or the microsteppingmode
     """
-    _tmc_logger:TmcLogger = None
 
-    mtr_id:int = 0
     ser:serial.Serial = None
-    r_frame:List[int] = [0x55, 0, 0, 0  ]
-    w_frame:List[int] = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
-    communication_pause:int = 0
-    error_handler_running:bool = False
+
 
     @property
     def tmc_logger(self) -> TmcLogger:
@@ -54,7 +46,8 @@ class TmcUart:
             baudrate (int): baudrate
             mtr_id (int, optional): driver address [0-3]. Defaults to 0.
         """
-        self._tmc_logger = tmc_logger
+        super().__init__(mtr_id, tmc_logger)
+
         if serialport is None:
             return
         try:
@@ -70,7 +63,6 @@ class TmcUart:
                                     You may need to add your user to the dialout group
                                     with \"sudo usermod -a -G dialout pi\"""")
 
-        self.mtr_id = mtr_id
         # adjust per baud and hardware. Sequential reads without some delay fail.
         self.communication_pause = 500 / baudrate
 
@@ -88,34 +80,10 @@ class TmcUart:
         self.ser.reset_input_buffer()
 
 
-
     def __del__(self):
         """destructor"""
         if self.ser is not None and isinstance(self.ser, serial.Serial):
             self.ser.close()
-
-
-
-    def compute_crc8_atm(self, datagram, initial_value=0):
-        """this function calculates the crc8 parity bit
-
-        Args:
-            datagram (list): datagram
-            initial_value (int): initial value (Default value = 0)
-        """
-        crc = initial_value
-        # Iterate bytes in data
-        for byte in datagram:
-            # Iterate bits in byte
-            for _ in range(0, 8):
-                if (crc >> 7) ^ (byte & 0x01):
-                    crc = ((crc << 1) ^ 0x07) & 0xFF
-                else:
-                    crc = (crc << 1) & 0xFF
-                # Shift to next bit
-                byte = byte >> 1
-        return crc
-
 
 
     def read_reg(self, register:TmcRegAddr):
@@ -134,7 +102,7 @@ class TmcUart:
 
         self.r_frame[1] = self.mtr_id
         self.r_frame[2] = register.value
-        self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
+        self.r_frame[3] = compute_crc8_atm(self.r_frame[:-1])
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):
@@ -151,7 +119,6 @@ class TmcUart:
         time.sleep(self.communication_pause)
 
         return rtn
-
 
 
     def read_int(self, register:TmcRegAddr, tries:int = 10):
@@ -175,7 +142,7 @@ class TmcUart:
                 self._tmc_logger.log(f"""UART Communication Error:
                                     {len(rtn_data)} data bytes |
                                     {len(rtn)} total bytes""", Loglevel.ERROR)
-            elif rtn[11] != self.compute_crc8_atm(rtn[4:11]):
+            elif rtn[11] != compute_crc8_atm(rtn[4:11]):
                 self._tmc_logger.log("UART Communication Error: CRC MISMATCH", Loglevel.ERROR)
             else:
                 break
@@ -189,7 +156,6 @@ class TmcUart:
 
         val = struct.unpack(">i",rtn_data)[0]
         return val
-
 
 
     def write_reg(self, register:TmcRegAddr, val:int):
@@ -217,7 +183,7 @@ class TmcUart:
         self.w_frame[5] = 0xFF & (val>>8)
         self.w_frame[6] = 0xFF & val
 
-        self.w_frame[7] = self.compute_crc8_atm(self.w_frame[:-1])
+        self.w_frame[7] = compute_crc8_atm(self.w_frame[:-1])
 
 
         rtn = self.ser.write(self.w_frame)
@@ -228,7 +194,6 @@ class TmcUart:
         time.sleep(self.communication_pause)
 
         return True
-
 
 
     def write_reg_check(self, register:TmcRegAddr, val:int, tries:int=10):
@@ -264,14 +229,12 @@ class TmcUart:
                 return -1
 
 
-
     def flush_serial_buffer(self):
         """this function clear the communication buffers of the Raspberry Pi"""
         if self.ser is None:
             return
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
-
 
 
     def handle_error(self):
@@ -300,7 +263,6 @@ class TmcUart:
         raise SystemExit
 
 
-
     def test_com(self, register:TmcRegAddr):
         """test UART connection
 
@@ -317,7 +279,7 @@ class TmcUart:
 
         self.r_frame[1] = self.mtr_id
         self.r_frame[2] = register.value
-        self.r_frame[3] = self.compute_crc8_atm(self.r_frame[:-1])
+        self.r_frame[3] = compute_crc8_atm(self.r_frame[:-1])
 
         rtn = self.ser.write(self.r_frame)
         if rtn != len(self.r_frame):

@@ -11,10 +11,21 @@ Tmc2209 stepper driver test module
 import time
 from ._tmc_gpio_board import tmc_gpio, Gpio
 from ._tmc_logger import Loglevel
-from ._tmc_move import MovementAbsRel, MovementPhase
+from .motion_control._tmc_mc import MovementAbsRel, MovementPhase
 from .reg.bitfields import _tmc_220x_ioin as tmc_ioin_reg
 from .reg._tmc_220x_reg_addr import TmcRegAddr
 
+
+def test_step(self):
+    """test method"""
+    self.set_direction_pin(1)
+
+    for _ in range(100):
+        self._current_pos += 1
+        tmc_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+        time.sleep(0.001)
+        tmc_gpio.gpio_output(self._pin_step, Gpio.LOW)
+        time.sleep(0.01)
 
 
 def test_pin(self, pin, ioin_reg_bp):
@@ -25,8 +36,8 @@ def test_pin(self, pin, ioin_reg_bp):
     """
     pin_ok = True
 
-    tmc_gpio.gpio_output(self._pin_dir, Gpio.HIGH)
-    tmc_gpio.gpio_output(self._pin_step, Gpio.HIGH)
+    tmc_gpio.gpio_output(self.tmc_mc._pin_dir, Gpio.HIGH)
+    tmc_gpio.gpio_output(self.tmc_mc._pin_step, Gpio.HIGH)
     tmc_gpio.gpio_output(self._pin_en, Gpio.HIGH)
 
     ioin = self.read_ioin()
@@ -43,15 +54,14 @@ def test_pin(self, pin, ioin_reg_bp):
     return pin_ok
 
 
-
 def test_dir_step_en(self):
     """tests the EN, DIR and STEP pin
 
     this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
     and checks the IOIN Register of the TMC meanwhile
     """
-    pin_dir_ok = self.test_pin(self._pin_dir, tmc_ioin_reg.dir_bp)
-    pin_step_ok = self.test_pin(self._pin_step, tmc_ioin_reg.step_bp)
+    pin_dir_ok = self.test_pin(self.tmc_mc._pin_dir, tmc_ioin_reg.dir_bp)
+    pin_step_ok = self.test_pin(self.tmc_mc._pin_step, tmc_ioin_reg.step_bp)
     pin_en_ok = self.test_pin(self._pin_en, tmc_ioin_reg.enn_bp)
 
     self.set_motor_enabled(False)
@@ -70,20 +80,6 @@ def test_dir_step_en(self):
     else:
         self.tmc_logger.log("Pin EN: \tnot OK")
     self.tmc_logger.log("---")
-
-
-
-def test_step(self):
-    """test method"""
-    self.set_direction_pin(1)
-
-    for _ in range(100):
-        self._current_pos += 1
-        tmc_gpio.gpio_output(self._pin_step, Gpio.HIGH)
-        time.sleep(0.001)
-        tmc_gpio.gpio_output(self._pin_step, Gpio.LOW)
-        time.sleep(0.01)
-
 
 
 def test_com(self):
@@ -143,7 +139,6 @@ def test_com(self):
     return status
 
 
-
 def test_stallguard_threshold(self, steps):
     """test method for tuning stallguard threshold
 
@@ -163,26 +158,26 @@ def test_stallguard_threshold(self, steps):
     min_stallguard_result_maxspeed = 511
     min_stallguard_result_decel = 511
 
-    self.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
+    self.tmc_mc.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
 
 
-    while self._movement_phase != MovementPhase.STANDSTILL:
+    while self.tmc_mc.movement_phase != MovementPhase.STANDSTILL:
         stallguard_result = self.get_stallguard_result()
 
-        self.tmc_logger.log(f"{self._movement_phase} | {stallguard_result}",
+        self.tmc_logger.log(f"{self.tmc_mc.movement_phase} | {stallguard_result}",
                     Loglevel.INFO)
 
-        if (self._movement_phase == MovementPhase.ACCELERATING and
+        if (self.tmc_mc.movement_phase == MovementPhase.ACCELERATING and
             stallguard_result < min_stallguard_result_accel):
             min_stallguard_result_accel = stallguard_result
-        if (self._movement_phase == MovementPhase.MAXSPEED and
+        if (self.tmc_mc.movement_phase == MovementPhase.MAXSPEED and
             stallguard_result < min_stallguard_result_maxspeed):
             min_stallguard_result_maxspeed = stallguard_result
-        if (self._movement_phase == MovementPhase.DECELERATING and
+        if (self.tmc_mc.movement_phase == MovementPhase.DECELERATING and
             stallguard_result < min_stallguard_result_decel):
             min_stallguard_result_decel = stallguard_result
 
-    self.wait_for_movement_finished_threaded()
+    self.tmc_mc.wait_for_movement_finished_threaded()
 
     self.tmc_logger.log("---", Loglevel.INFO)
     self.tmc_logger.log(f"min StallGuard result during accel: {min_stallguard_result_accel}",
