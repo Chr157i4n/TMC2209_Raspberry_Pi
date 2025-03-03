@@ -103,6 +103,9 @@ class Tmc220x(TmcStepperDriver):
             if hasattr(self.tmc_mc, "tmc_com"):
                 self.tmc_mc.tmc_com = tmc_com
 
+            if hasattr(self.tmc_ec, "tmc_com"):
+                self.tmc_ec.tmc_com = tmc_com
+
             if self.tmc_mc is not None:
                 self.read_steps_per_rev()
             self.clear_gstat()

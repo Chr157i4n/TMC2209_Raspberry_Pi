@@ -18,21 +18,10 @@ from ..reg._tmc_220x_reg_addr import TmcRegAddr
 class TmcMotionControlVActual(TmcMotionControl):
     """VActual Motion Control class"""
 
-    _tmc_logger:TmcLogger = None
     _tmc_com:TmcCom = None
 
     _starttime:int = 0
 
-
-    @property
-    def tmc_logger(self):
-        """get the tmc_logger"""
-        return self._tmc_logger
-
-    @tmc_logger.setter
-    def tmc_logger(self, tmc_logger):
-        """set the tmc_logger"""
-        self._tmc_logger = tmc_logger
 
     @property
     def tmc_com(self):

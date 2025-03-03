@@ -105,8 +105,8 @@ tmc.max_speed_fullstep = 250
 #-----------------------------------------------------------------------
 # activate the motor current output
 #-----------------------------------------------------------------------
-#tmc.set_motor_enabled(True)
-tmc.set_toff(3)
+tmc.set_motor_enabled(True)
+# tmc.set_toff(3)
 
 
 
@@ -130,8 +130,8 @@ tmc.run_to_position_steps(0)                               #move to position 0
 #-----------------------------------------------------------------------
 # deactivate the motor current output
 #-----------------------------------------------------------------------
-#tmc.set_motor_enabled(False)
-tmc.set_toff(0)
+tmc.set_motor_enabled(False)
+# tmc.set_toff(0)
 
 print("---\n---")
 
