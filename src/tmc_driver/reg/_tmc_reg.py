@@ -5,14 +5,13 @@ Register module
 """
 
 from .._tmc_logger import TmcLogger, Loglevel
-from ._tmc_220x_reg_addr import TmcRegAddr
 
 
 class TmcReg():
     """Register class"""
 
-    addr: TmcRegAddr
-    data: int
+    addr = None
+    data: int = None
 
 
     def deserialise(self, data:int):

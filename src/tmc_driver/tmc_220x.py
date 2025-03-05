@@ -17,6 +17,7 @@ this module has two different functions:
 
 import logging
 import threading
+import time
 from ._tmc_stepperdriver import *
 from .com._tmc_com import TmcCom
 from .com._tmc_com_uart import TmcComUart
@@ -25,13 +26,14 @@ from .motion_control._tmc_mc_step_reg import TmcMotionControlStepReg
 from .enable_control._tmc_ec_toff import TmcEnableControlToff
 from .motion_control._tmc_mc_vactual import TmcMotionControlVActual
 from ._tmc_logger import TmcLogger, Loglevel
-from .reg._tmc_220x_reg_addr import TmcRegAddr
-from .reg._tmc_drvstatus import DrvStatus
-from .reg._tmc_gconf import GConf
-from .reg._tmc_ioin import IOIN
-from .reg._tmc_gstat import GStat
-from .reg._tmc_ihold_irun import IHoldIRun
-from .reg._tmc_chopconf import ChopConf
+from .reg.tmc220x._tmc_reg_addr import TmcRegAddr
+from .reg.tmc220x._tmc_drvstatus import DrvStatus
+from .reg.tmc220x._tmc_gconf import GConf
+from .reg.tmc220x._tmc_ioin import IOIN
+from .reg.tmc220x._tmc_gstat import GStat
+from .reg.tmc220x._tmc_ihold_irun import IHoldIRun
+from .reg.tmc220x._tmc_chopconf import ChopConf
+from .reg.tmc220x.bitfields import _tmc_220x_ioin as tmc_ioin_reg
 from . import _tmc_math as tmc_math
 
 
@@ -55,10 +57,6 @@ class Tmc220x(TmcStepperDriver):
 
     tmc_com:TmcComUart = None
 
-
-    from ._tmc_test import (
-        test_pin, test_dir_step_en, test_com
-    )
 
 
 # Constructor/Destructor
@@ -680,3 +678,113 @@ class Tmc220x(TmcStepperDriver):
         step = (4*self.tmc_mc.mres)-step-1
         step = round(step)
         return step+offset
+
+
+
+    def test_pin(self, pin, ioin_reg_bp):
+        """tests one pin
+
+        this function checks the connection to a pin
+        by toggling it and reading the IOIN register
+        """
+        pin_ok = True
+
+        # turn on all pins
+        tmc_gpio.gpio_output(self.tmc_mc._pin_dir, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_mc._pin_step, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_ec._pin_en, Gpio.HIGH)
+
+        # check that the selected pin is on
+        ioin = self.read_ioin()
+        if not ioin.data >> ioin_reg_bp & 0x1:
+            pin_ok = False
+
+        # turn off only the selected pin
+        tmc_gpio.gpio_output(pin, Gpio.LOW)
+        time.sleep(0.1)
+
+        # check that the selected pin is off
+        ioin = self.read_ioin()
+        if ioin.data >> ioin_reg_bp & 0x1:
+            pin_ok = False
+
+        return pin_ok
+
+
+
+    def test_dir_step_en(self):
+        """tests the EN, DIR and STEP pin
+
+        this sets the EN, DIR and STEP pin to HIGH, LOW and HIGH
+        and checks the IOIN Register of the TMC meanwhile
+        """
+        # test each pin on their own
+        pin_dir_ok = self.test_pin(self.tmc_mc._pin_dir, tmc_ioin_reg.dir_bp)
+        pin_step_ok = self.test_pin(self.tmc_mc.pin_step, tmc_ioin_reg.step_bp)
+        pin_en_ok = self.test_pin(self.tmc_ec._pin_en, tmc_ioin_reg.enn_bp)
+
+        self.set_motor_enabled(False)
+
+        self.tmc_logger.log("---")
+        self.tmc_logger.log(f"Pin DIR: \t{'OK' if pin_dir_ok else 'not OK'}")
+        self.tmc_logger.log(f"Pin STEP: \t{'OK' if pin_step_ok else 'not OK'}")
+        self.tmc_logger.log(f"Pin EN: \t{'OK' if pin_en_ok else 'not OK'}")
+        self.tmc_logger.log("---")
+
+
+
+    def test_com(self):
+        """test method"""
+        self.tmc_logger.log("---")
+        self.tmc_logger.log("TEST COM")
+        result = self.tmc_com.test_com(TmcRegAddr.IOIN)
+
+        snd = result[0]
+        rtn = result[1]
+
+        status = True
+
+        self.tmc_logger.log(f"length snd: {len(snd)}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"length rtn: {len(rtn)}", Loglevel.DEBUG)
+
+
+        self.tmc_logger.log("complete messages:", Loglevel.DEBUG)
+        self.tmc_logger.log(str(snd.hex()), Loglevel.DEBUG)
+        self.tmc_logger.log(str(rtn.hex()), Loglevel.DEBUG)
+
+        self.tmc_logger.log("just the first 4 bytes:", Loglevel.DEBUG)
+        self.tmc_logger.log(str(snd[0:4].hex()), Loglevel.DEBUG)
+        self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG)
+
+        if len(rtn)==12:
+            self.tmc_logger.log("""the Raspberry Pi received the sent
+                                bytes and the answer from the TMC""", Loglevel.DEBUG)
+        elif len(rtn)==4:
+            self.tmc_logger.log("the Raspberry Pi received only the sent bytes",
+                                Loglevel.ERROR)
+            status = False
+        elif len(rtn)==0:
+            self.tmc_logger.log("the Raspberry Pi did not receive anything",
+                                Loglevel.ERROR)
+            status = False
+        else:
+            self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bytes: {len(rtn)}",
+                                Loglevel.ERROR)
+            status = False
+
+        if snd[0:4] == rtn[0:4]:
+            self.tmc_logger.log("""the Raspberry Pi received exactly the bytes it has send.
+                        the first 4 bytes are the same""", Loglevel.DEBUG)
+        else:
+            self.tmc_logger.log("""the Raspberry Pi did not received the bytes it has send.
+                        the first 4 bytes are different""", Loglevel.DEBUG)
+            status = False
+
+        self.tmc_logger.log("---")
+        if status:
+            self.tmc_logger.log("UART connection: OK", Loglevel.INFO)
+        else:
+            self.tmc_logger.log("UART connection: not OK", Loglevel.ERROR)
+
+        self.tmc_logger.log("---")
+        return status

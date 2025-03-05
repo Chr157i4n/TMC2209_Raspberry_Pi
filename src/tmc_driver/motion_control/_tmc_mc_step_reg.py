@@ -8,7 +8,7 @@ from ._tmc_mc_step_dir import TmcMotionControlStepDir
 from ..com._tmc_com import TmcCom
 from .._tmc_logger import Loglevel
 from .._tmc_gpio_board import tmc_gpio, Gpio, GpioMode
-from ..reg._tmc_gconf import GConf
+from ..reg.tmc220x._tmc_gconf import GConf
 
 
 class TmcMotionControlStepReg(TmcMotionControlStepDir):

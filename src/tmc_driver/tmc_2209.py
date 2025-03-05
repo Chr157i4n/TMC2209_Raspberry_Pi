@@ -12,7 +12,6 @@ from .tmc_220x import *
 from ._tmc_gpio_board import GpioPUD
 
 
-
 class Tmc2209(Tmc220x):
     """Tmc2209"""
 
@@ -20,11 +19,6 @@ class Tmc2209(Tmc220x):
     _sg_callback:types.FunctionType = None
     _sg_threshold:int = 100             # threshold for stallguard
 
-
-
-    from ._tmc_test import (
-        test_stallguard_threshold
-    )
 
 
     def __del__(self):
@@ -241,3 +235,54 @@ class Tmc2209(Tmc220x):
 
         self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO)
         self.tmc_com.write_reg_check(TmcRegAddr.TCOOLTHRS, threshold)
+
+
+
+    def test_stallguard_threshold(self, steps):
+        """test method for tuning stallguard threshold
+
+        run this function with your motor settings and your motor load
+        the function will determine the minimum stallguard results for each movement phase
+
+        Args:
+            steps (int):
+        """
+
+        self.tmc_logger.log("---", Loglevel.INFO)
+        self.tmc_logger.log("test_stallguard_threshold", Loglevel.INFO)
+
+        self.set_spreadcycle(0)
+
+        min_stallguard_result_accel = 511
+        min_stallguard_result_maxspeed = 511
+        min_stallguard_result_decel = 511
+
+        self.tmc_mc.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
+
+
+        while self.tmc_mc.movement_phase != MovementPhase.STANDSTILL:
+            stallguard_result = self.get_stallguard_result()
+
+            self.tmc_logger.log(f"{self.tmc_mc.movement_phase} | {stallguard_result}",
+                        Loglevel.INFO)
+
+            if (self.tmc_mc.movement_phase == MovementPhase.ACCELERATING and
+                stallguard_result < min_stallguard_result_accel):
+                min_stallguard_result_accel = stallguard_result
+            if (self.tmc_mc.movement_phase == MovementPhase.MAXSPEED and
+                stallguard_result < min_stallguard_result_maxspeed):
+                min_stallguard_result_maxspeed = stallguard_result
+            if (self.tmc_mc.movement_phase == MovementPhase.DECELERATING and
+                stallguard_result < min_stallguard_result_decel):
+                min_stallguard_result_decel = stallguard_result
+
+        self.tmc_mc.wait_for_movement_finished_threaded()
+
+        self.tmc_logger.log("---", Loglevel.INFO)
+        self.tmc_logger.log(f"min StallGuard result during accel: {min_stallguard_result_accel}",
+                            Loglevel.INFO)
+        self.tmc_logger.log(f"min StallGuard result during maxspeed: {min_stallguard_result_maxspeed}",
+        Loglevel.INFO)
+        self.tmc_logger.log(f"min StallGuard result during decel: {min_stallguard_result_decel}",
+                            Loglevel.INFO)
+        self.tmc_logger.log("---", Loglevel.INFO)

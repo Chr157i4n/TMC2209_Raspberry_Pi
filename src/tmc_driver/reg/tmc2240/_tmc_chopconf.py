@@ -6,26 +6,29 @@ Chopper Configuration register
 """
 
 import math
-from .bitfields import _tmc_220x_chopconf as bit
-from ._tmc_reg import *
+from .bitfields import _tmc_224x_chopconf as bit
+from ._tmc_reg_addr import *
+from .._tmc_reg import *
 
 
 class ChopConf(TmcReg):
     """Chopper Configuration register"""
 
-    data: int
-
-    diss2vs: bool
-    diss2g: bool
-    dedge: bool
-    intpol: bool
-    mres: int
-
-    vsense: bool
-    tbl: int
-    hend: int
-    hstrt: int
-    toff: int
+    diss2vs         : bool
+    diss2g          : bool
+    dedge           : bool
+    intpol          : bool
+    mres            : int
+    tpdf            : int
+    vhighchm        : bool
+    vhighfs         : bool
+    tbl             : int
+    chm             : int
+    disfdcc         : bool
+    fd3             : bool
+    hend_offset     : int
+    hstrt_tfd210    : int
+    toff            : int
 
 
     def __init__(self, data:int = None):
@@ -52,10 +55,15 @@ class ChopConf(TmcReg):
         self.dedge = bool(data >> bit.dedge_bp & bit.dedge_bm)
         self.intpol = bool(data >> bit.intpol_bp & bit.intpol_bm)
         self.mres = int(data >> bit.mres_bp & bit.mres_bm)
-        self.vsense = bool(data >> bit.vsense_bp & bit.vsense_bm)
+        self.tpdf = int(data >> bit.tpdf_bp & bit.tpdf_bm)
+        self.vhighchm = bool(data >> bit.vhighchm_bp & bit.vhighchm_bm)
+        self.vhighfs = bool(data >> bit.vhighfs_bp & bit.vhighfs_bm)
         self.tbl = int(data >> bit.tbl_bp & bit.tbl_bm)
-        self.hend = int(data >> bit.hend_bp & bit.hend_bm)
-        self.hstrt = int(data >> bit.hstrt_bp & bit.hstrt_bm)
+        self.chm = int(data >> bit.chm_bp & bit.chm_bm)
+        self.disfdcc = bool(data >> bit.disfdcc_bp & bit.disfdcc_bm)
+        self.fd3 = bool(data >> bit.fd3_bp & bit.fd3_bm)
+        self.hend_offset = int(data >> bit.hend_offset_bp & bit.hend_offset_bm)
+        self.hstrt_tfd210 = int(data >> bit.hstrt_tfd210_bp & bit.hstrt_tfd210_bm)
         self.toff = int(data >> bit.toff_bp & bit.toff_bm)
 
 
@@ -72,10 +80,15 @@ class ChopConf(TmcReg):
         data |= int(self.dedge) << bit.dedge_bp
         data |= int(self.intpol) << bit.intpol_bp
         data |= self.mres << bit.mres_bp
-        data |= int(self.vsense) << bit.vsense_bp
+        data |= self.tpdf << bit.tpdf_bp
+        data |= int(self.vhighchm) << bit.vhighchm_bp
+        data |= int(self.vhighfs) << bit.vhighfs_bp
         data |= self.tbl << bit.tbl_bp
-        data |= self.hend << bit.hend_bp
-        data |= self.hstrt << bit.hstrt_bp
+        data |= self.chm << bit.chm_bp
+        data |= int(self.disfdcc) << bit.disfdcc_bp
+        data |= int(self.fd3) << bit.fd3_bp
+        data |= self.hend_offset << bit.hend_offset_bp
+        data |= self.hstrt_tfd210 << bit.hstrt_tfd210_bp
         data |= self.toff << bit.toff_bp
 
         return data

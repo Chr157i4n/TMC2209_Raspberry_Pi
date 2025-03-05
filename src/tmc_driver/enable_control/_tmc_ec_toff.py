@@ -4,7 +4,7 @@ Enable Control base module
 
 from ._tmc_ec import TmcEnableControl
 from ..com._tmc_com import TmcCom
-from ..reg._tmc_chopconf import ChopConf
+from ..reg.tmc220x._tmc_chopconf import ChopConf
 
 
 class TmcEnableControlToff(TmcEnableControl):

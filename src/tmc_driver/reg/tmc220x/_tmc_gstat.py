@@ -2,30 +2,28 @@
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
 """
-Driver current control register
+Global status flags register
 """
 
-from .bitfields import _tmc_220x_ihold_irun as bit
-from ._tmc_reg import *
+from .bitfields import _tmc_220x_gstat as bit
+from ._tmc_reg_addr import *
+from .._tmc_reg import *
 
 
-class IHoldIRun(TmcReg):
-    """Driver current control register"""
+class GStat(TmcReg):
+    """Global status flags register"""
 
-    data: int
-
-    ihold: int
-    irun: int
-    iholddelay: int
-
+    reset: bool
+    drv_err: bool
+    uv_cp: bool
 
     def __init__(self, data:int = None):
         """Initialises the object with the given register value
 
         Args:
-            data (int, optional): register value. Defaults to None.
+            data (int): register value
         """
-        self.addr = TmcRegAddr.IHOLD_IRUN
+        self.addr = TmcRegAddr.GSTAT
         if data is not None:
             self.deserialise(data)
 
@@ -38,9 +36,9 @@ class IHoldIRun(TmcReg):
         """
         self.data = data
 
-        self.ihold = data >> bit.ihold_bp & bit.ihold_bm
-        self.irun = data >> bit.irun_bp & bit.irun_bm
-        self.iholddelay = data >> bit.iholddelay_bp & bit.iholddelay_bm
+        self.reset = bool(data >> bit.reset_bp & bit.reset_bm)
+        self.drv_err = bool(data >> bit.drv_err_bp & bit.drv_err_bm)
+        self.uv_cp = bool(data >> bit.uv_cp_bp & bit.uv_cp_bm)
 
 
     def serialise(self) -> int:
@@ -51,9 +49,9 @@ class IHoldIRun(TmcReg):
         """
         data = 0
 
-        data |= self.ihold << bit.ihold_bp
-        data |= self.irun << bit.irun_bp
-        data |= self.iholddelay << bit.iholddelay_bp
+        data |= self.reset << bit.reset_bp
+        data |= self.drv_err << bit.drv_err_bp
+        data |= self.uv_cp << bit.uv_cp_bp
 
         return data
 
@@ -64,6 +62,6 @@ class IHoldIRun(TmcReg):
         Args:
             logger (TmcLogger): Logger
         """
-        logger.log(f"IHOLD: {self.ihold}")
-        logger.log(f"IRUN: {self.irun}")
-        logger.log(f"IHOLDDELAY: {self.iholddelay}")
+        logger.log(f"Reset: {self.reset}")
+        logger.log(f"Driver error: {self.drv_err}")
+        logger.log(f"Under voltage on charge pump: {self.uv_cp}")

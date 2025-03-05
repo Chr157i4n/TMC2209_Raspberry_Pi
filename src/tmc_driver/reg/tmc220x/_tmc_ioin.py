@@ -6,13 +6,12 @@ INPUT register
 """
 
 from .bitfields import _tmc_220x_ioin as bit
-from ._tmc_reg import *
+from ._tmc_reg_addr import *
+from .._tmc_reg import *
 
 
 class IOIN(TmcReg):
     """INPUT register"""
-
-    data: int
 
     enn: bool
 

@@ -3,11 +3,14 @@ this file contains the bitposition and bitmasks of the different values of the f
 IHOLD_IRUN
 """
 
-ihold_bp = 0
-ihold_bm = 0x1F
+irundelay_bp = 24
+irundelay_bm = 0xF
+
+iholddelay_bp = 16
+iholddelay_bm = 0xF
 
 irun_bp  = 8
 irun_bm  = 0x1F
 
-iholddelay_bp = 16
-iholddelay_bm = 0xF
+ihold_bp = 0
+ihold_bm = 0x1F

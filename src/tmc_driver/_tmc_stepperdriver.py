@@ -12,7 +12,7 @@ this module has the function to move the motor via STEP/DIR pins
 
 import logging
 from ._tmc_gpio_board import Gpio, GpioMode, Board, BOARD, tmc_gpio
-from .motion_control._tmc_mc import TmcMotionControl, MovementAbsRel, MovementPhase, StopMode
+from .motion_control._tmc_mc import TmcMotionControl, MovementAbsRel, MovementPhase, StopMode, Direction
 from .enable_control._tmc_ec import TmcEnableControl
 from .enable_control._tmc_ec_pin import TmcEnableControlPin
 from .motion_control._tmc_mc_step_dir import TmcMotionControlStepDir
@@ -37,11 +37,6 @@ class TmcStepperDriver:
 
     _deinit_finished:bool = False
 
-
-
-    from ._tmc_test import (
-        test_step
-    )
 
 
 # Constructor/Destructor
@@ -264,3 +259,12 @@ class TmcStepperDriver:
         """motioncontrol wrapper"""
         if self.tmc_mc is not None:
             self.tmc_mc.run_to_position_steps(steps, movement_abs_rel)
+
+
+# StepperDriver methods
+# ----------------------------
+    def test_step(self):
+        """test method"""
+        for _ in range(100):
+            self.tmc_mc.set_direction(Direction.CW)
+            self.tmc_mc.make_a_step()

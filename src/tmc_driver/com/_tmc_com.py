@@ -9,8 +9,8 @@ TmcCom stepper driver communication module
 import time
 import struct
 from typing import List
-from ..reg._tmc_220x_reg_addr import TmcRegAddr
-from ..reg._tmc_gstat import GStat
+from ..reg._tmc_reg_addr import TmcRegAddr
+from ..reg.tmc220x._tmc_gstat import GStat
 from .._tmc_logger import TmcLogger, Loglevel
 
 

@@ -6,13 +6,12 @@ Driver Status register
 """
 
 from .bitfields import _tmc_220x_drvstatus as bit
-from ._tmc_reg import *
+from ._tmc_reg_addr import *
+from .._tmc_reg import *
 
 
 class DrvStatus(TmcReg):
     """Driver Status register"""
-
-    data: int
 
     stst: bool      # standstill indicator
     stealth: bool   # StealthChop indicator
