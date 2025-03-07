@@ -256,13 +256,12 @@ class TmcComUart(TmcCom):
         raise SystemExit
 
 
-    def test_com(self, register):
+    def test_com(self, addr):
         """test UART connection
 
         Args:
-            register (int):  HEX, which register to read
+            addr (int):  HEX, which register to test
         """
-
         if self.ser is None:
             self._tmc_logger.log("Cannot test UART, serial is not initialized", Loglevel.ERROR)
             return False
@@ -271,7 +270,7 @@ class TmcComUart(TmcCom):
         self.ser.reset_input_buffer()
 
         self.r_frame[1] = self.mtr_id
-        self.r_frame[2] = register.value
+        self.r_frame[2] = addr
         self.r_frame[3] = compute_crc8_atm(self.r_frame[:-1])
 
         rtn = self.ser.write(self.r_frame)
@@ -279,8 +278,8 @@ class TmcComUart(TmcCom):
             self._tmc_logger.log("Err in write", Loglevel.ERROR)
             return False
 
-        # adjust per baud and hardware. Sequential reads without some delay fail.
-        time.sleep(self.communication_pause)
+
+        snd = bytes(self.r_frame)
 
         rtn = self.ser.read(12)
         self._tmc_logger.log(f"received {len(rtn)} bytes; {len(rtn)*8} bits", Loglevel.DEBUG)
@@ -288,6 +287,51 @@ class TmcComUart(TmcCom):
         rtn_bin = format(int(rtn.hex(),16), f"0>{len(rtn)*8}b")
         self._tmc_logger.log(f"bin: {rtn_bin}", Loglevel.DEBUG)
 
-        time.sleep(self.communication_pause)
 
-        return bytes(self.r_frame), rtn
+        self.tmc_logger.log(f"length snd: {len(snd)}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"length rtn: {len(rtn)}", Loglevel.DEBUG)
+
+
+        self.tmc_logger.log("complete messages:", Loglevel.DEBUG)
+        self.tmc_logger.log(str(snd.hex()), Loglevel.DEBUG)
+        self.tmc_logger.log(str(rtn.hex()), Loglevel.DEBUG)
+
+        self.tmc_logger.log("just the first 4 bytes:", Loglevel.DEBUG)
+        self.tmc_logger.log(str(snd[0:4].hex()), Loglevel.DEBUG)
+        self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG)
+
+        status = True
+
+        if len(rtn)==12:
+            self.tmc_logger.log("""the Raspberry Pi received the sent
+                                bytes and the answer from the TMC""", Loglevel.DEBUG)
+        elif len(rtn)==4:
+            self.tmc_logger.log("the Raspberry Pi received only the sent bytes",
+                                Loglevel.ERROR)
+            status = False
+        elif len(rtn)==0:
+            self.tmc_logger.log("the Raspberry Pi did not receive anything",
+                                Loglevel.ERROR)
+            status = False
+        else:
+            self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bytes: {len(rtn)}",
+                                Loglevel.ERROR)
+            status = False
+
+        if snd[0:4] == rtn[0:4]:
+            self.tmc_logger.log("""the Raspberry Pi received exactly the bytes it has send.
+                        the first 4 bytes are the same""", Loglevel.DEBUG)
+        else:
+            self.tmc_logger.log("""the Raspberry Pi did not received the bytes it has send.
+                        the first 4 bytes are different""", Loglevel.DEBUG)
+            status = False
+
+        self.tmc_logger.log("---")
+        if status:
+            self.tmc_logger.log("UART connection: OK", Loglevel.INFO)
+        else:
+            self.tmc_logger.log("UART connection: not OK", Loglevel.ERROR)
+
+        self.tmc_logger.log("---")
+
+        return

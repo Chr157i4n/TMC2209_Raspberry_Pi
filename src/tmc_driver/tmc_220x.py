@@ -673,54 +673,7 @@ class Tmc220x(TmcStepperDriver):
         """test method"""
         self.tmc_logger.log("---")
         self.tmc_logger.log("TEST COM")
-        result = self.tmc_com.test_com(TmcRegAddr.IOIN)
 
-        snd = result[0]
-        rtn = result[1]
+        ioin = Ioin(self.tmc_com)
 
-        status = True
-
-        self.tmc_logger.log(f"length snd: {len(snd)}", Loglevel.DEBUG)
-        self.tmc_logger.log(f"length rtn: {len(rtn)}", Loglevel.DEBUG)
-
-
-        self.tmc_logger.log("complete messages:", Loglevel.DEBUG)
-        self.tmc_logger.log(str(snd.hex()), Loglevel.DEBUG)
-        self.tmc_logger.log(str(rtn.hex()), Loglevel.DEBUG)
-
-        self.tmc_logger.log("just the first 4 bytes:", Loglevel.DEBUG)
-        self.tmc_logger.log(str(snd[0:4].hex()), Loglevel.DEBUG)
-        self.tmc_logger.log(str(rtn[0:4].hex()), Loglevel.DEBUG)
-
-        if len(rtn)==12:
-            self.tmc_logger.log("""the Raspberry Pi received the sent
-                                bytes and the answer from the TMC""", Loglevel.DEBUG)
-        elif len(rtn)==4:
-            self.tmc_logger.log("the Raspberry Pi received only the sent bytes",
-                                Loglevel.ERROR)
-            status = False
-        elif len(rtn)==0:
-            self.tmc_logger.log("the Raspberry Pi did not receive anything",
-                                Loglevel.ERROR)
-            status = False
-        else:
-            self.tmc_logger.log(f"the Raspberry Pi received an unexpected amount of bytes: {len(rtn)}",
-                                Loglevel.ERROR)
-            status = False
-
-        if snd[0:4] == rtn[0:4]:
-            self.tmc_logger.log("""the Raspberry Pi received exactly the bytes it has send.
-                        the first 4 bytes are the same""", Loglevel.DEBUG)
-        else:
-            self.tmc_logger.log("""the Raspberry Pi did not received the bytes it has send.
-                        the first 4 bytes are different""", Loglevel.DEBUG)
-            status = False
-
-        self.tmc_logger.log("---")
-        if status:
-            self.tmc_logger.log("UART connection: OK", Loglevel.INFO)
-        else:
-            self.tmc_logger.log("UART connection: not OK", Loglevel.ERROR)
-
-        self.tmc_logger.log("---")
-        return status
+        return self.tmc_com.test_com(ioin.addr)

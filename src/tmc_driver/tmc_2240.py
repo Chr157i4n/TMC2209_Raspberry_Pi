@@ -521,7 +521,6 @@ class Tmc2240(TmcStepperDriver):
 
 
 
-
     def test_pin(self, pin, ioin_reg_bp):
         """tests one pin
 
@@ -578,7 +577,7 @@ class Tmc2240(TmcStepperDriver):
         """test method"""
         self.tmc_logger.log("---")
         self.tmc_logger.log("TEST COM")
-        result = self.tmc_com.test_com(TmcRegAddr.IOIN)
+        result = self.tmc_com.test_com(ioin.addr)
 
         snd = result[0]
         rtn = result[1]

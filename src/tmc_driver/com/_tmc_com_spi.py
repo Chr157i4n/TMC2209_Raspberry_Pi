@@ -138,10 +138,10 @@ class TmcComSpi(TmcCom):
         raise NotImplementedError
 
 
-    def test_com(self, register):
+    def test_com(self, addr):
         """test com connection
 
         Args:
-            register (int):  HEX, which register to read
+            addr (int):  HEX, which register to test
         """
         raise NotImplementedError

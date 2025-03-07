@@ -44,6 +44,7 @@ elif BOARD == Board.NVIDIA_JETSON:
     tmc.tmc_com = TmcComUart("/dev/ttyTHS1")
 
 tmc.tmc_com.tmc_logger = tmc.tmc_logger
+tmc.tmc_com.init()
 
 
 #-----------------------------------------------------------------------
