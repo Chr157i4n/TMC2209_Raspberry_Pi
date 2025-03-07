@@ -1,6 +1,6 @@
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-instance-attributes
-#pylint: disable=import-outside-toplevel
+#pylint: disable=no-member
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
 """Tmc2209 stepper driver module

@@ -4,9 +4,9 @@
 Register module
 """
 
+import typing
 from .._tmc_logger import TmcLogger, Loglevel
 from ..com._tmc_com import TmcCom
-import typing
 
 
 class TmcReg():

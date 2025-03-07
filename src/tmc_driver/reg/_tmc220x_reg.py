@@ -1,13 +1,13 @@
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
 #pylint: disable=unused-import
+#pylint: disable=duplicate-code
 """
 Register module
 """
 
-from ._tmc_reg import *
 import math
-
+from ._tmc_reg import *
 
 
 class GConf(TmcReg):

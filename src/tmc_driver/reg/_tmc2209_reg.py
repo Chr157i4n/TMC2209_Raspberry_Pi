@@ -1,6 +1,7 @@
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
 #pylint: disable=unused-import
+#pylint: disable=duplicate-code
 """
 Register module
 """
