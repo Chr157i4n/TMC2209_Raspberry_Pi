@@ -18,6 +18,7 @@ this module has two different functions:
 import logging
 import threading
 import time
+import typing
 from ._tmc_stepperdriver import *
 from .com._tmc_com import TmcCom
 from .com._tmc_com_uart import TmcComUart
@@ -26,25 +27,11 @@ from .motion_control._tmc_mc_step_reg import TmcMotionControlStepReg
 from .enable_control._tmc_ec_toff import TmcEnableControlToff
 from .motion_control._tmc_mc_vactual import TmcMotionControlVActual
 from ._tmc_logger import TmcLogger, Loglevel
-from .reg.tmc220x._tmc_reg_addr import TmcRegAddr
-from .reg.tmc220x._tmc_drvstatus import DrvStatus
-from .reg.tmc220x._tmc_gconf import GConf
-from .reg.tmc220x._tmc_ioin import IOIN
-from .reg.tmc220x._tmc_gstat import GStat
-from .reg.tmc220x._tmc_ihold_irun import IHoldIRun
-from .reg.tmc220x._tmc_chopconf import ChopConf
-from .reg.tmc220x.bitfields import _tmc_220x_ioin as tmc_ioin_reg
+from .reg._tmc220x_reg import *
 from . import _tmc_math as tmc_math
 
 
-reg_class_mapping = {
-    TmcRegAddr.DRVSTATUS: DrvStatus,
-    TmcRegAddr.GCONF: GConf,
-    TmcRegAddr.GSTAT: GStat,
-    TmcRegAddr.IOIN: IOIN,
-    TmcRegAddr.CHOPCONF: ChopConf,
-    TmcRegAddr.IHOLD_IRUN: IHoldIRun,
-}
+
 
 
 class Tmc220x(TmcStepperDriver):
@@ -56,7 +43,6 @@ class Tmc220x(TmcStepperDriver):
     """
 
     tmc_com:TmcComUart = None
-
 
 
 # Constructor/Destructor
@@ -75,10 +61,9 @@ class Tmc220x(TmcStepperDriver):
         """constructor
 
         Args:
-            pin_en (int): EN pin number
-            pin_step (int, optional): STEP pin number. Defaults to -1.
-            pin_dir (int, optional): DIR pin number. Defaults to -1.
-            tmc_com (TmcUart, optional): TMC UART object. Defaults to None.
+            tmc_ec (TmcEnableControl): enable control object
+            tmc_mc (TmcMotionControl): motion control object
+            tmc_com (TmcCom, optional): communication object. Defaults to None.
             driver_address (int, optional): driver address [0-3]. Defaults to 0.
             gpio_mode (enum, optional): gpio mode. Defaults to None.
             loglevel (enum, optional): loglevel. Defaults to None.
@@ -104,6 +89,34 @@ class Tmc220x(TmcStepperDriver):
             if hasattr(self.tmc_ec, "tmc_com"):
                 self.tmc_ec.tmc_com = tmc_com
 
+            registers_classes = {
+                GConf,
+                GStat,
+                IfCnt,
+                Ioin,
+                IHoldIRun,
+                TPowerDown,
+                TStep,
+                VActual,
+                MsCnt,
+                ChopConf,
+                DrvStatus
+            }
+
+            self.tmc_registers = {}
+
+            for register_class in registers_classes:
+                register = register_class(self.tmc_com)
+                name = register.name.lower()
+                self.tmc_registers[name] = register
+                getter = lambda self, name=name: self.tmc_registers[name]
+                setattr(self.__class__, name, property(getter))
+
+
+        if tmc_com is not None:
+            # Setup Registers
+            self.tmc_com.tmc_registers = self.tmc_registers
+
             if self.tmc_mc is not None:
                 self.read_steps_per_rev()
             self.clear_gstat()
@@ -113,7 +126,7 @@ class Tmc220x(TmcStepperDriver):
         self.max_speed_fullstep = 100
         self.acceleration_fullstep = 100
 
-        self.tmc_logger.log("Init finished", Loglevel.INFO)
+        self.tmc_logger.log("TMC220x Init finished", Loglevel.INFO)
 
 
 
@@ -144,36 +157,15 @@ class Tmc220x(TmcStepperDriver):
 
 
 
-    def read_reg(self, reg_addr: TmcRegAddr, log:bool = True):
-        """read the register Adress and logs the reg valuess
-
-        Returns:
-            Register instance
-        """
-        reg_value =self.tmc_com.read_int(reg_addr)
-
-        if log:
-            self.tmc_logger.log("---", Loglevel.INFO)
-            self.tmc_logger.log(f"{reg_addr.name}:", Loglevel.INFO)
-            self.tmc_logger.log(bin(reg_value), Loglevel.INFO)
-
-        reg_class = reg_class_mapping[reg_addr]
-        reg_instance = reg_class(reg_value)
-
-        if log:
-            reg_instance.log( self.tmc_logger )
-
-        return reg_instance
-
-
-
     def read_drv_status(self) -> DrvStatus:
         """read the register Adress "DRV_STATUS" and logs the reg valuess
 
         Returns:
             DRV_STATUS Register instance
         """
-        return self.read_reg(TmcRegAddr.DRVSTATUS)
+        self.drvstatus.read()
+        self.drvstatus.log(self.tmc_logger)
+        return self.drvstatus
 
 
 
@@ -183,7 +175,9 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             GCONF Register instance
         """
-        return self.read_reg(TmcRegAddr.GCONF)
+        self.gconf.read()
+        self.gconf.log(self.tmc_logger)
+        return self.gconf
 
 
 
@@ -193,32 +187,34 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             GSTAT Register instance
         """
-        return self.read_reg(TmcRegAddr.GSTAT)
+        self.gstat.read()
+        self.gstat.log(self.tmc_logger)
+        return self.gstat
 
 
 
     def clear_gstat(self):
         """clears the "GSTAT" register"""
         self.tmc_logger.log("clearing GSTAT", Loglevel.INFO)
-        gstat = self.tmc_com.read_int(TmcRegAddr.GSTAT)
+        self.gstat.read()
 
-        gstat = GStat(gstat)
-        gstat.reset = True
-        gstat.drv_err = True
-        gstat.uv_cp = True
-        gstat_int = gstat.serialise()
+        self.gstat.reset = True
+        self.gstat.drv_err = True
+        self.gstat.uv_cp = True
 
-        self.tmc_com.write_reg_check(TmcRegAddr.GSTAT, gstat_int)
+        self.gstat.write_check()
 
 
 
-    def read_ioin(self) -> IOIN:
+    def read_ioin(self) -> Ioin:
         """read the register Adress "IOIN" and logs the reg values
 
         Returns:
             IOIN Register instance
         """
-        return self.read_reg(TmcRegAddr.IOIN)
+        self.ioin.read()
+        self.ioin.log(self.tmc_logger)
+        return self.ioin
 
 
 
@@ -228,7 +224,9 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             CHOPCONF Register instance
         """
-        return self.read_reg(TmcRegAddr.CHOPCONF)
+        self.chopconf.read()
+        self.chopconf.log(self.tmc_logger)
+        return self.chopconf
 
 
 
@@ -238,10 +236,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             bool: motor shaft direction: False = CCW; True = CW
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-
-        gconf = GConf(gconf)
-        return gconf.shaft
+        self.gconf.read()
+        return self.gconf.shaft
 
 
 
@@ -251,13 +247,7 @@ class Tmc220x(TmcStepperDriver):
         Args:
             direction (bool): direction of the motor False = CCW; True = CW
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-
-        gconf = GConf(gconf)
-        gconf.shaft = direction
-        gconf_int = gconf.serialise()
-
-        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+        self.gconf.modify("shaft", direction)
 
 
 
@@ -267,9 +257,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             en (bool): whether Vref (True) or 5V (False) is used for current scale
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-        gconf = GConf(gconf)
-        return gconf.i_scale_analog
+        self.gconf.read()
+        return self.gconf.i_scale_analog
 
 
 
@@ -279,13 +268,7 @@ class Tmc220x(TmcStepperDriver):
         Args:
             en (bool): True=Vref, False=5V
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-
-        gconf = GConf(gconf)
-        gconf.i_scale_analog = en
-        gconf_int = gconf.serialise()
-
-        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+        self.gconf.modify("i_scale_analog", en)
 
 
 
@@ -297,10 +280,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             bool: whether high sensitivity should is used
         """
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-
-        chopconf = ChopConf(chopconf)
-        return chopconf.vsense
+        self.chopconf.read()
+        return self.chopconf.vsense
 
 
 
@@ -312,13 +293,7 @@ class Tmc220x(TmcStepperDriver):
         Args:
             en (bool):
         """
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-
-        chopconf = ChopConf(chopconf)
-        chopconf.vsense = en
-        chopconf_int = chopconf.serialise()
-
-        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+        self.chopconf.modify("vsense", en)
 
 
 
@@ -332,9 +307,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             bool: which sense resistor voltage is used
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-        gconf = GConf(gconf)
-        return gconf.internal_rsense
+        self.gconf.read()
+        return self.gconf.internal_rsense
 
 
 
@@ -359,12 +333,7 @@ class Tmc220x(TmcStepperDriver):
             raise SystemExit
 
 
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-        gconf = GConf(gconf)
-        gconf.internal_rsense = en
-        gconf_int = gconf.serialise()
-
-        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+        self.gconf.modify("internal_rsense", en)
 
 
 
@@ -377,14 +346,14 @@ class Tmc220x(TmcStepperDriver):
         irun (int): current while running [0-31]
         ihold_delay (int): delay after standstill for switching to ihold [0-15]
 
-            """
-        ihold_irun = IHoldIRun()
-        ihold_irun.ihold = ihold
-        ihold_irun.irun = irun
-        ihold_irun.iholddelay = ihold_delay
-        ihold_irun_int = ihold_irun.serialise()
+        """
+        self.ihold_irun.read()
 
-        self.tmc_com.write_reg_check(TmcRegAddr.IHOLD_IRUN, ihold_irun_int)
+        self.ihold_irun.ihold = ihold
+        self.ihold_irun.irun = irun
+        self.ihold_irun.ihold_delay = ihold_delay
+
+        self.ihold_irun.write_check()
 
 
 
@@ -397,13 +366,7 @@ class Tmc220x(TmcStepperDriver):
         Args:
             pdn_disable (bool): whether PDN should be disabled
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-
-        gconf = GConf(gconf)
-        gconf.pdn_disable = pdn_disable
-        gconf_int = gconf.serialise()
-
-        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+        self.gconf.modify("pdn_disable", pdn_disable)
 
 
 
@@ -467,10 +430,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             bool: True = spreadcycle; False = stealthchop
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-
-        gconf = GConf(gconf)
-        return gconf.en_spreadcycle
+        self.gconf.read()
+        return self.gconf.spreadcycle
 
 
 
@@ -481,13 +442,7 @@ class Tmc220x(TmcStepperDriver):
         en (bool): true to enable spreadcycle; false to enable stealthchop
 
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-
-        gconf = GConf(gconf)
-        gconf.en_spreadcycle = en
-        gconf_int = gconf.serialise()
-
-        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+        self.gconf.modify("spreadcycle", en)
 
 
 
@@ -497,10 +452,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             en (bool): true if internal µstep interpolation is enabled
         """
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-        chopconf = ChopConf(chopconf)
-
-        return chopconf.intpol
+        self.chopconf.read()
+        return self.chopconf.intpol
 
 
 
@@ -510,12 +463,7 @@ class Tmc220x(TmcStepperDriver):
         Args:
             en (bool): true to enable internal µstep interpolation
         """
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-        chopconf = ChopConf(chopconf)
-
-        chopconf.intpol = en
-        chopconf_int = chopconf.serialise()
-        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+        self.chopconf.modify("intpol", en)
 
 
 
@@ -525,10 +473,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             int: TOFF register value
         """
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-        chopconf = ChopConf(chopconf)
-
-        return chopconf.toff
+        self.chopconf.read()
+        return self.chopconf.toff
 
 
 
@@ -538,12 +484,7 @@ class Tmc220x(TmcStepperDriver):
         Args:
             toff (uint8_t): value of toff (must be a four-bit value)
         """
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-        chopconf = ChopConf(chopconf)
-
-        chopconf.toff = toff
-        chopconf_int = chopconf.serialise()
-        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+        self.chopconf.modify("toff", toff)
 
 
 
@@ -554,10 +495,9 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             int: µstep resolution
         """
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-        chopconf = ChopConf(chopconf)
+        self.chopconf.read()
 
-        self.tmc_mc.mres = chopconf.convert_reg_to_mres()
+        self.tmc_mc.mres = self.chopconf.convert_reg_to_mres()
 
         return self.tmc_mc.mres
 
@@ -583,16 +523,11 @@ class Tmc220x(TmcStepperDriver):
         if self.tmc_mc is not None:
             self.tmc_mc.mres = mres
 
-        chopconf = self.tmc_com.read_int(TmcRegAddr.CHOPCONF)
-        chopconf = ChopConf(chopconf)
-
-        chopconf.convert_mres_to_reg(mres)
-        chopconf_int = chopconf.serialise()
-        self.tmc_com.write_reg_check(TmcRegAddr.CHOPCONF, chopconf_int)
+        self.chopconf.read()
+        self.chopconf.convert_mres_to_reg(mres)
+        self.chopconf.write_check()
 
         self.set_mstep_resolution_reg_select(True)
-
-        return True
 
 
 
@@ -604,13 +539,7 @@ class Tmc220x(TmcStepperDriver):
         Args:
             en (bool): true to set µstep resolution via UART
         """
-        gconf = self.tmc_com.read_int(TmcRegAddr.GCONF)
-
-        gconf = GConf(gconf)
-        gconf.mstep_reg_select = en
-        gconf_int = gconf.serialise()
-
-        self.tmc_com.write_reg_check(TmcRegAddr.GCONF, gconf_int)
+        self.gconf.modify("mstep_reg_select", en)
 
 
 
@@ -622,7 +551,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             int: 8bit IFCNT Register
         """
-        ifcnt = self.tmc_com.read_int(TmcRegAddr.IFCNT)
+        self.ifcnt.read()
+        ifcnt = self.ifcnt.ifcnt
         self.tmc_logger.log(f"Interface Transmission Counter: {ifcnt}", Loglevel.INFO)
         return ifcnt
 
@@ -634,8 +564,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             int: TStep time
         """
-        tstep = self.tmc_com.read_int(TmcRegAddr.TSTEP)
-        return tstep
+        self.chopconf.read()
+        return self.chopconf.tstep
 
 
 
@@ -648,7 +578,8 @@ class Tmc220x(TmcStepperDriver):
         Args:
             vactual (int): value for VACTUAL
         """
-        self.tmc_com.write_reg_check(TmcRegAddr.VACTUAL, vactual)
+        self.vactual.vactual = vactual
+        self.vactual.write_check()
 
 
 
@@ -659,8 +590,8 @@ class Tmc220x(TmcStepperDriver):
         Returns:
             int: current Microstep counter
         """
-        mscnt = self.tmc_com.read_int(TmcRegAddr.MSCNT)
-        return mscnt
+        self.mscnt.read()
+        return self.mscnt.mscnt
 
 
 

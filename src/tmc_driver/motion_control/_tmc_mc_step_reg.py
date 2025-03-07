@@ -8,7 +8,6 @@ from ._tmc_mc_step_dir import TmcMotionControlStepDir
 from ..com._tmc_com import TmcCom
 from .._tmc_logger import Loglevel
 from .._tmc_gpio_board import tmc_gpio, Gpio, GpioMode
-from ..reg.tmc220x._tmc_gconf import GConf
 
 
 class TmcMotionControlStepReg(TmcMotionControlStepDir):
@@ -57,9 +56,5 @@ class TmcMotionControlStepReg(TmcMotionControlStepDir):
         """
         self._direction = direction
         self._tmc_logger.log(f"New Direction is: {direction}", Loglevel.MOVEMENT)
-        gconf = GConf()
-        gconf.read(self._tmc_com)
 
-        gconf.shaft = bool(direction.value)
-
-        gconf.write(self._tmc_com)
+        self._tmc_com.tmc_registers["gconf"].modify("shaft", bool(direction.value))

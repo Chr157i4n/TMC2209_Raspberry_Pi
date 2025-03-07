@@ -10,6 +10,7 @@ import statistics
 import types
 from .tmc_220x import *
 from ._tmc_gpio_board import GpioPUD
+from .reg._tmc2209_reg import *
 
 
 class Tmc2209(Tmc220x):
@@ -19,6 +20,56 @@ class Tmc2209(Tmc220x):
     _sg_callback:types.FunctionType = None
     _sg_threshold:int = 100             # threshold for stallguard
 
+
+
+# Constructor/Destructor
+# ----------------------------
+    def __init__(self,
+                    tmc_ec:TmcEnableControl,
+                    tmc_mc:TmcMotionControl,
+                    tmc_com:TmcCom = None,
+                    driver_address:int = 0,
+                    gpio_mode = None,
+                    loglevel:Loglevel = Loglevel.INFO,
+                    logprefix:str = None,
+                    log_handlers:list = None,
+                    log_formatter:logging.Formatter = None
+                    ):
+        """constructor
+
+        Args:
+            tmc_ec (TmcEnableControl): enable control object
+            tmc_mc (TmcMotionControl): motion control object
+            tmc_com (TmcCom, optional): communication object. Defaults to None.
+            driver_address (int, optional): driver address [0-3]. Defaults to 0.
+            gpio_mode (enum, optional): gpio mode. Defaults to None.
+            loglevel (enum, optional): loglevel. Defaults to None.
+            logprefix (str, optional): log prefix (name of the logger).
+                Defaults to None (standard TMC prefix).
+            log_handlers (list, optional): list of logging handlers.
+                Defaults to None (log to console).
+            log_formatter (logging.Formatter, optional): formatter for the log messages.
+                Defaults to None (messages are logged in the format
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s').
+        """
+        super().__init__(tmc_ec, tmc_mc, tmc_com, driver_address, gpio_mode, loglevel, logprefix, log_handlers, log_formatter)
+
+        if tmc_com is not None:
+
+            registers_classes = {
+                TCoolThrs,
+                SGThrs,
+                SGResult,
+            }
+
+            for register_class in registers_classes:
+                register = register_class(self.tmc_com)
+                name = register.name.lower()
+                self.tmc_registers[name] = register
+                getter = lambda self, name=name: self.tmc_registers[name]
+                setattr(self.__class__, name, property(getter))
+
+        self.tmc_logger.log("TMC2209 Init finished", Loglevel.INFO)
 
 
     def __del__(self):
@@ -203,8 +254,8 @@ class Tmc2209(Tmc220x):
         Returns:
             sg_result (int): StallGuard Result
         """
-        sg_result = self.tmc_com.read_int(TmcRegAddr.SG_RESULT)
-        return sg_result
+        self.sgresult.read()
+        return self.sgresult.sgresult
 
 
 
@@ -217,10 +268,7 @@ class Tmc2209(Tmc220x):
         Args:
             threshold (int): value for SGTHRS
         """
-        self.tmc_logger.log(f"sgthrs {bin(threshold)}", Loglevel.INFO)
-
-        self.tmc_logger.log("writing sgthrs", Loglevel.INFO)
-        self.tmc_com.write_reg_check(TmcRegAddr.SGTHRS, threshold)
+        self.sgthrs.modify("sgthrs", threshold)
 
 
 
@@ -231,10 +279,7 @@ class Tmc2209(Tmc220x):
         Args:
             threshold (int): threshold velocity for coolstep
         """
-        self.tmc_logger.log(f"tcoolthrs {bin(threshold)}", Loglevel.INFO)
-
-        self.tmc_logger.log("writing tcoolthrs", Loglevel.INFO)
-        self.tmc_com.write_reg_check(TmcRegAddr.TCOOLTHRS, threshold)
+        self.tcoolthrs.modify("tcoolthrs", threshold)
 
 
 

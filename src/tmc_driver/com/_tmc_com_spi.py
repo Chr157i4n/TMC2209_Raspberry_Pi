@@ -40,7 +40,7 @@ class TmcComSpi(TmcCom):
         """destructor"""
 
 
-    def read_reg(self, register:TmcRegAddr):
+    def read_reg(self, register):
         """reads the registry on the TMC with a given address.
         returns the binary value of that register
 
@@ -50,7 +50,7 @@ class TmcComSpi(TmcCom):
         raise NotImplementedError
 
 
-    def read_int(self, register:TmcRegAddr, tries:int = 10):
+    def read_int(self, register, tries:int = 10):
         """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
 
@@ -61,7 +61,7 @@ class TmcComSpi(TmcCom):
         raise NotImplementedError
 
 
-    def write_reg(self, register:TmcRegAddr, val:int):
+    def write_reg(self, register, val:int):
         """this function can write a value to the register of the tmc
         1. use read_int to get the current setting of the TMC
         2. then modify the settings as wished
@@ -74,7 +74,7 @@ class TmcComSpi(TmcCom):
         raise NotImplementedError
 
 
-    def write_reg_check(self, register:TmcRegAddr, val:int, tries:int=10):
+    def write_reg_check(self, register, val:int, tries:int=10):
         """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
         the InterfaceTransmissionCounter before and after writing
@@ -97,7 +97,7 @@ class TmcComSpi(TmcCom):
         raise NotImplementedError
 
 
-    def test_com(self, register:TmcRegAddr):
+    def test_com(self, register):
         """test com connection
 
         Args:

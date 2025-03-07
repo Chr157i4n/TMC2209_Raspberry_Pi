@@ -21,17 +21,6 @@ class TmcComUart(TmcCom):
     ser:serial.Serial = None
 
 
-    @property
-    def tmc_logger(self) -> TmcLogger:
-        """get the tmc_logger"""
-        return self._tmc_logger
-
-    @tmc_logger.setter
-    def tmc_logger(self, tmc_logger:TmcLogger):
-        """set the tmc_logger"""
-        self._tmc_logger = tmc_logger
-
-
     def __init__(self,
                  serialport:str ,
                  baudrate:int = 115200,
@@ -86,7 +75,7 @@ class TmcComUart(TmcCom):
             self.ser.close()
 
 
-    def read_reg(self, register:TmcRegAddr):
+    def read_reg(self, addr:hex):
         """reads the registry on the TMC with a given address.
         returns the binary value of that register
 
@@ -101,7 +90,7 @@ class TmcComUart(TmcCom):
         self.ser.reset_input_buffer()
 
         self.r_frame[1] = self.mtr_id
-        self.r_frame[2] = register.value
+        self.r_frame[2] = addr
         self.r_frame[3] = compute_crc8_atm(self.r_frame[:-1])
 
         rtn = self.ser.write(self.r_frame)
@@ -121,7 +110,7 @@ class TmcComUart(TmcCom):
         return rtn
 
 
-    def read_int(self, register:TmcRegAddr, tries:int = 10):
+    def read_int(self, addr:hex, tries:int = 10):
         """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
 
@@ -134,7 +123,7 @@ class TmcComUart(TmcCom):
             return -1
         while True:
             tries -= 1
-            rtn = self.read_reg(register)
+            rtn = self.read_reg(addr)
             rtn_data = rtn[7:11]
             not_zero_count = len([elem for elem in rtn if elem != 0])
 
@@ -158,7 +147,7 @@ class TmcComUart(TmcCom):
         return val
 
 
-    def write_reg(self, register:TmcRegAddr, val:int):
+    def write_reg(self, addr:hex, val:int):
         """this function can write a value to the register of the tmc
         1. use read_int to get the current setting of the TMC
         2. then modify the settings as wished
@@ -176,7 +165,7 @@ class TmcComUart(TmcCom):
         self.ser.reset_input_buffer()
 
         self.w_frame[1] = self.mtr_id
-        self.w_frame[2] =  register.value | 0x80  # set write bit
+        self.w_frame[2] = addr | 0x80  # set write bit
 
         self.w_frame[3] = 0xFF & (val>>24)
         self.w_frame[4] = 0xFF & (val>>16)
@@ -196,7 +185,7 @@ class TmcComUart(TmcCom):
         return True
 
 
-    def write_reg_check(self, register:TmcRegAddr, val:int, tries:int=10):
+    def write_reg_check(self, register, val:int, tries:int=10):
         """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
         the InterfaceTransmissionCounter before and after writing
@@ -209,7 +198,8 @@ class TmcComUart(TmcCom):
         if self.ser is None:
             self._tmc_logger.log("Cannot write reg check, serial is not initialized", Loglevel.ERROR)
             return False
-        ifcnt1 = self.read_int(TmcRegAddr.IFCNT)
+        self._tmc_registers["ifcnt"].read()
+        ifcnt1 = self._tmc_registers["ifcnt"].ifcnt
 
         if ifcnt1 == 255:
             ifcnt1 = -1
@@ -217,7 +207,8 @@ class TmcComUart(TmcCom):
         while True:
             self.write_reg(register, val)
             tries -= 1
-            ifcnt2 = self.read_int(TmcRegAddr.IFCNT)
+            self._tmc_registers["ifcnt"].read()
+            ifcnt2 = self._tmc_registers["ifcnt"].ifcnt
             if ifcnt1 >= ifcnt2:
                 self._tmc_logger.log("writing not successful!", Loglevel.ERROR)
                 self._tmc_logger.log(f"ifcnt: {ifcnt1}, {ifcnt2}", Loglevel.DEBUG)
@@ -242,28 +233,14 @@ class TmcComUart(TmcCom):
         if self.error_handler_running:
             return
         self.error_handler_running = True
-        gstat = self.read_int(TmcRegAddr.GSTAT)
-        self._tmc_logger.log("GSTAT Error check:", Loglevel.DEBUG)
-        if gstat == -1:
-            self._tmc_logger.log("No answer from Driver", Loglevel.DEBUG)
-        elif gstat == 0:
-            self._tmc_logger.log("Everything looks fine in GSTAT", Loglevel.DEBUG)
-        else:
-            gstat = GStat(gstat)
-            if gstat.reset:
-                self._tmc_logger.log("The Driver has been reset since the last read access to GSTAT",
-                                    Loglevel.DEBUG)
-            if gstat.drv_err:
-                self._tmc_logger.log("""The driver has been shut down due to overtemperature or short
-                      circuit detection since the last read access""", Loglevel.DEBUG)
-            if gstat.uv_cp:
-                self._tmc_logger.log("""Undervoltage on the charge pump.
-                      The driver is disabled in this case""", Loglevel.DEBUG)
+        self._tmc_registers["gstat"].read()
+        self._tmc_registers["gstat"].log()
+
         self._tmc_logger.log("EXITING!", Loglevel.INFO)
         raise SystemExit
 
 
-    def test_com(self, register:TmcRegAddr):
+    def test_com(self, register):
         """test UART connection
 
         Args:

@@ -9,8 +9,6 @@ TmcCom stepper driver communication module
 import time
 import struct
 from typing import List
-from ..reg._tmc_reg_addr import TmcRegAddr
-from ..reg.tmc220x._tmc_gstat import GStat
 from .._tmc_logger import TmcLogger, Loglevel
 
 
@@ -40,6 +38,7 @@ class TmcCom:
     """TmcCom
     """
     _tmc_logger:TmcLogger = None
+    _tmc_registers = None
 
     mtr_id:int = 0
     r_frame:List[int] = [0x55, 0, 0, 0  ]
@@ -56,6 +55,17 @@ class TmcCom:
     def tmc_logger(self, tmc_logger):
         """set the tmc_logger"""
         self._tmc_logger = tmc_logger
+
+    @property
+    def tmc_registers(self):
+        """get the tmc_registers"""
+        return self._tmc_registers
+
+    @tmc_registers.setter
+    def tmc_registers(self, tmc_registers):
+        """set the tmc_registers"""
+        self._tmc_registers = tmc_registers
+
 
 
     def __init__(self,
@@ -76,7 +86,7 @@ class TmcCom:
     #     """destructor"""
 
 
-    def read_reg(self, register:TmcRegAddr):
+    def read_reg(self, register):
         """reads the registry on the TMC with a given address.
         returns the binary value of that register
 
@@ -86,7 +96,7 @@ class TmcCom:
         raise NotImplementedError
 
 
-    def read_int(self, register:TmcRegAddr, tries:int = 10):
+    def read_int(self, register, tries:int = 10):
         """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
 
@@ -97,7 +107,7 @@ class TmcCom:
         raise NotImplementedError
 
 
-    def write_reg(self, register:TmcRegAddr, val:int):
+    def write_reg(self, register, val:int):
         """this function can write a value to the register of the tmc
         1. use read_int to get the current setting of the TMC
         2. then modify the settings as wished
@@ -110,7 +120,7 @@ class TmcCom:
         raise NotImplementedError
 
 
-    def write_reg_check(self, register:TmcRegAddr, val:int, tries:int=10):
+    def write_reg_check(self, register, val:int, tries:int=10):
         """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
         the InterfaceTransmissionCounter before and after writing
@@ -133,7 +143,7 @@ class TmcCom:
         raise NotImplementedError
 
 
-    def test_com(self, register:TmcRegAddr):
+    def test_com(self, register):
         """test com connection
 
         Args:

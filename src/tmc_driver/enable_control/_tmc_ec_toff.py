@@ -4,7 +4,7 @@ Enable Control base module
 
 from ._tmc_ec import TmcEnableControl
 from ..com._tmc_com import TmcCom
-from ..reg.tmc220x._tmc_chopconf import ChopConf
+from .._tmc_logger import Loglevel
 
 
 class TmcEnableControlToff(TmcEnableControl):
@@ -32,12 +32,8 @@ class TmcEnableControlToff(TmcEnableControl):
         Args:
             en (bool): whether the motor current output should be enabled
         """
-        chopconf = ChopConf()
-        chopconf.read(self._tmc_com)
+        self._tmc_logger.log(f"Motor output active: {en}", Loglevel.INFO)
 
-        if en:
-            chopconf.toff = self._default_toff
-        else:
-            chopconf.toff = 0
+        val = self._default_toff if en else 0
 
-        chopconf.write(self._tmc_com)
+        self._tmc_com.tmc_registers["chopconf"].modify("toff", val)

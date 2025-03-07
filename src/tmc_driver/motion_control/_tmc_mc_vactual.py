@@ -12,7 +12,6 @@ from ._tmc_mc import TmcMotionControl, MovementAbsRel, StopMode
 from ..com._tmc_com import TmcCom
 from .._tmc_logger import Loglevel
 from .. import _tmc_math as tmc_math
-from ..reg._tmc_reg_addr import TmcRegAddr
 
 
 class TmcMotionControlVActual(TmcMotionControl):
@@ -77,7 +76,7 @@ class TmcMotionControlVActual(TmcMotionControl):
         Args:
             vactual (int): value for VACTUAL
         """
-        self.tmc_com.write_reg_check(TmcRegAddr.VACTUAL, vactual)
+        self.tmc_com.tmc_registers["vactual"].modify("vactual", vactual)
 
 
     def set_vactual_dur(self, vactual, duration=0, acceleration=0,
