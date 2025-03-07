@@ -61,9 +61,9 @@ class TmcReg():
         data = 0
 
         for reg in self._reg_map:
-            name, pos, _, _ = reg
+            name, pos, mask, _ = reg
             value = getattr(self, name)
-            data |= int(value) << pos
+            data |= (int(value) & mask) << pos
 
         return data
 
