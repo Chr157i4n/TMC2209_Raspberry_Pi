@@ -6,8 +6,10 @@
 TmcComUart stepper driver uart module
 """
 
+import sys
 import serial
 from ._tmc_com import *
+
 
 
 class TmcComUart(TmcCom):
@@ -18,7 +20,7 @@ class TmcComUart(TmcCom):
     like the current or the microsteppingmode
     """
 
-    ser:serial.Serial = None
+    ser:serial.Serial = serial.Serial()
 
 
     def __init__(self,
@@ -39,21 +41,35 @@ class TmcComUart(TmcCom):
 
         if serialport is None:
             return
+
+        self.ser.port = serialport
+        self.ser.baudrate = baudrate
+
+        self.r_frame = [0x55, 0, 0, 0  ]
+        self.w_frame = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
+
+
+
+    def init(self):
+        """init"""
         try:
-            self.ser = serial.Serial(serialport, baudrate)
+            self.ser.open()
         except Exception as e:
             errnum = e.args[0]
             self._tmc_logger.log(f"SERIAL ERROR: {e}")
             if errnum == 2:
-                self._tmc_logger.log(f""""{serialport} does not exist.
-                      You need to activate the serial port with \"sudo raspi-config\"""")
+                self._tmc_logger.log(f""""{self.ser.serialport} does not exist.
+                      You need to activate the serial port with \"sudo raspi-config\"""", Loglevel.ERROR)
+                sys.exit()
+
             if errnum == 13:
                 self._tmc_logger.log("""you have no permission to use the serial port.
                                     You may need to add your user to the dialout group
-                                    with \"sudo usermod -a -G dialout pi\"""")
+                                    with \"sudo usermod -a -G dialout pi\"""", Loglevel.ERROR)
+                sys.exit()
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
-        self.communication_pause = 500 / baudrate
+        self.communication_pause = 500 / self.ser.baudrate
 
         if self.ser is None:
             return
@@ -63,7 +79,7 @@ class TmcComUart(TmcCom):
         self.ser.STOPBITS = 1
 
         # adjust per baud and hardware. Sequential reads without some delay fail.
-        self.ser.timeout = 20000/baudrate
+        self.ser.timeout = 20000/self.ser.baudrate
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
@@ -115,7 +131,7 @@ class TmcComUart(TmcCom):
         if a valid answer is returned, this function returns it as an integer
 
         Args:
-            register (int): HEX, which register to read
+            addr (int): HEX, which register to read
             tries (int): how many tries, before error is raised (Default value = 10)
         """
         if self.ser is None:
@@ -154,7 +170,7 @@ class TmcComUart(TmcCom):
         3. write them back to the driver with this function
 
         Args:
-            register (int): HEX, which register to write
+            addr (int): HEX, which register to write
             val (int): value for that register
         """
         if self.ser is None:
@@ -185,13 +201,13 @@ class TmcComUart(TmcCom):
         return True
 
 
-    def write_reg_check(self, register, val:int, tries:int=10):
+    def write_reg_check(self, addr:hex, val:int, tries:int=10):
         """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
         the InterfaceTransmissionCounter before and after writing
 
         Args:
-            register: HEX, which register to write
+            addr: HEX, which register to write
             val: value for that register
             tries: how many tries, before error is raised (Default value = 10)
         """
@@ -205,7 +221,7 @@ class TmcComUart(TmcCom):
             ifcnt1 = -1
 
         while True:
-            self.write_reg(register, val)
+            self.write_reg(addr, val)
             tries -= 1
             self._tmc_registers["ifcnt"].read()
             ifcnt2 = self._tmc_registers["ifcnt"].ifcnt

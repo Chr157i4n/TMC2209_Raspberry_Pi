@@ -83,6 +83,9 @@ class Tmc220x(TmcStepperDriver):
             self.tmc_com = tmc_com
             self.tmc_com.tmc_logger = self.tmc_logger
             self.tmc_com.mtr_id = driver_address
+
+            self.tmc_com.init()
+
             if hasattr(self.tmc_mc, "tmc_com"):
                 self.tmc_mc.tmc_com = tmc_com
 
@@ -380,7 +383,7 @@ class Tmc220x(TmcStepperDriver):
         hold_current_delay (int): delay after standstill after which cur drops (Default value = 10)
         pdn_disable (bool): should be disabled if UART is used (Default value = True)
 
-            """
+        """
         cs_irun = 0
         rsense = 0.11
         vfs = 0
@@ -497,9 +500,11 @@ class Tmc220x(TmcStepperDriver):
         """
         self.chopconf.read()
 
-        self.tmc_mc.mres = self.chopconf.convert_reg_to_mres()
+        mres = self.chopconf.convert_reg_to_mres()
+        if self.tmc_mc is not None:
+            self.tmc_mc.mres = mres
 
-        return self.tmc_mc.mres
+        return mres
 
 
 

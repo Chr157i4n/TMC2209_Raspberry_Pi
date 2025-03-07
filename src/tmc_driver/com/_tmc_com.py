@@ -41,8 +41,8 @@ class TmcCom:
     _tmc_registers = None
 
     mtr_id:int = 0
-    r_frame:List[int] = [0x55, 0, 0, 0  ]
-    w_frame:List[int] = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
+    r_frame:List[int]
+    w_frame:List[int]
     communication_pause:int = 0
     error_handler_running:bool = False
 
@@ -82,51 +82,55 @@ class TmcCom:
         self.mtr_id = mtr_id
 
 
+    # def init(self):
+    #     """init"""
+
+
     # def __del__(self):
     #     """destructor"""
 
 
-    def read_reg(self, register):
+    def read_reg(self, addr:hex):
         """reads the registry on the TMC with a given address.
         returns the binary value of that register
 
         Args:
-            register (int): HEX, which register to read
+            addr (int): HEX, which register to read
         """
         raise NotImplementedError
 
 
-    def read_int(self, register, tries:int = 10):
+    def read_int(self, addr:hex, tries:int = 10):
         """this function tries to read the registry of the TMC 10 times
         if a valid answer is returned, this function returns it as an integer
 
         Args:
-            register (int): HEX, which register to read
+            addr (int): HEX, which register to read
             tries (int): how many tries, before error is raised (Default value = 10)
         """
         raise NotImplementedError
 
 
-    def write_reg(self, register, val:int):
+    def write_reg(self, addr:hex, val:int):
         """this function can write a value to the register of the tmc
         1. use read_int to get the current setting of the TMC
         2. then modify the settings as wished
         3. write them back to the driver with this function
 
         Args:
-            register (int): HEX, which register to write
+            addr (int): HEX, which register to write
             val (int): value for that register
         """
         raise NotImplementedError
 
 
-    def write_reg_check(self, register, val:int, tries:int=10):
+    def write_reg_check(self, addr:hex, val:int, tries:int=10):
         """this function als writes a value to the register of the TMC
         but it also checks if the writing process was successfully by checking
         the InterfaceTransmissionCounter before and after writing
 
         Args:
-            register: HEX, which register to write
+            addr: HEX, which register to write
             val: value for that register
             tries: how many tries, before error is raised (Default value = 10)
         """

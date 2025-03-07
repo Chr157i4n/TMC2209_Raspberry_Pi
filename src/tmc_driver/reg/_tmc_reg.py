@@ -63,7 +63,7 @@ class TmcReg():
         for reg in self._reg_map:
             name, pos, _, _ = reg
             value = getattr(self, name)
-            data |= value << pos
+            data |= int(value) << pos
 
         return data
 
