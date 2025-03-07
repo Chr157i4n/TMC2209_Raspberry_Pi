@@ -72,7 +72,7 @@ tmc.read_gconf()
 print("---\n---")
 
 
-print(f"Tempearture:\t{tmc.get_temperature()} °C")
+print(f"Temperature:\t{tmc.get_temperature()} °C")
 print(f"VSupply:\t{tmc.get_vsupply()} V")
 
 print("---\n---")

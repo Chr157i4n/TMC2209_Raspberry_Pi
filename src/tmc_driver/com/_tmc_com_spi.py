@@ -79,7 +79,25 @@ class TmcComSpi(TmcCom):
         dummy_data = [0x00, 0x00, 0x00, 0x00, 0x00]
 
         self._spi.xfer2(self._w_frame)
-        return self._spi.xfer2(dummy_data)
+        rtn = self._spi.xfer2(dummy_data)
+
+        reset_flag =    rtn[0] >> 0 & 0x01
+        driver_error =  rtn[0] >> 1 & 0x01
+        sg2 =           rtn[0] >> 2 & 0x01
+        standstill =    rtn[0] >> 3 & 0x01
+
+
+        if reset_flag:
+            self._tmc_logger.log("TMC reset flag is set", Loglevel.ERROR)
+        if driver_error:
+            self._tmc_logger.log("TMC driver error flag is set", Loglevel.ERROR)
+        if sg2:
+            self._tmc_logger.log("TMC stallguard2 flag is set", Loglevel.MOVEMENT)
+        if standstill:
+            self._tmc_logger.log("TMC standstill flag is set", Loglevel.MOVEMENT)
+
+
+        return rtn[1:]
 
 
     def read_int(self, addr:hex, tries:int = 10):
@@ -91,7 +109,7 @@ class TmcComSpi(TmcCom):
             tries (int): how many tries, before error is raised (Default value = 10)
         """
         data = self.read_reg(addr)
-        return int.from_bytes(data[1:], byteorder='big', signed=False)
+        return int.from_bytes(data, byteorder='big', signed=False)
 
 
     def write_reg(self, addr:hex, val:int):
