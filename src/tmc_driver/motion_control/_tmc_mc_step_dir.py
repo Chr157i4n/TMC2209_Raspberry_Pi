@@ -106,6 +106,15 @@ class TmcMotionControlStepDir(TmcMotionControl):
         """_speed setter"""
         self.speed = speed * self.mres
 
+    @property
+    def pin_step(self):
+        """_pin_step property"""
+        return self._pin_step
+
+    @property
+    def pin_dir(self):
+        """_pin_dir property"""
+        return self._pin_dir
 
     def __init__(self, pin_step:int, pin_dir:int):
         """constructor"""

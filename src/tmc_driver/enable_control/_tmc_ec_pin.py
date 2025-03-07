@@ -13,6 +13,12 @@ class TmcEnableControlPin(TmcEnableControl):
     _pin_en:int = None
 
 
+    @property
+    def pin_en(self):
+        """pin_en property"""
+        return self._pin_en
+
+
     def __init__(self, pin_en:int = None):
         """constructor"""
         self._pin_en = pin_en

@@ -631,9 +631,9 @@ class Tmc220x(TmcStepperDriver):
         pin_ok = True
 
         # turn on all pins
-        tmc_gpio.gpio_output(self.tmc_mc._pin_dir, Gpio.HIGH)
-        tmc_gpio.gpio_output(self.tmc_mc._pin_step, Gpio.HIGH)
-        tmc_gpio.gpio_output(self.tmc_ec._pin_en, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_mc.pin_dir, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_mc.pin_step, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_ec.pin_en, Gpio.HIGH)
 
         # check that the selected pin is on
         ioin = self.read_ioin()
@@ -660,9 +660,9 @@ class Tmc220x(TmcStepperDriver):
         and checks the IOIN Register of the TMC meanwhile
         """
         # test each pin on their own
-        pin_dir_ok = self.test_pin(self.tmc_mc._pin_dir, 9)
+        pin_dir_ok = self.test_pin(self.tmc_mc.pin_dir, 9)
         pin_step_ok = self.test_pin(self.tmc_mc.pin_step, 7)
-        pin_en_ok = self.test_pin(self.tmc_ec._pin_en, 0)
+        pin_en_ok = self.test_pin(self.tmc_ec.pin_en, 0)
 
         self.set_motor_enabled(False)
 

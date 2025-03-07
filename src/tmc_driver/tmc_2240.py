@@ -526,9 +526,9 @@ class Tmc2240(TmcStepperDriver):
         pin_ok = True
 
         # turn on all pins
-        tmc_gpio.gpio_output(self.tmc_mc._pin_dir, Gpio.HIGH)
-        tmc_gpio.gpio_output(self.tmc_mc._pin_step, Gpio.HIGH)
-        tmc_gpio.gpio_output(self.tmc_ec._pin_en, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_mc.pin_dir, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_mc.pin_step, Gpio.HIGH)
+        tmc_gpio.gpio_output(self.tmc_ec.pin_en, Gpio.HIGH)
 
         # check that the selected pin is on
         ioin = self.read_ioin()
@@ -556,9 +556,9 @@ class Tmc2240(TmcStepperDriver):
         """
         # test each pin on their own
 
-        pin_dir_ok = self.test_pin(self.tmc_mc._pin_dir, 1)
+        pin_dir_ok = self.test_pin(self.tmc_mc.pin_dir, 1)
         pin_step_ok = self.test_pin(self.tmc_mc.pin_step, 0)
-        pin_en_ok = self.test_pin(self.tmc_ec._pin_en, 4)
+        pin_en_ok = self.test_pin(self.tmc_ec.pin_en, 4)
 
         self.set_motor_enabled(False)
 
@@ -574,7 +574,7 @@ class Tmc2240(TmcStepperDriver):
         """test method"""
         self.tmc_logger.log("---")
         self.tmc_logger.log("TEST COM")
-        result = self.tmc_com.test_com(ioin.addr)
+        result = self.tmc_com.test_com(self.ioin.addr)
 
         snd = result[0]
         rtn = result[1]

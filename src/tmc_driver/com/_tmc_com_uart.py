@@ -334,4 +334,4 @@ class TmcComUart(TmcCom):
 
         self.tmc_logger.log("---")
 
-        return
+        return status
