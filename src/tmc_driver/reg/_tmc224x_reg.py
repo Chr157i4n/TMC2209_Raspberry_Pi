@@ -93,6 +93,18 @@ class Ioin(TmcReg):
         super().__init__(0x4, "IOIN", tmc_com, reg_map)
 
 
+class GlobalScaler(TmcReg):
+    """GLOBAL_SCALER register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["global_scaler",       0, 0xFF, int]
+        ]
+        super().__init__(0xB, "GLOBAL_SCALER", tmc_com, reg_map)
+
+
 class IHoldIRun(TmcReg):
     """IHOLD_IRUN register class"""
 

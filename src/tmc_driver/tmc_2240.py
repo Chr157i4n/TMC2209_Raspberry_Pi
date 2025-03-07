@@ -97,6 +97,7 @@ class Tmc2240(TmcStepperDriver):
                 GStat,
                 IfCnt,
                 Ioin,
+                GlobalScaler,
                 IHoldIRun,
                 TPowerDown,
                 TStep,
@@ -280,6 +281,17 @@ class Tmc2240(TmcStepperDriver):
 
 
 
+    def set_global_scaler(self, scaler:int):
+        """sets the global scaler
+
+        Args:
+            scaler (int): global scaler value
+        """
+        self.gscaler.scaler = scaler
+        self.gscaler.write_check()
+
+
+
     def set_current(self, run_current:int, hold_current_multiplier:float = 0.5,
                     hold_current_delay:int = 10, run_current_delay:int = 0):
         """sets the current flow for the motor.
@@ -291,31 +303,31 @@ class Tmc2240(TmcStepperDriver):
         """
         # TODO: change algorithm for TMC2240
         cs_irun = 0
-        rsense = 0.11
+        rdson = 0.23    # 230 mOhm
         vfs = 0
 
-        vfs = 0.325
-        cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
+        # vfs = 0.325
+        # cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
 
-        cs_irun = min(cs_irun, 31)
-        cs_irun = max(cs_irun, 0)
+        # cs_irun = min(cs_irun, 31)
+        # cs_irun = max(cs_irun, 0)
 
-        cs_ihold = hold_current_multiplier * cs_irun
+        # cs_ihold = hold_current_multiplier * cs_irun
 
-        cs_irun = round(cs_irun)
-        cs_ihold = round(cs_ihold)
-        hold_current_delay = round(hold_current_delay)
+        # cs_irun = round(cs_irun)
+        # cs_ihold = round(cs_ihold)
+        # hold_current_delay = round(hold_current_delay)
 
-        self.tmc_logger.log(f"CS_IRun: {cs_irun}", Loglevel.INFO)
-        self.tmc_logger.log(f"CS_IHold: {cs_ihold}", Loglevel.INFO)
-        self.tmc_logger.log(f"IHold_Delay: {hold_current_delay}", Loglevel.INFO)
-        self.tmc_logger.log(f"IRun_Delay: {run_current_delay}", Loglevel.INFO)
+        # self.tmc_logger.log(f"CS_IRun: {cs_irun}", Loglevel.INFO)
+        # self.tmc_logger.log(f"CS_IHold: {cs_ihold}", Loglevel.INFO)
+        # self.tmc_logger.log(f"IHold_Delay: {hold_current_delay}", Loglevel.INFO)
+        # self.tmc_logger.log(f"IRun_Delay: {run_current_delay}", Loglevel.INFO)
 
-        run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
-        self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
-                            Loglevel.INFO)
+        # run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
+        # self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
+        #                     Loglevel.INFO)
 
-        self.set_irun_ihold(cs_ihold, cs_irun, hold_current_delay, run_current_delay)
+        # self.set_irun_ihold(cs_ihold, cs_irun, hold_current_delay, run_current_delay)
 
 
 
