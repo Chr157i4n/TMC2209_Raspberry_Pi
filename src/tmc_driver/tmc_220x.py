@@ -112,8 +112,13 @@ class Tmc220x(TmcStepperDriver):
                 register = register_class(self.tmc_com)
                 name = register.name.lower()
                 self.tmc_registers[name] = register
-                getter = lambda self, name=name: self.tmc_registers[name]
-                setattr(self.__class__, name, property(getter))
+
+                def create_getter(name):
+                    def getter(self):
+                        return self.tmc_registers[name]
+                    return getter
+
+                setattr(self.__class__, name, property(create_getter(name)))
 
 
         if tmc_com is not None:

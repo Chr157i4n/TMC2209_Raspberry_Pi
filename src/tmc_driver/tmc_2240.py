@@ -112,8 +112,13 @@ class Tmc2240(TmcStepperDriver):
                 register = register_class(self.tmc_com)
                 name = register.name.lower()
                 self.tmc_registers[name] = register
-                getter = lambda self, name=name: self.tmc_registers[name]
-                setattr(self.__class__, name, property(getter))
+
+                def create_getter(name):
+                    def getter(self):
+                        return self.tmc_registers[name]
+                    return getter
+
+                setattr(self.__class__, name, property(create_getter(name)))
 
 
         if tmc_com is not None:
@@ -254,7 +259,7 @@ class Tmc2240(TmcStepperDriver):
 
 
 
-    def set_irun_ihold(self, ihold:int, irun:int, ihold_delay:int):
+    def set_irun_ihold(self, ihold:int, irun:int, ihold_delay:int, irun_delay:int):
         """sets the current scale (CS) for Running and Holding
         and the delay, when to be switched to Holding current
 
@@ -268,58 +273,49 @@ class Tmc2240(TmcStepperDriver):
 
         self.ihold_irun.ihold = ihold
         self.ihold_irun.irun = irun
-        self.ihold_irun.ihold_delay = ihold_delay
+        self.ihold_irun.iholddelay = ihold_delay
+        self.ihold_irun.irundelay = irun_delay
 
         self.ihold_irun.write_check()
 
 
 
     def set_current(self, run_current:int, hold_current_multiplier:float = 0.5,
-                    hold_current_delay:int = 10, pdn_disable:bool = True):
+                    hold_current_delay:int = 10, run_current_delay:int = 0):
         """sets the current flow for the motor.
 
         Args:
         run_current (int): current during movement in mA
         hold_current_multiplier (int):current multiplier during standstill (Default value = 0.5)
         hold_current_delay (int): delay after standstill after which cur drops (Default value = 10)
-        pdn_disable (bool): should be disabled if UART is used (Default value = True)
-
         """
         # TODO: change algorithm for TMC2240
-        # cs_irun = 0
-        # rsense = 0.11
-        # vfs = 0
+        cs_irun = 0
+        rsense = 0.11
+        vfs = 0
 
-        # vfs = 0.325
-        # cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
+        vfs = 0.325
+        cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
 
-        # # If Current Scale is too low, turn on high sensitivity VSsense and calculate again
-        # if cs_irun < 16:
-        #     self.tmc_logger.log("CS too low; switching to VSense True", Loglevel.INFO)
-        #     vfs = 0.180
-        #     cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
-        # else: # If CS >= 16, turn off high_senser
-        #     self.tmc_logger.log("CS in range; using VSense False", Loglevel.INFO)
+        cs_irun = min(cs_irun, 31)
+        cs_irun = max(cs_irun, 0)
 
-        # cs_irun = min(cs_irun, 31)
-        # cs_irun = max(cs_irun, 0)
+        cs_ihold = hold_current_multiplier * cs_irun
 
-        # cs_ihold = hold_current_multiplier * cs_irun
+        cs_irun = round(cs_irun)
+        cs_ihold = round(cs_ihold)
+        hold_current_delay = round(hold_current_delay)
 
-        # cs_irun = round(cs_irun)
-        # cs_ihold = round(cs_ihold)
-        # hold_current_delay = round(hold_current_delay)
+        self.tmc_logger.log(f"CS_IRun: {cs_irun}", Loglevel.INFO)
+        self.tmc_logger.log(f"CS_IHold: {cs_ihold}", Loglevel.INFO)
+        self.tmc_logger.log(f"IHold_Delay: {hold_current_delay}", Loglevel.INFO)
+        self.tmc_logger.log(f"IRun_Delay: {run_current_delay}", Loglevel.INFO)
 
-        # self.tmc_logger.log(f"cs_irun: {cs_irun}", Loglevel.INFO)
-        # self.tmc_logger.log(f"CS_IHold: {cs_ihold}", Loglevel.INFO)
-        # self.tmc_logger.log(f"Delay: {hold_current_delay}", Loglevel.INFO)
+        run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
+        self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
+                            Loglevel.INFO)
 
-        # # return (float)(CS+1)/32.0 * (vsense() ? 0.180 : 0.325)/(rsense+0.02) / 1.41421 * 1000;
-        # run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
-        # self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
-        #                     Loglevel.INFO)
-
-        # self.set_irun_ihold(cs_ihold, cs_irun, hold_current_delay)
+        self.set_irun_ihold(cs_ihold, cs_irun, hold_current_delay, run_current_delay)
 
 
 
