@@ -97,6 +97,7 @@ class Tmc2240(TmcStepperDriver):
                 GStat,
                 IfCnt,
                 Ioin,
+                DrvConf,
                 GlobalScaler,
                 IHoldIRun,
                 TPowerDown,
@@ -260,7 +261,7 @@ class Tmc2240(TmcStepperDriver):
 
 
 
-    def set_irun_ihold(self, ihold:int, irun:int, ihold_delay:int, irun_delay:int):
+    def _set_irun_ihold(self, ihold:int, irun:int, ihold_delay:int, irun_delay:int):
         """sets the current scale (CS) for Running and Holding
         and the delay, when to be switched to Holding current
 
@@ -281,14 +282,32 @@ class Tmc2240(TmcStepperDriver):
 
 
 
-    def set_global_scaler(self, scaler:int):
+    def _set_global_scaler(self, scaler:int):
         """sets the global scaler
 
         Args:
             scaler (int): global scaler value
         """
-        self.gscaler.scaler = scaler
-        self.gscaler.write_check()
+        self.global_scaler.global_scaler = scaler
+        self.global_scaler.write_check()
+
+
+
+    def _set_current_range(self, current_range:int):
+        """sets the current range
+
+        0x0 = 1 A
+        0x1 = 2 A
+        0x2 = 3 A
+        0x3 = 3 A (maximum of driver)
+
+        Args:
+            current_range (int): current range in A
+        """
+        if current_range > 0:
+            current_range -= 1
+        self.drv_conf.current_range = current_range
+        self.drv_conf.modify("current_range", current_range)
 
 
 
@@ -301,33 +320,54 @@ class Tmc2240(TmcStepperDriver):
         hold_current_multiplier (int):current multiplier during standstill (Default value = 0.5)
         hold_current_delay (int): delay after standstill after which cur drops (Default value = 10)
         """
-        # TODO: change algorithm for TMC2240
-        cs_irun = 0
-        rdson = 0.23    # 230 mOhm
-        vfs = 0
+        self.tmc_logger.log(F"Desired current: {run_current} mA", Loglevel.DEBUG)
 
-        # vfs = 0.325
-        # cs_irun = 32.0*1.41421*run_current/1000.0*(rsense+0.02)/vfs - 1
+        # rdson = 0.23    # 230 mOhm
 
-        # cs_irun = min(cs_irun, 31)
-        # cs_irun = max(cs_irun, 0)
+        current_range_a = math.ceil(run_current/1000)
 
-        # cs_ihold = hold_current_multiplier * cs_irun
+        current_range_a = min(current_range_a, 3)
+        current_range_a = max(current_range_a, 0)
 
-        # cs_irun = round(cs_irun)
-        # cs_ihold = round(cs_ihold)
-        # hold_current_delay = round(hold_current_delay)
+        current_range_ma = current_range_a * 1000
 
-        # self.tmc_logger.log(f"CS_IRun: {cs_irun}", Loglevel.INFO)
-        # self.tmc_logger.log(f"CS_IHold: {cs_ihold}", Loglevel.INFO)
-        # self.tmc_logger.log(f"IHold_Delay: {hold_current_delay}", Loglevel.INFO)
-        # self.tmc_logger.log(f"IRun_Delay: {run_current_delay}", Loglevel.INFO)
+        self.tmc_logger.log(F"current_range: {current_range_a} A | {current_range_ma} mA", Loglevel.DEBUG)
+        self._set_current_range(current_range_a)
 
-        # run_current_actual = (cs_irun+1)/32.0 * (vfs)/(rsense+0.02) / 1.41421 * 1000
-        # self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
-        #                     Loglevel.INFO)
+        # 256 == 0  -> max current
+        global_scaler = round(run_current / current_range_ma * 256)
 
-        # self.set_irun_ihold(cs_ihold, cs_irun, hold_current_delay, run_current_delay)
+        global_scaler = min(global_scaler, 256)
+        global_scaler = max(global_scaler, 0)
+
+        self.tmc_logger.log(F"global_scaler: {global_scaler}", Loglevel.DEBUG)
+        self._set_global_scaler(global_scaler)
+
+        ct_current_ma = round(current_range_ma * global_scaler / 256)
+        self.tmc_logger.log(F"Calculated theoretical current after gscaler: {ct_current_ma} mA", Loglevel.DEBUG)
+
+
+        cs_irun = round(run_current / ct_current_ma * 31)
+
+        cs_irun = min(cs_irun, 31)
+        cs_irun = max(cs_irun, 0)
+
+        cs_ihold = hold_current_multiplier * cs_irun
+
+        cs_irun = round(cs_irun)
+        cs_ihold = round(cs_ihold)
+        hold_current_delay = round(hold_current_delay)
+        run_current_delay = round(run_current_delay)
+
+        self.tmc_logger.log(f"CS_IRun: {cs_irun}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"CS_IHold: {cs_ihold}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"IHold_Delay: {hold_current_delay}", Loglevel.DEBUG)
+        self.tmc_logger.log(f"IRun_Delay: {run_current_delay}", Loglevel.DEBUG)
+
+        self._set_irun_ihold(cs_ihold, cs_irun, hold_current_delay, run_current_delay)
+
+        ct_current_ma = round(ct_current_ma * cs_irun / 31)
+        self.tmc_logger.log(F"Calculated theoretical final current: {ct_current_ma} mA", Loglevel.INFO)
 
 
 

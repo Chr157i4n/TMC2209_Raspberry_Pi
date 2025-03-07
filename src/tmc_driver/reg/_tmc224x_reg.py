@@ -93,6 +93,19 @@ class Ioin(TmcReg):
         super().__init__(0x4, "IOIN", tmc_com, reg_map)
 
 
+class DrvConf(TmcReg):
+    """DRV_CONF register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["slope_control",       4, 0x3, int],
+            ["current_range",       0, 0x3, int],
+        ]
+        super().__init__(0x6, "DRV_CONF", tmc_com, reg_map)
+
+
 class GlobalScaler(TmcReg):
     """GLOBAL_SCALER register class"""
 

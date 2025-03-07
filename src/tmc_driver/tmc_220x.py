@@ -345,7 +345,7 @@ class Tmc220x(TmcStepperDriver):
 
 
 
-    def set_irun_ihold(self, ihold:int, irun:int, ihold_delay:int):
+    def _set_irun_ihold(self, ihold:int, irun:int, ihold_delay:int):
         """sets the current scale (CS) for Running and Holding
         and the delay, when to be switched to Holding current
 
@@ -365,7 +365,7 @@ class Tmc220x(TmcStepperDriver):
 
 
 
-    def set_pdn_disable(self,pdn_disable:bool):
+    def _set_pdn_disable(self,pdn_disable:bool):
         """disables PDN on the UART pin
         False: PDN_UART controls standstill current reduction
         True: PDN_UART input function disabled. Set this bit,
@@ -426,9 +426,9 @@ class Tmc220x(TmcStepperDriver):
         self.tmc_logger.log(f"actual current: {round(run_current_actual)} mA",
                             Loglevel.INFO)
 
-        self.set_irun_ihold(cs_ihold, cs_irun, hold_current_delay)
+        self._set_irun_ihold(cs_ihold, cs_irun, hold_current_delay)
 
-        self.set_pdn_disable(pdn_disable)
+        self._set_pdn_disable(pdn_disable)
 
 
 
