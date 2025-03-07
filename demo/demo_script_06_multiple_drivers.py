@@ -1,7 +1,6 @@
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
 #pylint: disable=unused-import
-#pylint: disable=duplicate-code
 #pylint: disable=broad-exception-raised
 #pylint: disable=no-else-raise
 """

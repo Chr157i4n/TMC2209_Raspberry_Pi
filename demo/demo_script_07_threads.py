@@ -1,7 +1,3 @@
-#pylint: disable=wildcard-import
-#pylint: disable=unused-wildcard-import
-#pylint: disable=unused-import
-#pylint: disable=duplicate-code
 """
 test file for testing movement of motors with threads
 """

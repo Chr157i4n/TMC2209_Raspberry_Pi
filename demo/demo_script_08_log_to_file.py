@@ -1,7 +1,3 @@
-#pylint: disable=wildcard-import
-#pylint: disable=unused-wildcard-import
-#pylint: disable=unused-import
-#pylint: disable=duplicate-code
 """
 test file for testing writing the log messages to a file
 """

@@ -44,9 +44,18 @@ jobs:
         pip install git+https://github.com/Chr157i4n/Mock.GPIO
         pip install mock
         pip install pyserial
+        pip install spidev
     - name: Analysing the code with pylint
       run: |
-        pylint $(find -wholename './src/*.py') --disable=C0103 --disable=W0511 --disable=W0012 --extension-pkg-whitelist=RPi --max-line-length=160
+        pylint $(find -wholename './src/*.py') \
+        --disable=C0103 \
+        --disable=W0511 \
+        --disable=W0012 \
+        --disable=R0801 \
+        --extension-pkg-whitelist=RPi \
+        --extension-pkg-whitelist=RPi.GPIO \
+        --extension-pkg-whitelist=spidev \
+        --max-line-length=160
 
 
   unittest:
@@ -72,6 +81,7 @@ jobs:
         pip install RPi.GPIO
         pip install git+https://github.com/Chr157i4n/Mock.GPIO
         pip install pyserial
+        pip install spidev
     - name: Run unittests
       run: |
         python -m unittest

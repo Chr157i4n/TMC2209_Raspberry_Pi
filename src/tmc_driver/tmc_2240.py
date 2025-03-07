@@ -555,9 +555,10 @@ class Tmc2240(TmcStepperDriver):
         and checks the IOIN Register of the TMC meanwhile
         """
         # test each pin on their own
-        pin_dir_ok = self.test_pin(self.tmc_mc._pin_dir, tmc_ioin_reg.dir_bp)
-        pin_step_ok = self.test_pin(self.tmc_mc.pin_step, tmc_ioin_reg.step_bp)
-        pin_en_ok = self.test_pin(self.tmc_ec._pin_en, tmc_ioin_reg.enn_bp)
+
+        pin_dir_ok = self.test_pin(self.tmc_mc._pin_dir, 1)
+        pin_step_ok = self.test_pin(self.tmc_mc.pin_step, 0)
+        pin_en_ok = self.test_pin(self.tmc_ec._pin_en, 4)
 
         self.set_motor_enabled(False)
 
