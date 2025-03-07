@@ -6,7 +6,7 @@ Register module
 """
 
 from ._tmc_reg import *
-
+import math
 
 
 class GConf(TmcReg):
@@ -60,7 +60,7 @@ class IfCnt(TmcReg):
         reg_map = [
             ["ifcnt",               0, 0xFF, int]
         ]
-        super().__init(0x2, "IFCNT", tmc_com, reg_map)
+        super().__init__(0x2, "IFCNT", tmc_com, reg_map)
 
 
 class Ioin(TmcReg):
@@ -88,7 +88,7 @@ class Ioin(TmcReg):
             ["dir",                 1,  0x1, bool],
             ["step",                0,  0x1, bool]
         ]
-        super().__init(0x4, "IOIN", tmc_com, reg_map)
+        super().__init__(0x4, "IOIN", tmc_com, reg_map)
 
 
 class IHoldIRun(TmcReg):
@@ -103,7 +103,31 @@ class IHoldIRun(TmcReg):
             ["irun",                8,  0x1F, int],
             ["ihold",               0,  0x1F, int]
         ]
-        super().__init(0x10, "IHOLD_IRUN", tmc_com, reg_map)
+        super().__init__(0x10, "IHOLD_IRUN", tmc_com, reg_map)
+
+
+class TPowerDown(TmcReg):
+    """TPOWERDOWN register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["tpowerdown",          0, 0xFF, int]
+        ]
+        super().__init__(0x11, "TPOWERDOWN", tmc_com, reg_map)
+
+
+class TStep(TmcReg):
+    """TSTEP register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["tstep",               0, 0xFFFFF, int]
+        ]
+        super().__init__(0x12, "TSTEP", tmc_com, reg_map)
 
 
 class ADCVSupplyAIN(TmcReg):
@@ -116,7 +140,7 @@ class ADCVSupplyAIN(TmcReg):
             ["adc_ain",             16, 0xFFFF, int],
             ["adc_vsupply",         0,  0xFFFF, int]
         ]
-        super().__init(0x50, "ADCV_SUPPLY_AIN", tmc_com, reg_map)
+        super().__init__(0x50, "ADCV_SUPPLY_AIN", tmc_com, reg_map)
 
 
 class ADCTemp(TmcReg):
@@ -128,7 +152,7 @@ class ADCTemp(TmcReg):
         reg_map = [
             ["adc_temp",            0,  0xFFFF, int]
         ]
-        super().__init(0x51, "ADC_TEMP", tmc_com, reg_map)
+        super().__init__(0x51, "ADC_TEMP", tmc_com, reg_map)
 
 
 class ChopConf(TmcReg):
@@ -157,6 +181,26 @@ class ChopConf(TmcReg):
         super().__init__(0x6C, "CHOPCONF", tmc_com, reg_map)
 
 
+    def convert_mres_to_reg(self, mres: int):
+        """converts the µstep resolution to the corresponding register value
+
+        Args:
+            mres (int): µstep resolution
+        """
+        mres_bit = int(math.log(mres, 2))
+        mres_bit = 8 - mres_bit
+        self.mres = mres_bit
+
+
+    def convert_reg_to_mres(self) -> int:
+        """converts the register value to the corresponding µstep resolution
+
+        Returns:
+            int: µstep resolution
+        """
+        return int(math.pow(2, 8 - self.mres))
+
+
 class DrvStatus(TmcReg):
     """DRVSTATUS register class"""
 
@@ -179,4 +223,4 @@ class DrvStatus(TmcReg):
             ["s2vsa",               12, 0x1, bool],
             ["sg_result",           0,  0x3FF, int]
         ]
-        super().__init(0x6F, "DRVSTATUS", tmc_com, reg_map)
+        super().__init__(0x6F, "DRVSTATUS", tmc_com, reg_map)
