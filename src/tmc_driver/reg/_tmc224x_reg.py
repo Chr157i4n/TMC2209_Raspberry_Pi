@@ -142,6 +142,16 @@ class ADCVSupplyAIN(TmcReg):
         ]
         super().__init__(0x50, "ADCV_SUPPLY_AIN", tmc_com, reg_map)
 
+    @property
+    def vsupply(self) -> float:
+        """return voltage in V"""
+        return round(self.adc_vsupply * 9.732/1000, 2)
+
+    @property
+    def ain(self) -> float:
+        """return current in A"""
+        return round(self.adc_ain * 305.2/1000/1000, 2)
+
 
 class ADCTemp(TmcReg):
     """ADC_TEMP register class"""
@@ -153,6 +163,11 @@ class ADCTemp(TmcReg):
             ["adc_temp",            0,  0xFFFF, int]
         ]
         super().__init__(0x51, "ADC_TEMP", tmc_com, reg_map)
+
+    @property
+    def temperature(self) -> float:
+        """return temperature in °C"""
+        return round((self.adc_temp - 2038) / 7.7, 1)
 
 
 class ChopConf(TmcReg):

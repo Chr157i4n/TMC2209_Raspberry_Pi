@@ -499,6 +499,29 @@ class Tmc2240(TmcStepperDriver):
 
 
 
+    def get_vsupply(self) -> int:
+        """reads the ADC_VSUPPLY_AIN register
+
+        Returns:
+            int: ADC_VSUPPLY_AIN register value
+        """
+        self.adcv_supply_ain.read()
+        return self.adcv_supply_ain.vsupply
+
+
+
+    def get_temperature(self) -> float:
+        """reads the ADC_TEMP register and returns the temperature
+
+        Returns:
+            float: temperature in °C
+        """
+        self.adc_temp.read()
+        return self.adc_temp.temperature
+
+
+
+
     def test_pin(self, pin, ioin_reg_bp):
         """tests one pin
 
