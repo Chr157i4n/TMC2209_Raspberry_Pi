@@ -110,18 +110,17 @@ print(f"VSupply:\t{tmc.get_vsupply()} V")
 #-----------------------------------------------------------------------
 # move the motor 1 revolution
 #-----------------------------------------------------------------------
-tmc.run_to_position_steps(400)                             #move to position 400
-tmc.run_to_position_steps(0)                               #move to position 0
+tmc.run_to_position_fullsteps(200)                              #move to position 200 (fullsteps)
+tmc.run_to_position_fullsteps(0)                                #move to position 0
 
+tmc.run_to_position_fullsteps(200, MovementAbsRel.RELATIVE)     #move 200 fullsteps forward
+tmc.run_to_position_fullsteps(-200, MovementAbsRel.RELATIVE)    #move 200 fullsteps backward
 
-tmc.run_to_position_steps(400, MovementAbsRel.RELATIVE)    #move 400 steps forward
-tmc.run_to_position_steps(-400, MovementAbsRel.RELATIVE)   #move 400 steps backward
+tmc.run_to_position_steps(400)                                  #move to position 400 (µsteps)
+tmc.run_to_position_steps(0)                                    #move to position 0
 
-
-tmc.run_to_position_steps(400)                             #move to position 400
-tmc.run_to_position_steps(0)                               #move to position 0
-
-
+tmc.run_to_position_revolutions(1)                              #move 1 revolution forward
+tmc.run_to_position_revolutions(0)                              #move 1 revolution backward
 
 
 
