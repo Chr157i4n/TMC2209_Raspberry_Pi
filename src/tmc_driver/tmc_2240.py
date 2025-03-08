@@ -16,13 +16,13 @@ this module has two different functions:
 """
 
 import logging
-import threading
 import time
-import typing
+import types
 from ._tmc_stepperdriver import *
 from .com._tmc_com import TmcCom
 from .com._tmc_com_uart import TmcComUart
 from .com._tmc_com_spi import TmcComSpi
+from ._tmc_gpio_board import GpioPUD
 from .motion_control._tmc_mc_step_reg import TmcMotionControlStepReg
 from .enable_control._tmc_ec_toff import TmcEnableControlToff
 from .motion_control._tmc_mc_vactual import TmcMotionControlVActual
@@ -42,7 +42,11 @@ class Tmc2240(TmcStepperDriver):
     2. move the motor via STEP/DIR pins
     """
 
-    tmc_com:TmcComUart = None
+    tmc_com:TmcComSpi = None
+
+    _pin_stallguard:int = None
+    _sg_callback:types.FunctionType = None
+    _sg_threshold:int = 100             # threshold for stallguard
 
 
 # Constructor/Destructor
@@ -105,7 +109,11 @@ class Tmc2240(TmcStepperDriver):
                 ADCVSupplyAIN,
                 ADCTemp,
                 ChopConf,
-                DrvStatus
+                DrvStatus,
+                TCoolThrs,
+                SgThrs,
+                SgResult,
+                SgInd
             }
 
             self.tmc_registers = {}
@@ -544,6 +552,140 @@ class Tmc2240(TmcStepperDriver):
         step = (4*self.tmc_mc.mres)-step-1
         step = round(step)
         return step+offset
+
+
+
+    def set_stallguard_callback(self, pin_stallguard, threshold, callback,
+                                min_speed = 100):
+        """set a function to call back, when the driver detects a stall
+        via stallguard
+        high value on the diag pin can also mean a driver error
+
+        Args:
+            pin_stallguard (int): pin needs to be connected to DIAG
+            threshold (int): value for SGTHRS
+            callback (func): will be called on StallGuard trigger
+            min_speed (int): min speed [steps/s] for StallGuard (Default value = 100)
+        """
+        self.tmc_logger.log(f"setup stallguard callback on GPIO {pin_stallguard}", Loglevel.INFO)
+        self.tmc_logger.log(f"StallGuard Threshold: {threshold} | minimum Speed: {min_speed}", Loglevel.INFO)
+
+        self.set_stallguard_threshold(threshold)
+        self.set_coolstep_threshold(tmc_math.steps_to_tstep(min_speed, self.get_microstepping_resolution()))
+        self._sg_callback = callback
+        self._pin_stallguard = pin_stallguard
+
+        tmc_gpio.gpio_setup(self._pin_stallguard, GpioMode.IN, pull_up_down=GpioPUD.PUD_DOWN)
+        # first remove existing events
+        tmc_gpio.gpio_remove_event_detect(self._pin_stallguard)
+        tmc_gpio.gpio_add_event_detect(self._pin_stallguard, self.stallguard_callback)
+
+
+
+    def stallguard_callback(self, gpio_pin):
+        """the callback function for StallGuard.
+        only checks whether the duration of the current movement is longer than
+        _sg_delay and then calls the actual callback
+
+        Args:
+            gpio_pin (int): pin number of the interrupt pin
+        """
+        del gpio_pin
+        if self._sg_callback is None:
+            self.tmc_logger.log("StallGuard callback is None", Loglevel.DEBUG)
+            return
+        self._sg_callback()
+
+
+
+    def set_coolstep_threshold(self, threshold):
+        """This  is  the  lower  threshold  velocity  for  switching
+        on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
+
+        Args:
+            threshold (int): threshold velocity for coolstep
+        """
+        self.tcoolthrs.modify("tcoolthrs", threshold)
+
+
+
+    def get_stallguard_result(self):
+        """return the current stallguard result
+        its will be calculated with every fullstep
+        higher values means a lower motor load
+
+        Returns:
+            sg_result (int): StallGuard Result
+        """
+        self.sg_result.read()
+        return self.sg_result.sg_result
+
+
+
+    def set_stallguard_threshold(self, threshold):
+        """sets the register bit "SGTHRS" to to a given value
+        this is needed for the stallguard interrupt callback
+        SG_RESULT becomes compared to the double of this threshold.
+        SG_RESULT ≤ SGTHRS*2
+
+        Args:
+            threshold (int): value for SGTHRS
+        """
+        self.sg_thrs.modify("sg_thrs", threshold)
+
+
+
+    def test_stallguard_threshold(self, steps):
+        """test method for tuning stallguard threshold
+
+        run this function with your motor settings and your motor load
+        the function will determine the minimum stallguard results for each movement phase
+
+        Args:
+            steps (int):
+        """
+
+        self.tmc_logger.log("---", Loglevel.INFO)
+        self.tmc_logger.log("test_stallguard_threshold", Loglevel.INFO)
+
+        self.set_spreadcycle(False)
+
+        min_stallguard_result_accel = 512
+        min_stallguard_result_maxspeed = 512
+        min_stallguard_result_decel = 512
+
+        self.tmc_mc.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
+
+
+        while self.tmc_mc.movement_phase != MovementPhase.STANDSTILL:
+            self.drvstatus.read()
+            stallguard_result = self.drvstatus.sg_result
+            stallguard_triggered = self.drvstatus.stallguard
+            # stallguard_result = self.get_stallguard_result()
+
+            self.tmc_logger.log(f"{self.tmc_mc.movement_phase} | {stallguard_result} | {stallguard_triggered}",
+                        Loglevel.INFO)
+
+            if (self.tmc_mc.movement_phase == MovementPhase.ACCELERATING and
+                stallguard_result < min_stallguard_result_accel):
+                min_stallguard_result_accel = stallguard_result
+            if (self.tmc_mc.movement_phase == MovementPhase.MAXSPEED and
+                stallguard_result < min_stallguard_result_maxspeed):
+                min_stallguard_result_maxspeed = stallguard_result
+            if (self.tmc_mc.movement_phase == MovementPhase.DECELERATING and
+                stallguard_result < min_stallguard_result_decel):
+                min_stallguard_result_decel = stallguard_result
+
+        self.tmc_mc.wait_for_movement_finished_threaded()
+
+        self.tmc_logger.log("---", Loglevel.INFO)
+        self.tmc_logger.log(f"min StallGuard result during accel: {min_stallguard_result_accel}",
+                            Loglevel.INFO)
+        self.tmc_logger.log(f"min StallGuard result during maxspeed: {min_stallguard_result_maxspeed}",
+        Loglevel.INFO)
+        self.tmc_logger.log(f"min StallGuard result during decel: {min_stallguard_result_decel}",
+                            Loglevel.INFO)
+        self.tmc_logger.log("---", Loglevel.INFO)
 
 
 

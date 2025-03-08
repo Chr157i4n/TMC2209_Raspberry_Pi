@@ -304,9 +304,9 @@ class Tmc2209(Tmc220x):
 
         self.set_spreadcycle(0)
 
-        min_stallguard_result_accel = 511
-        min_stallguard_result_maxspeed = 511
-        min_stallguard_result_decel = 511
+        min_stallguard_result_accel = 512
+        min_stallguard_result_maxspeed = 512
+        min_stallguard_result_decel = 512
 
         self.tmc_mc.run_to_position_steps_threaded(steps, MovementAbsRel.RELATIVE)
 

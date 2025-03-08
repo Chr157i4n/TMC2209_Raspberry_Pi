@@ -266,3 +266,55 @@ class DrvStatus(TmcReg):
             ["sg_result",           0,  0x3FF, int, None, ""]
         ]
         super().__init__(0x6F, "DRVSTATUS", tmc_com, reg_map)
+
+
+class TCoolThrs(TmcReg):
+    """TCOOLTHRS register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["tcoolthrs",           0,  0xFFFFF, int, None, ""]
+        ]
+        super().__init__(0x14, "TCOOLTHRS", tmc_com, reg_map)
+
+
+class SgThrs(TmcReg):
+    """SGTHRS register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["sg_angle_offset",      9,  0x1, bool, None, ""],
+            ["sg4_filt_en",          8,  0x1, bool, None, ""],
+            ["sg_thrs",              0,  0xFFF, int, None, ""]
+        ]
+        super().__init__(0x74, "SG_THRS", tmc_com, reg_map)
+
+
+class SgResult(TmcReg):
+    """SGRESULT register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["sg_result",            0,  0xFFFFF, int, None, ""]
+        ]
+        super().__init__(0x75, "SG_RESULT", tmc_com, reg_map)
+
+
+class SgInd(TmcReg):
+    """SGIND register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["sg_ind_2",            16, 0xFF, int, None, ""],
+            ["sg_ind_1",            8, 0xFF, int, None, ""],
+            ["sg_ind_0",            0,  0xFF, int, None, ""],
+        ]
+        super().__init__(0x76, "SG_IND", tmc_com, reg_map)
