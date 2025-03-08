@@ -1,10 +1,5 @@
-#pylint: disable=missing-function-docstring
-#pylint: disable=missing-class-docstring
-#pylint: disable=wildcard-import
-#pylint: disable=pointless-statement
-#pylint: disable=unused-wildcard-import
 """
-test for _tmc_uart.py
+test for _tmc_com_uart.py
 """
 
 import unittest
@@ -13,8 +8,8 @@ from src.tmc_driver._tmc_logger import *
 from src.tmc_driver.com._tmc_com_uart import *
 
 
-class TestTMCUart(unittest.TestCase):
-    """TestTMCUart"""
+class TestTmcComUart(unittest.TestCase):
+    """TestTmcComUart"""
 
     def setUp(self):
         """setUp"""

@@ -1,5 +1,3 @@
-#pylint: disable=missing-function-docstring
-#pylint: disable=missing-class-docstring
 """
 test for _tmc_math.py
 """
