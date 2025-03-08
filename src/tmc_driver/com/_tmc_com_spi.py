@@ -3,9 +3,13 @@
 #pylint: disable=unused-import
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
+#pylint: disable=too-few-public-methods
 """
 TmcComSpi stepper driver spi module
 """
+
+import sys
+from ._tmc_com import *
 
 class MockSpiDev:
     """MockSpiDev"""
@@ -13,16 +17,10 @@ class MockSpiDev:
     def SpiDev(self):
         """SpiDev"""
 
-
-import sys
 try:
     import spidev
 except ImportError:
     spidev = MockSpiDev()
-from ._tmc_com import *
-
-
-
 
 
 

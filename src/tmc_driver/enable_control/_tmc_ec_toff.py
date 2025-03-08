@@ -4,7 +4,7 @@ Enable Control base module
 
 from ._tmc_ec import TmcEnableControl
 from ..com._tmc_com import TmcCom
-from .._tmc_logger import TmcLogger, Loglevel
+from .._tmc_logger import Loglevel
 
 
 class TmcEnableControlToff(TmcEnableControl):
