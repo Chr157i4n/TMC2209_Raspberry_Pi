@@ -10,7 +10,7 @@ import time
 import math
 import threading
 from ._tmc_mc import TmcMotionControl, MovementAbsRel, MovementPhase, Direction, StopMode
-from .._tmc_logger import Loglevel
+from .._tmc_logger import TmcLogger, Loglevel
 from .._tmc_gpio_board import tmc_gpio, Gpio, GpioMode
 from .. import _tmc_math as tmc_math
 
@@ -122,15 +122,14 @@ class TmcMotionControlStepDir(TmcMotionControl):
         self._pin_dir = pin_dir
 
 
-    def init(self):
+    def init(self, tmc_logger:TmcLogger):
         """init: called by the Tmc class"""
+        super().init(tmc_logger)
         self._tmc_logger.log(f"STEP Pin: {self._pin_step}", Loglevel.DEBUG)
         tmc_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
 
         self._tmc_logger.log(f"DIR Pin: {self._pin_dir}", Loglevel.DEBUG)
         tmc_gpio.gpio_setup(self._pin_dir, GpioMode.OUT, initial=self._direction.value)
-
-        super().init()
 
 
     def __del__(self):

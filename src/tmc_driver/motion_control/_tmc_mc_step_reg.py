@@ -6,7 +6,7 @@ STEP/REG Motion Control module
 from ._tmc_mc import Direction
 from ._tmc_mc_step_dir import TmcMotionControlStepDir
 from ..com._tmc_com import TmcCom
-from .._tmc_logger import Loglevel
+from .._tmc_logger import TmcLogger, Loglevel
 from .._tmc_gpio_board import tmc_gpio, Gpio, GpioMode
 
 
@@ -33,8 +33,9 @@ class TmcMotionControlStepReg(TmcMotionControlStepDir):
         del self._pin_dir
 
 
-    def init(self):
+    def init(self, tmc_logger:TmcLogger):
         """init: called by the Tmc class"""
+        super().init(tmc_logger)
         self._tmc_logger.log(f"STEP Pin: {self._pin_step}", Loglevel.DEBUG)
         tmc_gpio.gpio_setup(self._pin_step, GpioMode.OUT, initial=Gpio.LOW)
 

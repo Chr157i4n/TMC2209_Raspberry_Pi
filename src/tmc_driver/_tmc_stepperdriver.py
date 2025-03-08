@@ -78,13 +78,11 @@ class TmcStepperDriver:
 
         if tmc_mc is not None:
             self.tmc_mc = tmc_mc
-            self.tmc_mc.tmc_logger = self.tmc_logger
-            self.tmc_mc.init()
+            self.tmc_mc.init(self.tmc_logger)
 
         if tmc_ec is not None:
             self.tmc_ec = tmc_ec
-            self.tmc_ec.tmc_logger = self.tmc_logger
-            self.tmc_ec.init()
+            self.tmc_ec.init(self.tmc_logger)
 
         self.tmc_logger.log("GPIO Init finished", Loglevel.INFO)
 

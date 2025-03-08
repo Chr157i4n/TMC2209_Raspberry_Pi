@@ -10,7 +10,7 @@ VActual Motion Control module
 import time
 from ._tmc_mc import TmcMotionControl, MovementAbsRel, StopMode
 from ..com._tmc_com import TmcCom
-from .._tmc_logger import Loglevel
+from .._tmc_logger import TmcLogger, Loglevel
 from .. import _tmc_math as tmc_math
 
 
@@ -32,14 +32,6 @@ class TmcMotionControlVActual(TmcMotionControl):
         """set the tmc_logger"""
         self._tmc_com = tmc_com
 
-
-    # def __init__(self):
-    #     """constructor"""
-
-
-    # def init(self):
-    #     """init: called by the Tmc class"""
-    #     super().init()
 
 
     def make_a_step(self):

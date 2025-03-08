@@ -61,15 +61,6 @@ class TmcMotionControl():
     _movement_abs_rel:MovementAbsRel = MovementAbsRel.ABSOLUTE
     _movement_phase:MovementPhase = MovementPhase.STANDSTILL
 
-    @property
-    def tmc_logger(self):
-        """_tmc_logger property"""
-        return self._tmc_logger
-
-    @tmc_logger.setter
-    def tmc_logger(self, tmc_logger:TmcLogger):
-        """_tmc_logger setter"""
-        self._tmc_logger = tmc_logger
 
     @property
     def current_pos(self):
@@ -179,12 +170,10 @@ class TmcMotionControl():
         self.acceleration = acceleration_fullstep * self.mres
 
 
-    # def __init__(self):
-    #     """constructor"""
 
-
-    def init(self):
+    def init(self, tmc_logger:TmcLogger):
         """init: called by the Tmc class"""
+        self._tmc_logger = tmc_logger
         self.max_speed_fullstep = 100
         self.acceleration_fullstep = 100
 

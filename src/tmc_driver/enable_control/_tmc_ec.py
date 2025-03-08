@@ -10,20 +10,11 @@ class TmcEnableControl():
 
     _tmc_logger:TmcLogger
 
-    @property
-    def tmc_logger(self):
-        """_tmc_logger property"""
-        return self._tmc_logger
-
-    @tmc_logger.setter
-    def tmc_logger(self, tmc_logger:TmcLogger):
-        """_tmc_logger setter"""
-        self._tmc_logger = tmc_logger
 
 
-
-    def init(self):
+    def init(self, tmc_logger: TmcLogger):
         """init: called by the Tmc class"""
+        self._tmc_logger = tmc_logger
 
 
     def set_motor_enabled(self, en):
