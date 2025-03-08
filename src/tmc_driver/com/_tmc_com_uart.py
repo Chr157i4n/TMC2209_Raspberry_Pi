@@ -250,7 +250,7 @@ class TmcComUart(TmcCom):
             return
         self.error_handler_running = True
         self._tmc_registers["gstat"].read()
-        self._tmc_registers["gstat"].log()
+        self._tmc_registers["gstat"].log(self.tmc_logger)
 
         self._tmc_logger.log("EXITING!", Loglevel.INFO)
         raise SystemExit
