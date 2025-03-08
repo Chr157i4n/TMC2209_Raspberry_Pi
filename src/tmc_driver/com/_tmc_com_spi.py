@@ -46,7 +46,6 @@ class TmcComSpi(TmcCom):
         self._w_frame = [0x55, 0, 0, 0, 0]
 
 
-
     def init(self):
         """init"""
         try:

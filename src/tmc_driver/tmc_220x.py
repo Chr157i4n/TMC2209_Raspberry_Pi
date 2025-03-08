@@ -637,7 +637,7 @@ class Tmc220x(TmcStepperDriver):
 
         # check that the selected pin is on
         ioin = self.read_ioin()
-        if not ioin.data >> ioin_reg_bp & 0x1:
+        if not ioin.data_int >> ioin_reg_bp & 0x1:
             pin_ok = False
 
         # turn off only the selected pin
@@ -646,7 +646,7 @@ class Tmc220x(TmcStepperDriver):
 
         # check that the selected pin is off
         ioin = self.read_ioin()
-        if ioin.data >> ioin_reg_bp & 0x1:
+        if ioin.data_int >> ioin_reg_bp & 0x1:
             pin_ok = False
 
         return pin_ok

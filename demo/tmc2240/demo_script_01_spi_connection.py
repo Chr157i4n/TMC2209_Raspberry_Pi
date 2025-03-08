@@ -51,8 +51,7 @@ tmc.set_direction_reg(False)
 tmc.set_current(300)
 tmc.set_interpolation(True)
 tmc.set_spreadcycle(False)
-
-
+tmc.set_microstepping_resolution(2)
 
 
 print("---\n---")
@@ -71,11 +70,23 @@ tmc.read_gconf()
 
 print("---\n---")
 
+# you can either read the register like this:
+# unfortunately you need to know the names of the register for this method
+# because they are generated at runtime and therefore not available in the IDE as a suggestion
+tmc.adcv_supply_ain.read()
+tmc.adcv_supply_ain.log(tmc.tmc_logger)
 
+tmc.adc_temp.read()
+tmc.adc_temp.log(tmc.tmc_logger)
+
+print("---\n---")
+
+# or use the wrapper functions in the Tmc2240 class
 print(f"Temperature:\t{tmc.get_temperature()} °C")
 print(f"VSupply:\t{tmc.get_vsupply()} V")
 
 print("---\n---")
+
 
 #-----------------------------------------------------------------------
 # deinitiate the Tmc2209 class

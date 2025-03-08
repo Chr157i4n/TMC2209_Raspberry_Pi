@@ -34,6 +34,11 @@ class TmcReg():
         """reg_map property"""
         return self._reg_map
 
+    @property
+    def data_int(self) -> int:
+        """data_int property"""
+        return self._data_int
+
 
     def __init__(self, address:hex, name:str, tmc_com:TmcCom, reg_map:typing.List):
         """Constructor"""

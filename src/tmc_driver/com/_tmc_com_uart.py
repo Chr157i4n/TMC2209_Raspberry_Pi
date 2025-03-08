@@ -49,7 +49,6 @@ class TmcComUart(TmcCom):
         self.w_frame = [0x55, 0, 0, 0 , 0, 0, 0, 0 ]
 
 
-
     def init(self):
         """init"""
         try:
