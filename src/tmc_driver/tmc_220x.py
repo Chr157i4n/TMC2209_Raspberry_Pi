@@ -505,7 +505,7 @@ class Tmc220x(TmcStepperDriver):
         """
         self.chopconf.read()
 
-        mres = self.chopconf.convert_reg_to_mres()
+        mres = self.chopconf.mres_ms
         if self.tmc_mc is not None:
             self.tmc_mc.mres = mres
 
@@ -534,7 +534,7 @@ class Tmc220x(TmcStepperDriver):
             self.tmc_mc.mres = mres
 
         self.chopconf.read()
-        self.chopconf.convert_mres_to_reg(mres)
+        self.chopconf.mres_ms = mres
         self.chopconf.write_check()
 
         self.set_mstep_resolution_reg_select(True)

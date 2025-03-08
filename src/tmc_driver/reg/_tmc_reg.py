@@ -52,7 +52,7 @@ class TmcReg():
         self._data_int = data
 
         for reg in self._reg_map:
-            name, pos, mask, _ = reg
+            name, pos, mask, _, _, _ = reg
             value = data >> pos & mask
             setattr(self, name, reg[3](value))
 
@@ -66,7 +66,7 @@ class TmcReg():
         data = 0
 
         for reg in self._reg_map:
-            name, pos, mask, _ = reg
+            name, pos, mask, _, _, _ = reg
             value = getattr(self, name)
             data |= (int(value) & mask) << pos
 
@@ -78,10 +78,12 @@ class TmcReg():
         logger.log(f"{self._name} | {hex(self._addr)} | {bin(self._data_int)}")
 
         for reg in self._reg_map:
-            name, _, _, _ = reg
+            name, _, _, _, conv_func, unit = reg
             value = getattr(self, name)
-            logger.log(f"  {name:<20}{value}")
-
+            log_string = f"  {name:<20}{value:<10}"
+            if conv_func is not None:
+                log_string += f" {conv_func()} {unit}"
+            logger.log(log_string)
 
 
     def read(self):
@@ -111,4 +113,4 @@ class TmcReg():
         """
         self.read()
         setattr(self, name, value)
-        self.write()
+        self.write_check()

@@ -17,16 +17,16 @@ class GConf(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["test_mode",           9, 0x1, bool],
-            ["multistep_filt",      8, 0x1, bool],
-            ["mstep_reg_select",    7, 0x1, bool],
-            ["pdn_disable",         6, 0x1, bool],
-            ["index_step",          5, 0x1, bool],
-            ["index_otpw",          4, 0x1, bool],
-            ["shaft",               3, 0x1, bool],
-            ["en_spreadcycle",      2, 0x1, bool],
-            ["internal_rsense",     1, 0x1, bool],
-            ["i_scale_analog",      0, 0x1, bool]
+            ["test_mode",           9, 0x1, bool, None, ""],
+            ["multistep_filt",      8, 0x1, bool, None, ""],
+            ["mstep_reg_select",    7, 0x1, bool, None, ""],
+            ["pdn_disable",         6, 0x1, bool, None, ""],
+            ["index_step",          5, 0x1, bool, None, ""],
+            ["index_otpw",          4, 0x1, bool, None, ""],
+            ["shaft",               3, 0x1, bool, None, ""],
+            ["en_spreadcycle",      2, 0x1, bool, None, ""],
+            ["internal_rsense",     1, 0x1, bool, None, ""],
+            ["i_scale_analog",      0, 0x1, bool, None, ""]
         ]
         super().__init__(0x0, "GCONF", tmc_com, reg_map)
 
@@ -38,9 +38,9 @@ class GStat(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["uv_cp",               2, 0x1, bool],
-            ["drv_err",             1, 0x1, bool],
-            ["reset",               0, 0x1, bool]
+            ["uv_cp",               2, 0x1, bool, None, ""],
+            ["drv_err",             1, 0x1, bool, None, ""],
+            ["reset",               0, 0x1, bool, None, ""]
         ]
         super().__init__(0x1, "GSTAT", tmc_com, reg_map)
 
@@ -52,7 +52,7 @@ class IfCnt(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["ifcnt",               0, 0xFF, int]
+            ["ifcnt",               0, 0xFF, int, None, ""]
         ]
         super().__init__(0x2, "IFCNT", tmc_com, reg_map)
 
@@ -64,13 +64,13 @@ class Ioin(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["version",             24, 0xFF, int],
-            ["dir",                 9,  0x1, bool],
-            ["spread",              8,  0x1, bool],
-            ["step",                7,  0x1, bool],
-            ["ms2",                 3,  0x1, bool],
-            ["ms1",                 2,  0x1, bool],
-            ["enn",                 0,  0x1, bool]
+            ["version",             24, 0xFF, int, None, ""],
+            ["dir",                 9,  0x1, bool, None, ""],
+            ["spread",              8,  0x1, bool, None, ""],
+            ["step",                7,  0x1, bool, None, ""],
+            ["ms2",                 3,  0x1, bool, None, ""],
+            ["ms1",                 2,  0x1, bool, None, ""],
+            ["enn",                 0,  0x1, bool, None, ""]
         ]
         super().__init__(0x3, "IOIN", tmc_com, reg_map)
 
@@ -82,9 +82,9 @@ class IHoldIRun(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["iholddelay",          16, 0xF, int],
-            ["irun",                8,  0x1F, int],
-            ["ihold",               0,  0x1F, int]
+            ["iholddelay",          16, 0xF, int, None, ""],
+            ["irun",                8,  0x1F, int, None, ""],
+            ["ihold",               0,  0x1F, int, None, ""]
         ]
         super().__init__(0x10, "IHOLD_IRUN", tmc_com, reg_map)
 
@@ -96,7 +96,7 @@ class TPowerDown(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["tpowerdown",          0,  0xFF, int]
+            ["tpowerdown",          0,  0xFF, int, None, ""]
         ]
         super().__init__(0x11, "TPowerDown", tmc_com, reg_map)
 
@@ -108,7 +108,7 @@ class TStep(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["tstep",               0,  0xFFFFF, int]
+            ["tstep",               0,  0xFFFFF, int, None, ""]
         ]
         super().__init__(0x12, "TSTEP", tmc_com, reg_map)
 
@@ -120,7 +120,7 @@ class VActual(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["vactual",             0,  0x1FFFFF, int]
+            ["vactual",             0,  0x1FFFFF, int, None, ""]
         ]
         super().__init__(0x22, "VACTUAL", tmc_com, reg_map)
 
@@ -132,7 +132,7 @@ class MsCnt(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["mscnt",               0,  0xFF, int]
+            ["mscnt",               0,  0xFF, int, None, ""]
         ]
         super().__init__(0x6A, "MSCNT", tmc_com, reg_map)
 
@@ -144,38 +144,32 @@ class ChopConf(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["diss2vs",             31, 0x1, bool],
-            ["diss2g",              30, 0x1, bool],
-            ["dedge",               29, 0x1, bool],
-            ["intpol",              28, 0x1, bool],
-            ["mres",                24, 0xF, int],
-            ["vsense",              17, 0x1, bool],
-            ["tbl",                 15, 0x3, int],
-            ["hend",                7,  0xF, int],
-            ["hstrt",               4,  0x7, int],
-            ["toff",                0,  0xF, int]
+            ["diss2vs",             31, 0x1, bool, None, ""],
+            ["diss2g",              30, 0x1, bool, None, ""],
+            ["dedge",               29, 0x1, bool, None, ""],
+            ["intpol",              28, 0x1, bool, None, ""],
+            ["mres",                24, 0xF, int, lambda: self.mres_ms, "µStep"],
+            ["vsense",              17, 0x1, bool, None, ""],
+            ["tbl",                 15, 0x3, int, None, ""],
+            ["hend",                7,  0xF, int, None, ""],
+            ["hstrt",               4,  0x7, int, None, ""],
+            ["toff",                0,  0xF, int, None, ""]
         ]
         super().__init__(0x6C, "CHOPCONF", tmc_com, reg_map)
 
+    @property
+    def mres_ms(self) -> int:
+        """return µstep resolution"""
+        if hasattr(self, "mres"):
+            return int(math.pow(2, 8 - self.mres))
+        return None
 
-    def convert_mres_to_reg(self, mres: int):
-        """converts the µstep resolution to the corresponding register value
-
-        Args:
-            mres (int): µstep resolution
-        """
+    @mres_ms.setter
+    def mres_ms(self, mres: int):
+        """set µstep resolution"""
         mres_bit = int(math.log(mres, 2))
         mres_bit = 8 - mres_bit
         self.mres = mres_bit
-
-
-    def convert_reg_to_mres(self) -> int:
-        """converts the register value to the corresponding µstep resolution
-
-        Returns:
-            int: µstep resolution
-        """
-        return int(math.pow(2, 8 - self.mres))
 
 
 class DrvStatus(TmcReg):
@@ -185,20 +179,20 @@ class DrvStatus(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["stst",                31, 0x1, bool],
-            ["stealth",             30, 0x1, bool],
-            ["cs_actual",           16, 0x1F, int],
-            ["t157",                11, 0x1, bool],
-            ["t150",                10, 0x1, bool],
-            ["t143",                9,  0x1, bool],
-            ["t120",                8,  0x1, bool],
-            ["olb",                 7,  0x1, bool],
-            ["ola",                 6,  0x1, bool],
-            ["s2vsb",               5,  0x1, bool],
-            ["s2vsa",               4,  0x1, bool],
-            ["s2gb",                3,  0x1, bool],
-            ["s2ga",                2,  0x1, bool],
-            ["ot",                  1,  0x1, bool],
-            ["otpw",                0,  0x1, bool]
+            ["stst",                31, 0x1, bool, None, ""],
+            ["stealth",             30, 0x1, bool, None, ""],
+            ["cs_actual",           16, 0x1F, int, None, ""],
+            ["t157",                11, 0x1, bool, None, ""],
+            ["t150",                10, 0x1, bool, None, ""],
+            ["t143",                9,  0x1, bool, None, ""],
+            ["t120",                8,  0x1, bool, None, ""],
+            ["olb",                 7,  0x1, bool, None, ""],
+            ["ola",                 6,  0x1, bool, None, ""],
+            ["s2vsb",               5,  0x1, bool, None, ""],
+            ["s2vsa",               4,  0x1, bool, None, ""],
+            ["s2gb",                3,  0x1, bool, None, ""],
+            ["s2ga",                2,  0x1, bool, None, ""],
+            ["ot",                  1,  0x1, bool, None, ""],
+            ["otpw",                0,  0x1, bool, None, ""]
         ]
         super().__init__(0x6F, "DRVSTATUS", tmc_com, reg_map)

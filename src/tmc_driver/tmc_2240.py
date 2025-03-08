@@ -444,7 +444,7 @@ class Tmc2240(TmcStepperDriver):
         """
         self.chopconf.read()
 
-        mres = self.chopconf.convert_reg_to_mres()
+        mres = self.chopconf.mres_ms
         if self.tmc_mc is not None:
             self.tmc_mc.mres = mres
 
@@ -473,7 +473,7 @@ class Tmc2240(TmcStepperDriver):
             self.tmc_mc.mres = mres
 
         self.chopconf.read()
-        self.chopconf.convert_mres_to_reg(mres)
+        self.chopconf.mres_ms = mres
         self.chopconf.write_check()
 
 
@@ -554,7 +554,7 @@ class Tmc2240(TmcStepperDriver):
             int: ADC_VSUPPLY_AIN register value
         """
         self.adcv_supply_ain.read()
-        return self.adcv_supply_ain.vsupply
+        return self.adcv_supply_ain.adc_vsupply_v
 
 
 
@@ -565,7 +565,7 @@ class Tmc2240(TmcStepperDriver):
             float: temperature in °C
         """
         self.adc_temp.read()
-        return self.adc_temp.temperature
+        return self.adc_temp.adc_temp_c
 
 
 

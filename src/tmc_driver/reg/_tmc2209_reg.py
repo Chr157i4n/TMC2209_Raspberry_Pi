@@ -17,7 +17,7 @@ class TCoolThrs(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["tcoolthrs",           0,  0xFFFFF, int]
+            ["tcoolthrs",           0,  0xFFFFF, int, None, ""]
         ]
         super().__init__(0x14, "TCOOLTHRS", tmc_com, reg_map)
 
@@ -29,7 +29,7 @@ class SGThrs(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["sgthrs",              0,  0xFFFFF, int]
+            ["sgthrs",              0,  0xFFFFF, int, None, ""]
         ]
         super().__init__(0x40, "SGTHRS", tmc_com, reg_map)
 
@@ -41,6 +41,6 @@ class SGResult(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["sgresult",            0,  0xFFFFF, int]
+            ["sgresult",            0,  0xFFFFF, int, None, ""]
         ]
         super().__init__(0x41, "SGRESULT", tmc_com, reg_map)
