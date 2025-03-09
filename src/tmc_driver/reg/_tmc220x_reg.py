@@ -82,9 +82,9 @@ class IHoldIRun(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["iholddelay",          16, 0xF, int, None, ""],
-            ["irun",                8,  0x1F, int, None, ""],
-            ["ihold",               0,  0x1F, int, None, ""]
+            ["iholddelay",          16, 0xF,    int, None, ""],
+            ["irun",                8,  0x1F,   int, None, ""],
+            ["ihold",               0,  0x1F,   int, None, ""]
         ]
         super().__init__(0x10, "IHOLD_IRUN", tmc_com, reg_map)
 
@@ -144,16 +144,16 @@ class ChopConf(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["diss2vs",             31, 0x1, bool, None, ""],
-            ["diss2g",              30, 0x1, bool, None, ""],
-            ["dedge",               29, 0x1, bool, None, ""],
-            ["intpol",              28, 0x1, bool, None, ""],
-            ["mres",                24, 0xF, int, lambda: self.mres_ms, "µStep"],
-            ["vsense",              17, 0x1, bool, None, ""],
-            ["tbl",                 15, 0x3, int, None, ""],
-            ["hend",                7,  0xF, int, None, ""],
-            ["hstrt",               4,  0x7, int, None, ""],
-            ["toff",                0,  0xF, int, None, ""]
+            ["diss2vs",             31, 0x1, bool,  None, ""],
+            ["diss2g",              30, 0x1, bool,  None, ""],
+            ["dedge",               29, 0x1, bool,  None, ""],
+            ["intpol",              28, 0x1, bool,  None, ""],
+            ["mres",                24, 0xF, int,   lambda: self.mres_ms, "µStep"],
+            ["vsense",              17, 0x1, bool,  None, ""],
+            ["tbl",                 15, 0x3, int,   None, ""],
+            ["hend",                7,  0xF, int,   None, ""],
+            ["hstrt",               4,  0x7, int,   None, ""],
+            ["toff",                0,  0xF, int,   None, ""]
         ]
         super().__init__(0x6C, "CHOPCONF", tmc_com, reg_map)
 

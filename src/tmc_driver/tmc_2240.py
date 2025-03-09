@@ -106,9 +106,11 @@ class Tmc2240(TmcStepperDriver):
                 IHoldIRun,
                 TPowerDown,
                 TStep,
+                THigh,
                 ADCVSupplyAIN,
                 ADCTemp,
                 ChopConf,
+                CoolConf,
                 DrvStatus,
                 TCoolThrs,
                 SgThrs,
@@ -570,8 +572,8 @@ class Tmc2240(TmcStepperDriver):
         self.tmc_logger.log(f"setup stallguard callback on GPIO {pin_stallguard}", Loglevel.INFO)
         self.tmc_logger.log(f"StallGuard Threshold: {threshold} | minimum Speed: {min_speed}", Loglevel.INFO)
 
-        self.set_stallguard_threshold(threshold)
-        self.set_coolstep_threshold(tmc_math.steps_to_tstep(min_speed, self.get_microstepping_resolution()))
+        self._set_stallguard_threshold(threshold)
+        self._set_coolstep_threshold(tmc_math.steps_to_tstep(min_speed, self.get_microstepping_resolution()))
         self._sg_callback = callback
         self._pin_stallguard = pin_stallguard
 
@@ -598,7 +600,7 @@ class Tmc2240(TmcStepperDriver):
 
 
 
-    def set_coolstep_threshold(self, threshold):
+    def _set_coolstep_threshold(self, threshold):
         """This  is  the  lower  threshold  velocity  for  switching
         on  smart energy CoolStep and StallGuard to DIAG output. (unsigned)
 
@@ -606,6 +608,30 @@ class Tmc2240(TmcStepperDriver):
             threshold (int): threshold velocity for coolstep
         """
         self.tcoolthrs.modify("tcoolthrs", threshold)
+
+
+
+    def enable_coolstep(self, semin_sg:int = 150, semax_sg:int = 200, seup:int = 1, sedn:int = 3, min_speed:int = 100):
+        """enables coolstep and sets the parameters for coolstep
+        The values for semin etc. can be tested with the test_stallguard_threshold function
+
+        Args:
+            semin_sg (int): lower threshold. Current will be increased if SG_Result goes below this
+            semax_sg (int): upper threshold. Current will be decreased if SG_Result goes above this
+            seup (int): current increment step
+            sedn (int): number of SG_Result readings for each current decrement
+        """
+        semax_sg = semax_sg - semin_sg
+
+        self.coolconf.read()
+        self.coolconf.semin = round(max(0, min(semin_sg/32, 15)))
+        self.coolconf.semax = round(max(0, min(semax_sg/32, 15)))
+        self.coolconf.seimin = 1        # scale down to until 1/4 of IRun (7 - 31)
+        self.coolconf.seup = seup
+        self.coolconf.sedn = sedn
+        self.coolconf.write_check()
+
+        self._set_coolstep_threshold(tmc_math.steps_to_tstep(min_speed, self.get_microstepping_resolution()))
 
 
 
@@ -622,7 +648,7 @@ class Tmc2240(TmcStepperDriver):
 
 
 
-    def set_stallguard_threshold(self, threshold):
+    def _set_stallguard_threshold(self, threshold):
         """sets the register bit "SGTHRS" to to a given value
         this is needed for the stallguard interrupt callback
         SG_RESULT becomes compared to the double of this threshold.
@@ -661,9 +687,10 @@ class Tmc2240(TmcStepperDriver):
             self.drvstatus.read()
             stallguard_result = self.drvstatus.sg_result
             stallguard_triggered = self.drvstatus.stallguard
+            cs_actual = self.drvstatus.cs_actual
             # stallguard_result = self.get_stallguard_result()
 
-            self.tmc_logger.log(f"{self.tmc_mc.movement_phase} | {stallguard_result} | {stallguard_triggered}",
+            self.tmc_logger.log(f"{self.tmc_mc.movement_phase} | {stallguard_result} | {stallguard_triggered} | {cs_actual}",
                         Loglevel.INFO)
 
             if (self.tmc_mc.movement_phase == MovementPhase.ACCELERATING and

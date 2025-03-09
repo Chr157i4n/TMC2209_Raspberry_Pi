@@ -125,10 +125,10 @@ class IHoldIRun(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["irundelay",           24, 0xF, int, None, ""],
-            ["iholddelay",          16, 0xF, int, None, ""],
-            ["irun",                8,  0x1F, int, None, ""],
-            ["ihold",               0,  0x1F, int, None, ""]
+            ["irundelay",           24, 0xF,    int, None, ""],
+            ["iholddelay",          16, 0xF,    int, None, ""],
+            ["irun",                8,  0x1F,   int, None, ""],
+            ["ihold",               0,  0x1F,   int, None, ""]
         ]
         super().__init__(0x10, "IHOLD_IRUN", tmc_com, reg_map)
 
@@ -155,6 +155,18 @@ class TStep(TmcReg):
             ["tstep",               0, 0xFFFFF, int, None, ""]
         ]
         super().__init__(0x12, "TSTEP", tmc_com, reg_map)
+
+
+class THigh(TmcReg):
+    """THIGH register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["thigh",               0, 0xFFFFF, int, None, ""]
+        ]
+        super().__init__(0x13, "THIGH", tmc_com, reg_map)
 
 
 class ADCVSupplyAIN(TmcReg):
@@ -210,21 +222,21 @@ class ChopConf(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["diss2vs",             31, 0x1, bool, None, ""],
-            ["diss2g",              30, 0x1, bool, None, ""],
-            ["dedge",               29, 0x1, bool, None, ""],
-            ["intpol",              28, 0x1, bool, None, ""],
-            ["mres",                24, 0xF, int, lambda: self.mres_ms, "µStep"],
-            ["tpfd",                20, 0xF, int, None, ""],
-            ["vhighchm",            19, 0x1, bool, None, ""],
-            ["vhighfs",             18, 0x1, bool, None, ""],
-            ["tbl",                 15, 0x3, int, None, ""],
-            ["chm",                 14, 0x3, int, None, ""],
-            ["disfdcc",             12, 0x1, bool, None, ""],
-            ["fd3",                 11, 0x1, bool, None, ""],
-            ["hend_offset",         7,  0xF, int, None, ""],
-            ["hstrt_tfd210",        4,  0x7, int, None, ""],
-            ["toff",                0,  0xF, int, None, ""]
+            ["diss2vs",             31, 0x1, bool,  None, ""],
+            ["diss2g",              30, 0x1, bool,  None, ""],
+            ["dedge",               29, 0x1, bool,  None, ""],
+            ["intpol",              28, 0x1, bool,  None, ""],
+            ["mres",                24, 0xF, int,   lambda: self.mres_ms, "µStep"],
+            ["tpfd",                20, 0xF, int,   None, ""],
+            ["vhighchm",            19, 0x1, bool,  None, ""],
+            ["vhighfs",             18, 0x1, bool,  None, ""],
+            ["tbl",                 15, 0x3, int,   None, ""],
+            ["chm",                 14, 0x3, int,   None, ""],
+            ["disfdcc",             12, 0x1, bool,  None, ""],
+            ["fd3",                 11, 0x1, bool,  None, ""],
+            ["hend_offset",         7,  0xF, int,   None, ""],
+            ["hstrt_tfd210",        4,  0x7, int,   None, ""],
+            ["toff",                0,  0xF, int,   None, ""]
         ]
         super().__init__(0x6C, "CHOPCONF", tmc_com, reg_map)
 
@@ -243,6 +255,25 @@ class ChopConf(TmcReg):
         self.mres = mres_bit
 
 
+class CoolConf(TmcReg):
+    """COOLCONF register class"""
+
+    def __init__(self, tmc_com: TmcCom):
+        """constructor"""
+
+        reg_map = [
+            ["sfilt",               24, 0x1,    bool,   None, ""],
+            ["sgt",                 16, 0x7F,   int,    None, ""],
+            ["seimin",              15, 0x1,    bool,   None, ""],
+            ["sedn",                13, 0x3,    int,    None, ""],
+            ["semax",               8,  0xF,    int,    None, ""],
+            ["seup",                5,  0x3,    int,    None, ""],
+            ["semin",               0,  0xF,    int,    None, ""]
+
+        ]
+        super().__init__(0x6D, "COOLCONF", tmc_com, reg_map)
+
+
 class DrvStatus(TmcReg):
     """DRVSTATUS register class"""
 
@@ -250,20 +281,20 @@ class DrvStatus(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["stst",                31, 0x1, bool, None, ""],
-            ["olb",                 30, 0x1, bool, None, ""],
-            ["ola",                 29, 0x1, bool, None, ""],
-            ["s2gb",                28, 0x1, bool, None, ""],
-            ["s2ga",                27, 0x1, bool, None, ""],
-            ["otpw",                26, 0x1, bool, None, ""],
-            ["ot",                  25, 0x1, bool, None, ""],
-            ["stallguard",          24, 0x1, bool, None, ""],
-            ["cs_actual",           16, 0x1F, int, None, ""],
-            ["fsactive",            15, 0x1, bool, None, ""],
-            ["stealth",             14, 0x1, bool, None, ""],
-            ["s2vsb",               13, 0x1, bool, None, ""],
-            ["s2vsa",               12, 0x1, bool, None, ""],
-            ["sg_result",           0,  0x3FF, int, None, ""]
+            ["stst",                31, 0x1,    bool,   None, ""],
+            ["olb",                 30, 0x1,    bool,   None, ""],
+            ["ola",                 29, 0x1,    bool,   None, ""],
+            ["s2gb",                28, 0x1,    bool,   None, ""],
+            ["s2ga",                27, 0x1,    bool,   None, ""],
+            ["otpw",                26, 0x1,    bool,   None, ""],
+            ["ot",                  25, 0x1,    bool,   None, ""],
+            ["stallguard",          24, 0x1,    bool,   None, ""],
+            ["cs_actual",           16, 0x1F,   int,    None, ""],
+            ["fsactive",            15, 0x1,    bool,   None, ""],
+            ["stealth",             14, 0x1,    bool,   None, ""],
+            ["s2vsb",               13, 0x1,    bool,   None, ""],
+            ["s2vsa",               12, 0x1,    bool,   None, ""],
+            ["sg_result",           0,  0x3FF,  int,    None, ""]
         ]
         super().__init__(0x6F, "DRVSTATUS", tmc_com, reg_map)
 
@@ -287,9 +318,9 @@ class SgThrs(TmcReg):
         """constructor"""
 
         reg_map = [
-            ["sg_angle_offset",      9,  0x1, bool, None, ""],
-            ["sg4_filt_en",          8,  0x1, bool, None, ""],
-            ["sg_thrs",              0,  0xFFF, int, None, ""]
+            ["sg_angle_offset",      9,  0x1,   bool,   None, ""],
+            ["sg4_filt_en",          8,  0x1,   bool,   None, ""],
+            ["sg_thrs",              0,  0xFFF, int,    None, ""]
         ]
         super().__init__(0x74, "SG_THRS", tmc_com, reg_map)
 
@@ -314,7 +345,7 @@ class SgInd(TmcReg):
 
         reg_map = [
             ["sg_ind_2",            16, 0xFF, int, None, ""],
-            ["sg_ind_1",            8, 0xFF, int, None, ""],
+            ["sg_ind_1",            8,  0xFF, int, None, ""],
             ["sg_ind_0",            0,  0xFF, int, None, ""],
         ]
         super().__init__(0x76, "SG_IND", tmc_com, reg_map)

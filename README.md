@@ -80,9 +80,11 @@ pip3 install TMC-2209-Raspberry-Pi[RASPBERRY_PI]
 
 The currently supported drivers are:
 
-- TMC2208 (UART)
-- TMC2209 (UART)
-- TMC2240 (SPI/UART)
+Driver  | Interface
+--      | --
+TMC2208 | UART
+TMC2209 | UART
+TMC2240 | SPI/UART
 
 ## Submodules
 
@@ -108,6 +110,7 @@ Further methods of controlling a motor could be:
 
 - using the built in Motion Controller of the TMC5130
 - via a µC which controlls the Motor
+- highperformance Step/Dir Library written in a compiled language (C/C++)
 
 ### Com
 
@@ -131,6 +134,9 @@ STEP    | GREEN     |GPIO16 of Raspberry Pi         | moves the motor one step p
 DIR     | WHITE     |GPIO20 of Raspberry Pi         | set the direction of the motor
 DIAG    | ORANGE | GPIO26 of Raspberry Pi           | optional, for StallGuard
 
+The GPIO pins can be specific when initiating the class.
+If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
+
 ### UART
 
 Pin TMC                     | Color     | connect to            | Function
@@ -146,9 +152,6 @@ MOSI    |       | MOSI                              | Data from Pi to TMC
 MISO    |       | MOSI                              | Data from TMC to Pi
 SPI-CLK |       | CLK                               | Clock for SPI
 CS      |       | SPI CE0 (for the demo scripts)    | Chipselect (2nd parameter of TmcComSpi "spi_dev")
-
-The GPIO pins can be specific when initiating the class.
-If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
 
 ## Demo scripts
 
