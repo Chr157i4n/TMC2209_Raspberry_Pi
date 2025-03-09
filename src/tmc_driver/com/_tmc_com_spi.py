@@ -20,6 +20,7 @@ class MockSpiDev:
 try:
     import spidev
 except ImportError:
+    print("spidev not found. Using MockSpiDev")
     spidev = MockSpiDev()
 
 
