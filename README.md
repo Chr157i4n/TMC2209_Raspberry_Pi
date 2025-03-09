@@ -76,22 +76,75 @@ You can also install the needed GPIO library by specifing the Installation Param
 pip3 install TMC-2209-Raspberry-Pi[RASPBERRY_PI]
 ```
 
+## Driver Support
+
+The currently supported drivers are:
+- TMC2208 (UART)
+- TMC2209 (UART)
+- TMC2240 (SPI/UART)
+
+## Submodules
+
+with V0.7 the code for enabling the motor current output and the code for controling the motion of the drivers
+is split into their own classes to be able to support the diverse methods.
+
+#### EnableControl
+
+EnableControl   | Class                 | Driver    | Notes
+--              | --                    | --        | --
+Pin             | TmcEnableControlPin   | all       | the EN Pin of the Driver needs to be connected to a GPIO of the Pi
+TOff            | TmcEnableControlToff  | all       | the EN Pin needs to be connected to GND.<br />On the TMC2209 this enables current Output on Startup!<br />On the TMC2240 this works fine, because TOff is per default 0 (off).
+
+#### MotionControl
+
+MotionControl   | Class                     | Driver    | Notes
+--              | --                        | --        | --
+STEP/DIR        | TmcMotionControlStepDir   | all       | the STEP and DIR pin of the driver must each be connected to a GPIO of the Pi
+STEP/REG        | TmcMotionControlStepReg   | all       | only the STEP pin needs to be connected to a GPIO of the Pi.<br />The direction is controlled via the Register.
+VACTUAL         | TmcMotionControlVActual   | TMC220x   | the Direction and Speed is controlled via Register. But VActual does only allow setting a speed and therefore cannot control positioning of the Motor.
+
+Further methods of controlling a motor could be:
+- using the built in Motion Controller of the TMC5130
+- via a µC which controlls the Motor
+
+#### Com
+
+Com     | Class         | Driver    | Notes
+--      | --            | --        | --
+UART    | TmcComUart    | all       | Communication via UART (RX, TX). See [Wiring](#uart)<br />[pyserial](https://pypi.org/project/pyserial) needs to be installed
+SPI     | TmcComSpi     | TMC2240   | Communication via SPI (MOSI, MISO, CLK, CS). See [Wiring](#spi)<br />[spidev](https://pypi.org/project/spidev) needs to be installed
+
 ## Wiring
 
-Pin TMC2209 | connect to | Function
--- | -- | --
-TX or PDN_UART with 1kOhm | TX of Raspberry Pi | send data to TMC via UART
-RX or PDN_UART directly | RX of Raspberry Pi | receive data from TMC via UART
-VDD | 3,3V of Raspberry Pi | optional, for more stable logic voltage
-GND | GND of Raspberry Pi | GND for VDD and Signals
-VM | 12V or 24V of power supply | power for the motor
-GND | GND of power supply | power for the motor
-EN | GPIO21 of Raspberry Pi | enable the motor output
-STEP | GPIO16 of Raspberry Pi | moves the motor one step per pulse
-DIR | GPIO20 of Raspberry Pi | set the direction of the motor
-DIAG | GPIO26 of Raspberry Pi | optional, for StallGuard
-
 ![wiring diagram](docs/images/wiring_diagram.png)
+
+Pin TMC | Color     | connect to                    | Function
+--      | --        | --                            | --
+VDD     |           | 3,3V of Raspberry Pi          | optional, for more stable logic voltage
+GND     | BLACK     | GND of Raspberry Pi           | GND for VDD and Signals
+VM      | RED       | 12V or 24V of power supply    | power for the motor
+GND     | BLACK     | GND of power supply           | power for the motor
+EN      | RED       |GPIO21 of Raspberry Pi         | enable the motor output
+STEP    | GREEN     |GPIO16 of Raspberry Pi         | moves the motor one step per pulse
+DIR     | WHITE     |GPIO20 of Raspberry Pi         | set the direction of the motor
+DIAG    | ORANGE | GPIO26 of Raspberry Pi           | optional, for StallGuard
+
+### UART
+
+Pin TMC                     | Color     | connect to            | Function
+--                          | --        | --                    | --
+TX or PDN_UART with 1kOhm   | YELLOW    | TX of Raspberry Pi    | send data to TMC via UART
+RX or PDN_UART directly     | YELLOW    | RX of Raspberry Pi    | receive data from TMC via UART
+
+### SPI
+
+Pin TMC | Color | connect to                        | Function
+--      | --    | --                                | --
+MOSI    |       | MOSI                              | Data from Pi to TMC
+MISO    |       | MOSI                              | Data from TMC to Pi
+SPI-CLK |       | CLK                               | Clock for SPI
+CS      |       | SPI CE0 (for the demo scripts)    | Chipselect (2nd parameter of TmcComSpi "spi_dev")
+
 
 The GPIO pins can be specific when initiating the class.
 If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.
