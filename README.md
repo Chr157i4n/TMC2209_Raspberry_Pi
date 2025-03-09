@@ -79,6 +79,7 @@ pip3 install TMC-2209-Raspberry-Pi[RASPBERRY_PI]
 ## Driver Support
 
 The currently supported drivers are:
+
 - TMC2208 (UART)
 - TMC2209 (UART)
 - TMC2240 (SPI/UART)
@@ -88,14 +89,14 @@ The currently supported drivers are:
 with V0.7 the code for enabling the motor current output and the code for controling the motion of the drivers
 is split into their own classes to be able to support the diverse methods.
 
-#### EnableControl
+### EnableControl
 
 EnableControl   | Class                 | Driver    | Notes
 --              | --                    | --        | --
 Pin             | TmcEnableControlPin   | all       | the EN Pin of the Driver needs to be connected to a GPIO of the Pi
 TOff            | TmcEnableControlToff  | all       | the EN Pin needs to be connected to GND.<br />On the TMC2209 this enables current Output on Startup!<br />On the TMC2240 this works fine, because TOff is per default 0 (off).
 
-#### MotionControl
+### MotionControl
 
 MotionControl   | Class                     | Driver    | Notes
 --              | --                        | --        | --
@@ -104,10 +105,11 @@ STEP/REG        | TmcMotionControlStepReg   | all       | only the STEP pin need
 VACTUAL         | TmcMotionControlVActual   | TMC220x   | the Direction and Speed is controlled via Register. But VActual does only allow setting a speed and therefore cannot control positioning of the Motor.
 
 Further methods of controlling a motor could be:
+
 - using the built in Motion Controller of the TMC5130
 - via a µC which controlls the Motor
 
-#### Com
+### Com
 
 Com     | Class         | Driver    | Notes
 --      | --            | --        | --
@@ -144,7 +146,6 @@ MOSI    |       | MOSI                              | Data from Pi to TMC
 MISO    |       | MOSI                              | Data from TMC to Pi
 SPI-CLK |       | CLK                               | Clock for SPI
 CS      |       | SPI CE0 (for the demo scripts)    | Chipselect (2nd parameter of TmcComSpi "spi_dev")
-
 
 The GPIO pins can be specific when initiating the class.
 If you test this on a breadboard, make sure to cut off the bottomside of the pins (Vref and DIAG) next to the EN pin, so that they are not shorted trough the breadboard.

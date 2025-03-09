@@ -7,12 +7,12 @@
 - added Support for SPI
 - Split code for EnableControl and MotionControl into their own classes
 - added Classes for EnableControl
-    - TmcEnableControlPin
-    - TmcEnableControlToff
+  - TmcEnableControlPin
+  - TmcEnableControlToff
 - added Classes for MotionControl
-    - TmcMotionControlStepDir
-    - TmcMotionControlStepReg
-    - TmcMotionControlVActual
+  - TmcMotionControlStepDir
+  - TmcMotionControlStepReg
+  - TmcMotionControlVActual
 
 ## version 0.6
 
