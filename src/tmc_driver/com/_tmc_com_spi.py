@@ -9,19 +9,21 @@ TmcComSpi stepper driver spi module
 """
 
 import sys
+import spidev
 from ._tmc_com import *
 
-class MockSpiDev:
-    """MockSpiDev"""
+# class MockSpiDev:
+#     """MockSpiDev"""
 
-    def SpiDev(self):
-        """SpiDev"""
+#     def SpiDev(self):
+#         """SpiDev"""
 
-try:
-    import spidev
-except ImportError:
-    print("spidev not found. Using MockSpiDev")
-    spidev = MockSpiDev()
+# try:
+#     import spidev
+# except ImportError:
+#     print("spidev not found. Using MockSpiDev")
+#     spidev = MockSpiDev()
+
 
 
 
